@@ -2132,12 +2132,8 @@ function appendFiguresToWrapper(wrapper, figures) {
               alt="${escapeHtml(figTitle)}" 
               class="w-full h-full object-contain p-1 transition-transform duration-200 group-hover:scale-105" 
               loading="lazy" 
-              onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" 
+              onerror="const card = this.closest('.figure-card'); if (card) { const cont = card.closest('.figures-container'); card.remove(); if (cont && cont.querySelectorAll('.figure-card').length === 0) cont.remove(); }" 
             />
-            <div class="hidden text-slate-500 text-xs flex flex-col items-center gap-1 p-2 text-center">
-              <svg class="w-6 h-6 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              <span class="text-xs">Textbook Diagram</span>
-            </div>
             <span class="absolute bottom-1.5 right-1.5 bg-slate-900/70 text-white text-xs px-1.5 py-0.5 rounded backdrop-blur-xs font-mono">p. ${fig.page_start}</span>
           </div>
 
@@ -2383,13 +2379,9 @@ function appendAssistantMessage(data) {
                 alt="${escapeHtml(figTitle)}" 
                 class="w-full h-full object-contain p-1 transition-transform duration-200 group-hover:scale-105" 
                 loading="lazy" 
-                onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" 
+                onerror="const card = this.closest('.figure-card'); if (card) { const cont = card.closest('.figures-container'); card.remove(); if (cont && cont.querySelectorAll('.figure-card').length === 0) cont.remove(); }" 
               />
-              <div class="hidden text-slate-400 text-xs flex flex-col items-center gap-1 p-2 text-center">
-                <svg class="w-6 h-6 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <span class="text-xs">Textbook Diagram</span>
-              </div>
-              <span class="absolute bottom-1.5 right-1.5 bg-slate-900/70 text-white text-[9px] px-1.5 py-0.5 rounded backdrop-blur-xs font-mono">p. ${fig.page_start}</span>
+              <span class="absolute bottom-1.5 right-1.5 bg-slate-900/70 text-white text-xs px-1.5 py-0.5 rounded backdrop-blur-xs font-mono">p. ${fig.page_start}</span>
             </div>
 
             <div class="flex items-center justify-between gap-1 mb-1">
@@ -2406,7 +2398,7 @@ function appendAssistantMessage(data) {
     }).join("");
 
     figuresHtml = `
-      <div class="mt-4 pt-3 border-t border-slate-100">
+      <div class="figures-container mt-4 pt-3 border-t border-slate-100">
         <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           <span>Related Textbook Figures & Diagrams (${data.figures.length})</span>

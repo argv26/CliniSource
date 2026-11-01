@@ -45,11 +45,12 @@ def _get_page_map(book_slug: str):
 
 def _resolve_pdf_path(book_slug: str) -> Path | None:
     """Finds the source PDF on disk for a book slug."""
-    if not BOOKS_DIR.exists():
-        return None
+    search_dirs = [BOOKS_DIR, ROOT]
+    candidates: list[Path] = []
+    for d in search_dirs:
+        if d.exists():
+            candidates.extend(list(d.glob("*.pdf")))
 
-    # Exact or near matches
-    candidates = list(BOOKS_DIR.glob("*.pdf"))
     for p in candidates:
         stem_slug = p.stem.replace(" ", "_").replace("-", "_").lower()
         clean_target = book_slug.replace("-", "_").lower()
@@ -57,13 +58,22 @@ def _resolve_pdf_path(book_slug: str) -> Path | None:
             return p
 
     # Fallback to direct name matching
-    if "anatomy" in book_slug.lower():
+    clean_lower = book_slug.lower()
+    if "anatomy" in clean_lower:
         for p in candidates:
             if "anatomy" in p.name.lower():
                 return p
-    if "endocrinology" in book_slug.lower() or "williams" in book_slug.lower():
+    if "endocrinology" in clean_lower or "williams" in clean_lower:
         for p in candidates:
             if "endocrinology" in p.name.lower() or "williams" in p.name.lower():
+                return p
+    if "harrison" in clean_lower:
+        for p in candidates:
+            if "harrison" in p.name.lower():
+                return p
+    if "cornea" in clean_lower:
+        for p in candidates:
+            if "cornea" in p.name.lower():
                 return p
 
     return None
@@ -112,6 +122,21 @@ def _generate_card_image(target_path: Path, book_slug: str, page_start: int | No
         return None
 
 
+def has_figure_image(chunk_id: str) -> bool:
+    """Fast check whether an authentic figure image exists on disk without triggering extraction."""
+    target_cache_file = CACHE_DIR / f"{chunk_id}.jpg"
+    if target_cache_file.exists() and target_cache_file.stat().st_size >= 5000:
+        return True
+    try:
+        store = get_storage_provider()
+        existing_path = store.get_figure_path(chunk_id)
+        if existing_path and existing_path.exists() and existing_path.stat().st_size >= 5000:
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def get_figure_image_path(chunk_id: str) -> Path | None:
     """Resolves or generates a cached JPEG image for a textbook figure chunk.
 
@@ -150,7 +175,7 @@ def get_figure_image_path(chunk_id: str) -> Path | None:
 
     pdf_path = _resolve_pdf_path(book_slug)
     if not pdf_path or not pdf_path.exists():
-        return _generate_card_image(target_cache_file, book_slug, page_start, raw_text)
+        return None
 
     try:
         import pymupdf
@@ -158,7 +183,7 @@ def get_figure_image_path(chunk_id: str) -> Path | None:
         try:
             import fitz as pymupdf
         except ImportError:
-            return _generate_card_image(target_cache_file, book_slug, page_start, raw_text)
+            return None
 
     # chunks.page_start is stored as the 1-based physical PDF page.
     # Convert directly to 0-based PDF page index without applying printed-to-pdf offset.

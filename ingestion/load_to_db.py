@@ -245,6 +245,8 @@ class SqliteBackend:
                 FOREIGN KEY (book_slug, section_id) REFERENCES sections(book_slug, id) ON DELETE CASCADE
             );
 
+            CREATE INDEX IF NOT EXISTS idx_chunks_sec_fig ON chunks (book_slug, section_id, content_type);
+
             CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
                 chunk_id UNINDEXED,
                 book_slug UNINDEXED,

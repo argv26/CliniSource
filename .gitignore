@@ -10,6 +10,7 @@ ingestion/output/
 ingestion/analysis-result/
 *.jsonl
 ui/static/figures_cache/*
+!ui/static/figures_cache/*.jpg
 
 # ─── Local Databases ─────────────────────────────────────────────────────────
 *.db
