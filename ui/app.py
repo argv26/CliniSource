@@ -57,7 +57,14 @@ def index():
     index_file = STATIC_DIR / "index.html"
     if not index_file.exists():
         raise HTTPException(status_code=404, detail="index.html not found")
-    return FileResponse(str(index_file))
+    return FileResponse(
+        str(index_file),
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
 
 
 if __name__ == "__main__":
