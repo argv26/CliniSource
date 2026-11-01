@@ -78,8 +78,8 @@ gcloud run deploy clinisource \
 
 ### Using Docker:
 ```bash
-git clone https://github.com/argv26/Text-Book-RAG.git
-cd Text-Book-RAG
+git clone https://github.com/argv26/CliniSource.git
+cd CliniSource
 cp .env.example .env
 # Edit .env with your nano / vim
 docker compose up -d web

@@ -88,8 +88,8 @@ CliniSource bridges the gap between gold-standard medical reference canon (*Harr
 ### 1. Clone & Set Up Virtual Environment
 
 ```bash
-git clone https://github.com/argv26/Text-Book-RAG.git
-cd Text-Book-RAG
+git clone https://github.com/argv26/CliniSource.git
+cd CliniSource
 
 python -m venv .venv
 # Windows:
