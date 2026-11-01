@@ -9,7 +9,10 @@ app_port: 7860
 
 # TextBook RAG
 
-A production-grade, structure-aware **Retrieval-Augmented Generation (RAG)** system for academic medical textbooks, with an interactive web chat interface.
+A production-grade, structure-aware **Retrieval-Augmented Generation (RAG)** system for academic medical textbooks, with an interactive clinical web interface.
+
+> 🚀 **Live Demo on Render**: [https://text-book-rag-etiz.onrender.com](https://text-book-rag-etiz.onrender.com)  
+> 📖 **User Feedback & Evolution**: [docs/user-feedback.md](docs/user-feedback.md) | 🏗️ **Architecture**: [docs/architecture.md](docs/architecture.md)
 
 ---
 
@@ -162,25 +165,40 @@ Text-Book-RAG/
 
 | Feature | Description |
 |---|---|
-| **Structure-Aware Chunking** | Chunks never cross section boundaries; tables and callout boxes are typed and indexed separately |
-| **Printed Page Citations** | Every answer cites the real printed page number from the physical textbook |
-| **Clickable Evidence Drawer** | Click any `[1]` citation badge to see the exact passage, section heading, and page in a side drawer |
-| **Multi-Turn Sessions** | Full conversation state with token budgeting, tool output compaction, and citation accumulation |
-| **Offline-First** | Works 100% locally with SQLite FTS5 — no API keys, no Docker required |
-| **LLM-Powered Mode** | Set `GEMINI_API_KEY` or `OPENAI_API_KEY` for full agentic multi-hop tool calling |
-| **Follow-up Suggestions** | Interactive chips guide users to related clinical concepts |
+| **Structure-Aware Chunking** | Chunks never cross section boundaries; tables, callout boxes, and figure captions are typed and indexed separately |
+| **AttendingPlanner Reasoning** | Formulates differential diagnostic hypotheses and organ systems before retrieval, streaming clinical plans live over SSE |
+| **Semantic Book Routing** | User selection sovereignty guarantees explicit textbook choices are strictly honored, while smart routing directs broad queries |
+| **Zero-Multimodal Figure Carousel** | Pre-crops textbook diagrams into Object Storage; serves visual plates via responsive carousel without consuming LLM vision tokens |
+| **Dedicated Library Manager** | Dual-scroll sidebar separates consultation history from personal "My Study Library" curation with 1-click active switches |
+| **Dynamic Ingestion Worker** | Drag-and-drop PDF upload with non-blocking background worker, automatic TOC extraction, reading-order sorting, and atomic DB commit |
+| **Printed Page Citations** | Every answer cites the verified printed page number from physical textbook editions with interactive Evidence Drawer navigation |
+| **Medical Typography Normalization** | Sanitizes hormone LaTeX formulas (`T₄`, `TRβ₂`) and converts publisher bibliography brackets into non-colliding `(Ref X)` text |
+| **Production-Hardened Concurrency** | SQLite WAL mode, atomic thread-locked rate limiting, and 95 automated integration & stress tests (100% pass rate) |
+
+---
+
+## Comprehensive Engineering Documentation
+
+For detailed, human-oriented guides on every aspect of the system:
+
+- 🏗️ **[System Architecture & Design Guide](docs/architecture.md)**: Deep dive into the two-layer architecture, modular packages, and SQLite schema.
+- 🩺 **[Clinical Agent & Reasoning Engine](docs/clinical-agent.md)**: How AttendingPlanner, prompt caching, ReAct loops, and sanitizers operate.
+- 📑 **[Textbook Ingestion & Document Pipeline](docs/ingestion-pipeline.md)**: How PDFs are parsed, TOC trees built, columns sorted, and figures cropped.
+- 💬 **[User Feedback & Evolution Log](docs/user-feedback.md)**: Itemized clinical feedback from testing sessions, pain points, and architectural solutions.
+- 🔌 **[HTTP REST & SSE API Reference](docs/api-reference.md)**: Complete endpoint schemas, request/response bodies, and Server-Sent Event types.
+- 🚀 **[Production Deployment Guide](docs/deployment-guide.md)**: Containerization, environment setup, and instructions for deploying to **Render** or **Google Cloud Run**.
 
 ---
 
 ## Corpus Statistics
 
-| Metric | Anatomy & Physiology 2e | Williams Endocrinology 15e | Total |
-|---|---|---|---|
-| PDF Pages | 1,347 | 2,319 | **3,666** |
-| Section Nodes | 409 | 2,944 | **3,353** |
-| Retrieval Chunks | 3,240 | 9,016 | **12,010** |
-| Median Chunk Size | 481 tokens | 498 tokens | ~490 tokens |
-| Line Integrity | 100% | 100% | **100%** |
+| Metric | Anatomy & Physiology 2e | Williams Endocrinology 15e | Harrison's Internal Medicine 22e | Total |
+|---|---|---|---|---|
+| PDF Pages | 1,347 | 2,319 | 4,273 | **7,939** |
+| Section Nodes | 409 | 2,944 | 591 | **3,944** |
+| Retrieval Chunks | 3,240 | 9,016 | 16,963 | **29,219** |
+| Median Chunk Size | 481 tokens | 498 tokens | 445 tokens | ~470 tokens |
+| Line Integrity | 100% | 100% | 100% | **100%** |
 
 ---
 

@@ -53,7 +53,11 @@ gcloud run deploy textbook-rag \
 
 ## 3. Deploying to Render / Railway
 
-### Render:
+### Live Production Deployment on Render:
+- **Live URL**: [`https://text-book-rag-etiz.onrender.com`](https://text-book-rag-etiz.onrender.com)
+- **Health Check Endpoint**: `https://text-book-rag-etiz.onrender.com/api/quota`
+
+### Steps for Render Deployment:
 1. Connect your GitHub repository to [Render.com](https://render.com).
 2. Choose **Web Service** with **Docker** runtime.
 3. In the **Environment Variables** section, add:
