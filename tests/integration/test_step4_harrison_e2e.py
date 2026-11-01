@@ -1,7 +1,7 @@
 """Step 4 Full End-to-End System Verification: Harrison's Principles of Internal Medicine (22nd Edition).
 
 Validates:
-1. Book record and schema verification in textbook_rag.db (4,273 pages, 591 sections, ~16,963 chunks).
+1. Book record and schema verification in clinical database (4,273 pages, 591 sections, ~16,963 chunks).
 2. FTS5 BM25 search across Harrison medical sections and chunk breadcrumbs.
 3. User library personal curation, dynamic active toggles, and catalog enrichment.
 4. Semantic multi-book routing across Harrison (Internal Medicine) and Williams (Endocrinology).
@@ -27,17 +27,18 @@ from ui.library import (
 from ui.routers.content import api_get_chunk
 
 HARRISON_SLUG = "Harrison_2025_22nd_Edition"
-DB_PATH = Path(__file__).resolve().parent.parent.parent / "textbook_rag.db"
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+DB_PATH = (ROOT_DIR / "clinisource.db") if (ROOT_DIR / "clinisource.db").exists() else (ROOT_DIR / "textbook_rag.db")
 
 
 def test_harrison_database_record_and_schema():
-    # AC: Harrison 2025 (22nd Ed) must be indexed into textbook_rag.db with 4,273 pages,
+    # AC: Harrison 2025 (22nd Ed) must be indexed into clinical database with 4,273 pages,
     #     specialty 'Internal Medicine', and full FTS5 search index synchronization.
     # Behavior: Query SQLite books, sections, chunks, and chunks_fts tables -> Record counts match.
     # @lane: service-integration-e2e
     # @dependency: sqlite
     # Selection evidence: Proves the physical persistence layer accurately stores the 276.7 MB textbook.
-    assert DB_PATH.exists(), f"textbook_rag.db not found at {DB_PATH}"
+    assert DB_PATH.exists(), f"Clinical database not found at {DB_PATH}"
 
     conn = sqlite3.connect(str(DB_PATH))
     book = conn.execute(

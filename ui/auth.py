@@ -1,4 +1,4 @@
-"""Authentication service and user session management for Text-Book-RAG.
+"""Authentication service and user session management for CliniSource.
 
 Manages SQLite storage for user credentials (app_users.db), salted PBKDF2
 password hashing, 1-click ephemeral guest sessions, and token persistence.

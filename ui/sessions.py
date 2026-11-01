@@ -1,4 +1,4 @@
-"""Session and Consultation History persistence service for Text-Book-RAG.
+"""Session and Consultation History persistence service for CliniSource.
 
 Manages SQLite storage for consultation sessions and message turns in app_users.db,
 enabling multi-turn medical consultation history, session switching, and smart auto-titling.

@@ -1,4 +1,4 @@
-// Client application logic for TextBook RAG Web Interface
+// Client application logic for CliniSource Web Interface
 // Adheres to SKILL-Ui (ui-ux-pro-max) Accessibility, Responsive Design, and SVG Icon Standards
 
 const STARTER_PROMPTS = [
@@ -470,7 +470,9 @@ function showScopeWarning(msg) {
 
 function saveActiveBooks() {
   try {
-    localStorage.setItem("textbook_rag_active_books", JSON.stringify(Array.from(activeBooksSet)));
+    const serialized = JSON.stringify(Array.from(activeBooksSet));
+    localStorage.setItem("clinisource_active_books", serialized);
+    localStorage.setItem("textbook_rag_active_books", serialized);
   } catch (e) {
     console.error("Failed to save active books:", e);
   }
@@ -1662,7 +1664,7 @@ function switchAuthTab(mode) {
     tabLogin.setAttribute("aria-selected", "true");
     tabSignup.className = "flex-1 pb-2.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition";
     tabSignup.setAttribute("aria-selected", "false");
-    authModalTitle.textContent = "Sign In to TextBook RAG";
+    authModalTitle.textContent = "Sign In to CliniSource";
     authSubmitLabel.textContent = "Sign In";
     if (authUsernameHint) authUsernameHint.classList.add("hidden");
   } else {

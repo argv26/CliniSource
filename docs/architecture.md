@@ -1,6 +1,6 @@
-# Structure-Aware Textbook RAG: Architecture & System Design
+# CliniSource: Architecture & System Design
 
-This document details the system design, data models, ingestion pipeline, retrieval engines, and agent orchestration for the **Text-Book-RAG** project.
+This document details the system design, data models, ingestion pipeline, retrieval engines, and agent orchestration for **CliniSource** — the Authoritative Clinical Knowledge & Decision Intelligence Platform.
 
 ---
 
@@ -74,7 +74,7 @@ flowchart TD
 ## 4. Modular Codebase Architecture
 
 ```
-Text-Book-RAG/
+clinisource/
 ├── agent/
 │   ├── orchestrator.py    # Thin turn manager & SSE streaming dispatcher
 │   ├── planner.py         # AttendingPlanner pre-step clinical reasoning engine

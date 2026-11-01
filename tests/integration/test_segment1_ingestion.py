@@ -285,7 +285,7 @@ def test_atomic_rollback_on_failure(tmp_path: Path):
     # Behavior: Inject unhandled KeyError during chunk loading -> Transaction aborted -> 0 books and 0 sections persisted.
     # @lane: integration
     # @dependency: sqlite
-    # Selection evidence: Proves textbook_rag.db never enters a partially-indexed or corrupted orphan state.
+    # Selection evidence: Proves database never enters a partially-indexed or corrupted orphan state.
     db_path = tmp_path / "rollback_test.db"
     backend = SqliteBackend(db_path)
     backend.init_schema()

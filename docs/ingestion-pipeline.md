@@ -1,6 +1,6 @@
-# Textbook Ingestion & Document Pipeline: Engineering Guide
+# Medical Canon Ingestion & Document Pipeline: Engineering Guide
 
-This document provides a comprehensive, human-oriented explanation of how raw PDF medical textbooks are transformed into structured, searchable clinical knowledge in **TextBook RAG**.
+This document provides a comprehensive explanation of how raw clinical reference PDFs are transformed into structured, searchable knowledge in **CliniSource**.
 
 ---
 

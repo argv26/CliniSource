@@ -1,6 +1,6 @@
-# Structure-Aware Textbook RAG: API Reference
+# CliniSource: API Reference
 
-This document provides the complete HTTP API reference for the Textbook RAG application.
+This document provides the complete HTTP API reference for the CliniSource Clinical Decision Intelligence platform.
 
 ---
 

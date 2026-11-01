@@ -1,12 +1,12 @@
-# Production Deployment Guide — TextBook RAG
+# Production Deployment Guide — CliniSource
 
-This guide details how to deploy the **TextBook RAG** application to production across various cloud platforms and Docker environments.
+This guide details how to deploy the **CliniSource** application to production across various cloud platforms and Docker environments.
 
 ---
 
 ## 1. Quick Local Docker Deployment
 
-The application is completely self-contained. The 97MB `textbook_rag.db` database (containing 12,010 indexed chunks across 3,666 pages) is packaged directly into the container image, requiring zero external database setup.
+The application is completely self-contained. The pre-indexed medical SQLite database (containing 12,010 indexed chunks across 3,666 pages of clinical reference canon) is packaged directly into the container image, requiring zero external database setup.
 
 ### Step-by-Step:
 1. **Configure Environment:**
@@ -36,11 +36,11 @@ gcloud auth login
 gcloud config set project YOUR_PROJECT_ID
 
 # 2. Build and push container to Google Artifact Registry
-gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/textbook-rag
+gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/clinisource
 
 # 3. Deploy to Cloud Run
-gcloud run deploy textbook-rag \
-  --image gcr.io/YOUR_PROJECT_ID/textbook-rag \
+gcloud run deploy clinisource \
+  --image gcr.io/YOUR_PROJECT_ID/clinisource \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
@@ -93,16 +93,16 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# 2. Create systemd service (/etc/systemd/system/textbook-rag.service)
+# 2. Create systemd service (/etc/systemd/system/clinisource.service)
 [Unit]
-Description=TextBook RAG Web Service
+Description=CliniSource Web Service
 After=network.target
 
 [Service]
 User=ubuntu
-WorkingDirectory=/home/ubuntu/Text-Book-RAG
-EnvironmentFile=/home/ubuntu/Text-Book-RAG/.env
-ExecStart=/home/ubuntu/Text-Book-RAG/.venv/bin/uvicorn ui.app:app --host 0.0.0.0 --port 8000
+WorkingDirectory=/home/ubuntu/CliniSource
+EnvironmentFile=/home/ubuntu/CliniSource/.env
+ExecStart=/home/ubuntu/CliniSource/.venv/bin/uvicorn ui.app:app --host 0.0.0.0 --port 8000
 Restart=always
 
 [Install]
@@ -110,7 +110,7 @@ WantedBy=multi-user.target
 
 # 3. Enable and start
 sudo systemctl daemon-reload
-sudo systemctl enable --now textbook-rag
+sudo systemctl enable --now clinisource
 ```
 
 ---

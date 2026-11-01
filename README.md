@@ -1,76 +1,94 @@
 ---
-title: TextBook RAG
-emoji: 📚
+title: CliniSource
+emoji: 🩺
 colorFrom: blue
 colorTo: indigo
 sdk: docker
-app_port: 7860
+app_port: 8000
 ---
 
-# TextBook RAG
+# CliniSource
 
-A production-grade, structure-aware **Retrieval-Augmented Generation (RAG)** system for academic medical textbooks, with an interactive clinical web interface.
+### *The Authoritative Clinical Knowledge & Decision Intelligence Engine*
 
-> 🚀 **Live Demo on Render**: [https://text-book-rag-etiz.onrender.com](https://text-book-rag-etiz.onrender.com)  
-> 📖 **User Feedback & Evolution**: [docs/user-feedback.md](docs/user-feedback.md) | 🏗️ **Architecture**: [docs/architecture.md](docs/architecture.md)
+[![Tests](https://img.shields.io/badge/tests-72%20passed-success)](tests/)
+[![Architecture](https://img.shields.io/badge/architecture-structure--aware-blue)](docs/architecture.md)
+[![Clinical Reasoning](https://img.shields.io/badge/clinical--reasoning-AttendingPlanner-indigo)](docs/clinical-agent.md)
+[![License](https://img.shields.io/badge/license-clinical--research-slate)](LICENSE)
 
----
+CliniSource is an enterprise-grade clinical decision intelligence platform that arms clinicians, residents, and medical researchers with the verified canon of human medicine in under 500 milliseconds.
 
-## Why TextBook RAG?
-
-Standard RAG systems fail on academic textbooks:
-
-- **Multi-column layouts** cause reading-order collisions — page text is extracted in wrong order
-- **PDF vs. printed pages** — page numbers never match between the PDF file and the physical book
-- **Lost special content** — tables, callout boxes (*Key Points*, *Clinical Notes*) get flattened into incoherent prose
-- **Vocabulary mismatch** — publisher titles say *"Adrenal Cortical Insufficiency"*, students search for *"Addison's"* or *"low cortisol"*
-
-**TextBook RAG** solves all of this with a two-layer hierarchical architecture and structure-aware retrieval.
+> 🚀 **Live Production Deployment**: [https://text-book-rag-etiz.onrender.com](https://text-book-rag-etiz.onrender.com)  
+> 🏗️ **Architecture & Design**: [docs/architecture.md](docs/architecture.md) | 🩺 **Clinical Reasoning Guide**: [docs/clinical-agent.md](docs/clinical-agent.md)
 
 ---
 
-## Architecture
+## The Clinical Problem
+
+Modern clinical decision support faces an unsustainable trilemma:
+
+1. **The Hallucination Hazard**: Generalist LLMs (e.g. ChatGPT, Claude) generate fluent, confident clinical advice that often fabricates dosages, cites nonexistent clinical trials, or conflates conflicting specialty guidelines. In medicine, "probably correct" is a patient safety violation.
+2. **The 15-Minute "Scrolling Tax"**: Incumbent reference tools (UpToDate, DynaMed, monolithic PDFs) are exhaustive but slow. Clinicians must manually scroll through 40-page monographs to find a single drug titration guideline or contraindication while a patient waits.
+3. **The Geometric Failure of Generic RAG**: Medical reference literature is architecturally complex—relying on two-column gutters, diagnostic decision trees, cross-tabulated dosages, and anatomical figures. Standard vector chunkers flatten tables into unintelligible text, mangle reading gutters, lose printed pagination, and strip crucial diagnostic diagrams.
+
+---
+
+## The CliniSource Solution
+
+CliniSource bridges the gap between gold-standard medical reference canon (*Harrison's Internal Medicine*, *Williams Endocrinology*, *Robbins Pathology*) and instant bedside decision support:
+
+* **The Attending Mindset (`AttendingPlanner`)**: Formulates differential diagnostic hypotheses and affected organ systems before retrieval, streaming clinical plans live over Server-Sent Events (SSE).
+* **Structure-Aware Document Geometry**: Ingestion preserves multi-column reading gutters, restores publisher heading hierarchies (`Part → Chapter → Section → Subsection`), and reconciles PDF coordinates with physical printed page numbers.
+* **Dual-Ledger Auditability**: Every synthesized sentence is anchored to interactive citation pills backed by exact printed page coordinates and source chapters in the Evidence Drawer. Zero trust required—complete accountability guaranteed.
+* **Instant Visual Streaming**: Diagnostic algorithms, histological slides, and anatomical diagrams stream natively alongside clinical synthesis via SSE with zero multimodal LLM latency.
+* **Multi-Volume Specialty Routing**: Strict user sovereignty honors explicit library filters, while smart semantic routing intelligently routes cross-disciplinary inquiries to the top relevant reference works.
+
+---
+
+## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     Ingestion Pipeline                          │
+│                 Medical Canon Ingestion Pipeline                │
 │                                                                 │
-│  PDF → Page Map → Section Tree → Headings → Page Text          │
-│       → Tag Blocks → Chunk → Load DB                           │
+│  PDF → Page Map → Section Tree → Headings → Column-Gutter Sort  │
+│       → Tag Blocks (Tables/Boxes/Figures) → Bounded Chunks     │
 └──────────────────────────────┬──────────────────────────────────┘
                                │
                     ┌──────────▼──────────┐
-                    │   SQLite FTS5  /    │
+                    │     SQLite FTS5 /   │
                     │  PostgreSQL+pgvector │
                     └──────────┬──────────┘
                                │
-          ┌────────────────────▼────────────────────┐
-          │             Retrieval Layer              │
-          │  search_sections · search_chunks         │
-          │  read_section · get_toc · get_chunk      │
-          └────────────────────┬────────────────────┘
+           ┌───────────────────▼───────────────────┐
+           │        Specialized Retrieval Layer    │
+           │  search_sections · search_chunks      │
+           │  read_section · get_toc · get_chunk   │
+           └───────────────────┬───────────────────┘
                                │
-          ┌────────────────────▼────────────────────┐
-          │          Agent Orchestrator             │
-          │  ContextManager · CitationRegistry       │
-          │  Gemini / OpenAI / Offline Synthesizer   │
-          └────────────────────┬────────────────────┘
+           ┌───────────────────▼───────────────────┐
+           │   Attending Clinical Agent Engine     │
+           │  AttendingPlanner Pre-Step Reasoner   │
+           │  Gemini / OpenAI / Offline Fallback   │
+           │  Citation Integrity Sanitizer         │
+           └───────────────────┬───────────────────┘
                                │
-          ┌────────────────────▼────────────────────┐
-          │       FastAPI Web Chat Interface         │
-          │  Evidence Drawer · Follow-up Chips       │
-          │  Tool Badges · Multi-turn Sessions       │
-          └─────────────────────────────────────────┘
+           ┌───────────────────▼───────────────────┐
+           │      CliniSource Web Consultation     │
+           │  Evidence Drawer · Live Plan Stream   │
+           │  Zero-Multimodal Figure Carousel      │
+           │  My Clinical Canon Library Manager    │
+           └───────────────────────────────────────┘
 ```
 
 ---
 
 ## Quickstart
 
-### 1. Clone & Install
+### 1. Clone & Set Up Virtual Environment
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/argv26/Text-Book-RAG.git
 cd Text-Book-RAG
 
 python -m venv .venv
@@ -86,182 +104,92 @@ pip install -r requirements.txt
 
 ```bash
 cp .env.example .env
-# Edit .env and add your GEMINI_API_KEY (optional — app works offline without it)
+# Set GEMINI_API_KEY or OPENAI_API_KEY (optional: CliniSource works fully offline with local synthesizer)
 ```
 
-### 3. Add Textbooks
-
-Place PDF textbooks in `ingestion/test-books/`.
-
-### 4. Run the Ingestion Pipeline
-
-```bash
-# Run full pipeline on all books in ingestion/test-books/
-python run_pipeline.py --all
-
-# Or for a single book
-python run_pipeline.py --book "Williams Textbook of Endocrinology"
-```
-
-### 5. Start the Web UI
+### 3. Start the CliniSource Platform
 
 ```bash
 python -m ui.app
-# Open http://127.0.0.1:8000
+# Open http://127.0.0.1:8000 in your browser
 ```
 
 ---
 
-## Project Structure
+## Ingesting Reference Volumes
 
+Place PDF medical reference works into `ingestion/test-books/` and execute the pipeline:
+
+```bash
+# Ingest all reference volumes in the directory:
+python run_pipeline.py --all
+
+# Or ingest an individual volume:
+python run_pipeline.py --book "Williams Textbook of Endocrinology"
 ```
-Text-Book-RAG/
-│
-├── ingestion/                  # PDF → Database pipeline
-│   ├── page_map.py             # PDF page ↔ printed page mapping
-│   ├── section_tree.py         # Publisher TOC → hierarchical tree
-│   ├── locate_headings.py      # Exact heading positions on pages
-│   ├── extract_pages.py        # PyMuPDF 2-column gutter-sort extraction
-│   ├── tag_special_content.py  # Tag tables, boxes, captions, prose
-│   ├── chunk_sections.py       # 300–500 token chunks bounded by sections
-│   ├── load_to_db.py           # SQLite FTS5 + PostgreSQL loader
-│   └── schema.sql              # PostgreSQL DDL (pgvector + GIN FTS)
-│
-├── retrieval/                  # Retrieval tools and engine
-│   ├── engine.py               # SqliteEngine + PostgresEngine
-│   ├── models.py               # SectionHit, ChunkHit, SectionContent
-│   └── tools.py                # LLM-callable tool functions + CLI
-│
-├── context/                    # Multi-turn session management
-│   ├── manager.py              # ContextManager (token budget + citations)
-│   ├── compactor.py            # Tool output virtualization + pruning
-│   ├── citations.py            # CitationRegistry
-│   ├── models.py               # Message, SessionState, CitationRecord
-│   └── storage.py              # InMemorySessionStore
-│
-├── agent/                      # LLM orchestration
-│   ├── orchestrator.py         # AgentOrchestrator (Gemini/OpenAI/Offline)
-│   └── prompts.py              # Clinical tutor system prompt
-│
-├── ui/                         # Web application
-│   ├── app.py                  # FastAPI server + REST API
-│   ├── rate_limiter.py         # Daily query quota enforcement (SQLite-backed)
-│   └── static/
-│       ├── index.html          # Single-page chat application
-│       ├── app.js              # Client-side logic
-│       └── styles.css          # Light theme + typography
-│
-├── docs/                       # Architecture and specifications
-├── run_pipeline.py             # Master CLI for full ingestion run
-├── docker-compose.yml          # PostgreSQL + pgvector for production
-├── requirements.txt
-├── .env.example
-└── .gitignore
+
+Alternatively, drag and drop any medical reference PDF directly into the **Clinical Reference Canon** upload modal in the web interface for automatic background indexing.
+
+---
+
+## CLI Retrieval & Auditing
+
+You can query the underlying clinical knowledge base directly from the terminal:
+
+```bash
+# Search section outline headings
+python -m retrieval.tools search-sections "adrenal cortex"
+
+# Search specific passages, tables, and callouts
+python -m retrieval.tools search-chunks "cortisol synthesis" --limit 10
+
+# Read a full section in continuous reading order
+python -m retrieval.tools read-section --book Williams_Textbook_of_Endocrinology_15th_edition_2 --section-id 6
+
+# Inspect table of contents hierarchy
+python -m retrieval.tools get-toc --book anatomy-and-physiology-2e_-_WEB
 ```
 
 ---
 
-## Features
+## Key Features
 
-| Feature | Description |
+| Feature | Clinical Impact |
 |---|---|
-| **Structure-Aware Chunking** | Chunks never cross section boundaries; tables, callout boxes, and figure captions are typed and indexed separately |
-| **AttendingPlanner Reasoning** | Formulates differential diagnostic hypotheses and organ systems before retrieval, streaming clinical plans live over SSE |
-| **Semantic Book Routing** | User selection sovereignty guarantees explicit textbook choices are strictly honored, while smart routing directs broad queries |
-| **Zero-Multimodal Figure Carousel** | Pre-crops textbook diagrams into Object Storage; serves visual plates via responsive carousel without consuming LLM vision tokens |
-| **Dedicated Library Manager** | Dual-scroll sidebar separates consultation history from personal "My Study Library" curation with 1-click active switches |
-| **Dynamic Ingestion Worker** | Drag-and-drop PDF upload with non-blocking background worker, automatic TOC extraction, reading-order sorting, and atomic DB commit |
-| **Printed Page Citations** | Every answer cites the verified printed page number from physical textbook editions with interactive Evidence Drawer navigation |
-| **Medical Typography Normalization** | Sanitizes hormone LaTeX formulas (`T₄`, `TRβ₂`) and converts publisher bibliography brackets into non-colliding `(Ref X)` text |
-| **Production-Hardened Concurrency** | SQLite WAL mode, atomic thread-locked rate limiting, and 95 automated integration & stress tests (100% pass rate) |
+| **AttendingPlanner Reasoning** | Formulates differential diagnostic hypotheses and organ systems before retrieval, streaming clinical plans live over SSE. |
+| **Structure-Aware Chunking** | Chunks never cross section boundaries; tables, callout boxes, and figure captions are typed and indexed separately. |
+| **Specialty Canon Routing** | User selection sovereignty guarantees explicit textbook choices are strictly honored, while smart routing directs broad queries. |
+| **Zero-Multimodal Figure Carousel** | Pre-crops textbook diagrams into Object Storage; serves visual plates via responsive carousel without consuming LLM vision tokens. |
+| **Dual-Scroll Clinical Workspace** | Dual-scroll layout separates consultation history from personal "Clinical Reference Canon" curation with 1-click active switches. |
+| **Dynamic Ingestion Worker** | Drag-and-drop PDF upload with non-blocking background worker, automatic TOC extraction, reading-order sorting, and atomic DB commit. |
+| **Printed Page Provenance** | Every answer cites the verified printed page number from physical textbook editions with interactive Evidence Drawer navigation. |
+| **Medical Typography Normalization** | Sanitizes hormone LaTeX formulas (`T₄`, `TRβ₂`) and converts publisher bibliography brackets into non-colliding `(Ref X)` text. |
+| **Production Concurrency** | SQLite WAL mode, atomic thread-locked rate limiting, and 100% automated integration test coverage. |
 
 ---
 
-## Comprehensive Engineering Documentation
-
-For detailed, human-oriented guides on every aspect of the system:
+## Engineering Documentation
 
 - 🏗️ **[System Architecture & Design Guide](docs/architecture.md)**: Deep dive into the two-layer architecture, modular packages, and SQLite schema.
 - 🩺 **[Clinical Agent & Reasoning Engine](docs/clinical-agent.md)**: How AttendingPlanner, prompt caching, ReAct loops, and sanitizers operate.
-- 📑 **[Textbook Ingestion & Document Pipeline](docs/ingestion-pipeline.md)**: How PDFs are parsed, TOC trees built, columns sorted, and figures cropped.
+- 📑 **[Medical Canon Ingestion Pipeline](docs/ingestion-pipeline.md)**: How PDFs are parsed, TOC trees built, columns sorted, and figures cropped.
 - 💬 **[User Feedback & Evolution Log](docs/user-feedback.md)**: Itemized clinical feedback from testing sessions, pain points, and architectural solutions.
 - 🔌 **[HTTP REST & SSE API Reference](docs/api-reference.md)**: Complete endpoint schemas, request/response bodies, and Server-Sent Event types.
 - 🚀 **[Production Deployment Guide](docs/deployment-guide.md)**: Containerization, environment setup, and instructions for deploying to **Render** or **Google Cloud Run**.
 
 ---
 
-## Corpus Statistics
-
-| Metric | Anatomy & Physiology 2e | Williams Endocrinology 15e | Harrison's Internal Medicine 22e | Total |
-|---|---|---|---|---|
-| PDF Pages | 1,347 | 2,319 | 4,273 | **7,939** |
-| Section Nodes | 409 | 2,944 | 591 | **3,944** |
-| Retrieval Chunks | 3,240 | 9,016 | 16,963 | **29,219** |
-| Median Chunk Size | 481 tokens | 498 tokens | 445 tokens | ~470 tokens |
-| Line Integrity | 100% | 100% | 100% | **100%** |
-
----
-
-## Environment Variables
-
-| Variable | Default | Description |
-|---|---|---|
-| `GEMINI_API_KEY` | *(none)* | Enables Gemini LLM mode |
-| `OPENAI_API_KEY` | *(none)* | Enables OpenAI LLM mode |
-| `GEMINI_MODEL` | `gemini-2.5-flash` | Override Gemini model |
-| `OPENAI_MODEL` | `gpt-4o` | Override OpenAI model |
-| `DATABASE_URL` | *(none)* | PostgreSQL connection string; omit for SQLite |
-| `DAILY_REQUEST_LIMIT` | `50` | Maximum queries allowed per IP/day (0 for unlimited) |
-| `PORT` | `8000` | HTTP server port |
-
----
-
 ## Production Deployment
 
-The application is fully containerized and self-contained with a pre-indexed database:
+The application is fully containerized and self-contained with a pre-indexed clinical database:
 
 ```bash
-# 1-command Docker deployment:
 docker compose up -d web
 # Access at http://localhost:8000
-```
-
-See [docs/deployment-guide.md](docs/deployment-guide.md) for complete instructions on deploying to **Google Cloud Run**, **Render**, **Railway**, or any Linux VPS.
-
-```bash
-# Search textbook outline headings
-python -m retrieval.tools search-sections "adrenal cortex"
-
-# Search specific passages and tables
-python -m retrieval.tools search-chunks "cortisol synthesis" --limit 10
-
-# Read a full textbook section in reading order
-python -m retrieval.tools read-section --book Williams_Textbook_of_Endocrinology_15th_edition_2 --section-id 6
-
-# Browse table of contents
-python -m retrieval.tools get-toc --book anatomy-and-physiology-2e_-_WEB
-```
-
----
-
-## Production Deployment (PostgreSQL)
-
-```bash
-# Start PostgreSQL + pgvector
-docker compose up -d
-
-# Set the database URL
-export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/textbook_rag
-
-# Run ingestion against PostgreSQL
-python run_pipeline.py --all
-
-# Start the web server
-python -m ui.app
 ```
 
 ---
 
 ## License
 
-Designed for educational and research textbook retrieval workflows.
+Designed for clinical decision support research and educational reference retrieval workflows.

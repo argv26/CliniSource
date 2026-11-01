@@ -1,4 +1,4 @@
-"""Context & Session Management Package for Text-Book-RAG."""
+"""Context & Session Management Package for CliniSource."""
 from context.citations import CitationRegistry
 from context.compactor import estimate_tokens, prune_to_budget, virtualize_tool_outputs
 from context.manager import ContextManager

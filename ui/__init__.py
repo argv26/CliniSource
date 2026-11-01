@@ -1,2 +1,2 @@
-"""UI package — FastAPI web application for the textbook RAG chat interface."""
+"""UI package — FastAPI web application for the CliniSource clinical interface."""
 

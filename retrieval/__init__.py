@@ -1,4 +1,4 @@
-"""Text-Book-RAG Retrieval Package."""
+"""CliniSource Retrieval Package."""
 from retrieval.engine import BaseEngine, PostgresEngine, SqliteEngine, get_engine
 from retrieval.models import ChunkHit, SectionContent, SectionHit
 from retrieval.tools import (

@@ -1,4 +1,4 @@
-"""Daily rate limiter for Text-Book-RAG with SQLite persistence."""
+"""Daily rate limiter for CliniSource with SQLite persistence."""
 from __future__ import annotations
 
 import datetime
@@ -10,7 +10,8 @@ from typing import Tuple
 
 from fastapi import Request
 
-DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent / "textbook_rag.db"
+_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_DB_PATH = (_ROOT / "clinisource.db") if (_ROOT / "clinisource.db").exists() else (_ROOT / "textbook_rag.db")
 
 
 class DailyRateLimiter:

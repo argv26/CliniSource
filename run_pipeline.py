@@ -1,4 +1,4 @@
-"""Master Pipeline Orchestrator for Text-Book-RAG.
+"""Master Pipeline Orchestrator for CliniSource.
 
 Executes the entire ingestion pipeline end-to-end:
   1. extract_pages.py      (PyMuPDF clean lines & 2-column gutter sort)
@@ -41,7 +41,7 @@ def run_stage(title: str, script_name: str, extra_args: list[str]) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run the Text-Book-RAG ingestion pipeline end-to-end.")
+    parser = argparse.ArgumentParser(description="Run the CliniSource ingestion pipeline end-to-end.")
     parser.add_argument("--book", type=str, help="Book folder name")
     parser.add_argument("--all", action="store_true", help="Process all books")
     parser.add_argument("--skip-extract", action="store_true", help="Skip extract_pages.py if pages.jsonl already exists")
@@ -57,7 +57,7 @@ def main():
         ("Step 7: Database Setup & Loader", "load_to_db.py", book_arg),
     ]
 
-    print("\nStarting Text-Book-RAG Ingestion Pipeline...")
+    print("\nStarting CliniSource Ingestion Pipeline...")
     overall_start = time.time()
 
     for title, script, s_args in pipeline_stages:

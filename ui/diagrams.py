@@ -1,7 +1,7 @@
 """
 ui/diagrams.py
 
-High-performance Medical Diagram Extraction & Caching Engine for Text-Book-RAG.
+High-performance Medical Diagram Extraction & Caching Engine for CliniSource.
 Extracts high-resolution visual figures, diagrams, and anatomical plates directly
 from source textbook PDFs using PyMuPDF and PageMap offset calibration.
 """
@@ -17,7 +17,7 @@ from storage.object_store import get_storage_provider
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "ui" / "static" / "figures_cache"
-DB_PATH = ROOT / "textbook_rag.db"
+DB_PATH = (ROOT / "clinisource.db") if (ROOT / "clinisource.db").exists() else (ROOT / "textbook_rag.db")
 BOOKS_DIR = ROOT / "ingestion" / "test-books"
 PROFILES_DIR = ROOT / "ingestion" / "analysis-result"
 
@@ -116,7 +116,7 @@ def get_figure_image_path(chunk_id: str) -> Path | None:
     """Resolves or generates a cached JPEG image for a textbook figure chunk.
 
     Args:
-        chunk_id: The chunk identifier from textbook_rag.db.
+        chunk_id: The chunk identifier from the CliniSource database.
 
     Returns:
         Path to the cached image on disk, or None if extraction is unavailable.

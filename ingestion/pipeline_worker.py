@@ -1,11 +1,11 @@
-"""Background Ingestion Pipeline Worker for Dynamic Textbook Ingestion.
+"""Background Ingestion Pipeline Worker for Dynamic CliniSource Canon Ingestion.
 
 Executes end-to-end PDF processing in a non-blocking background thread:
 1. Validates PDF integrity, page text layer, and encryption locks.
 2. Extracts hierarchical Table of Contents (or builds fallback structure).
 3. Extracts and sorts page text in reading order (multi-column aware).
 4. Generates bounded semantic chunks (300-500 tokens).
-5. Atomically commits sections and chunks into textbook_rag.db.
+5. Atomically commits sections and chunks into the CliniSource database.
 6. Maps failures to reassuring, high-level clinical error summaries.
 """
 from __future__ import annotations
@@ -34,7 +34,7 @@ from storage.object_store import get_storage_provider
 logger = logging.getLogger("ingestion.worker")
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-DEFAULT_DB_PATH = ROOT_DIR / "textbook_rag.db"
+DEFAULT_DB_PATH = (ROOT_DIR / "clinisource.db") if (ROOT_DIR / "clinisource.db").exists() else (ROOT_DIR / "textbook_rag.db")
 UPLOAD_STAGING_DIR = ROOT_DIR / "temp" / "uploads"
 UPLOAD_STAGING_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -204,7 +204,7 @@ def generate_book_slug(title: str) -> str:
 
 
 def check_book_exists(slug: str, title: str, db_path: Path | str | None = None) -> bool:
-    """Checks whether a book slug or exact title already exists in textbook_rag.db."""
+    """Checks whether a book slug or exact title already exists in the CliniSource database."""
     target_db = Path(db_path) if db_path else DEFAULT_DB_PATH
     if not target_db.exists():
         return False

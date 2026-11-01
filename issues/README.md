@@ -1,6 +1,6 @@
 # Production Issues & Verification Registry
 
-This directory contains production gap reports, test failure reproductions, and remediation tracking for the Text-Book-RAG system.
+This directory contains production gap reports, test failure reproductions, and remediation tracking for the CliniSource system.
 
 ---
 

@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: textbook_rag_web
+    container_name: clinisource_web
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -16,17 +16,17 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       # Uncomment to use PostgreSQL container instead of local SQLite:
-      # - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/textbook_rag
+      # - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/clinisource
     # depends_on:
     #   - postgres
 
   # ─── Optional PostgreSQL + pgvector (for multi-node production) ───────────
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: textbook_rag_postgres
+    container_name: clinisource_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: textbook_rag
+      POSTGRES_DB: clinisource
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:

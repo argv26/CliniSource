@@ -188,7 +188,7 @@ def list_books() -> list[dict[str, Any]]:
 # =============================================================================
 
 def main():
-    parser = argparse.ArgumentParser(description="Text-Book-RAG Retrieval Tools CLI")
+    parser = argparse.ArgumentParser(description="CliniSource Retrieval Tools CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # search-sections

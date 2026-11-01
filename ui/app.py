@@ -1,4 +1,4 @@
-"""FastAPI application entrypoint for the Structure-Aware Textbook RAG Web UI."""
+"""FastAPI application entrypoint for CliniSource Clinical Decision Intelligence Web UI."""
 from __future__ import annotations
 
 import os
@@ -26,8 +26,8 @@ orchestrator = auth_deps.get_orchestrator()
 rate_limiter = auth_deps.get_rate_limiter()
 
 app = FastAPI(
-    title="Structure-Aware Textbook RAG",
-    description="Conversational medical textbook assistant with structure-aware retrieval and evidence drawer",
+    title="CliniSource API",
+    description="Authoritative Clinical Knowledge & Decision Intelligence Platform",
     version="1.0.0",
 )
 
@@ -70,5 +70,5 @@ def index():
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    print(f"Starting Textbook RAG Web UI on http://127.0.0.1:{port}")
+    print(f"Starting CliniSource Web UI on http://127.0.0.1:{port}")
     uvicorn.run("ui.app:app", host="127.0.0.1", port=port, reload=False)

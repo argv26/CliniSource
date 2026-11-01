@@ -1,14 +1,14 @@
 # Clinical Agent & Reasoning Engine: Architecture Guide
 
-This document details the reasoning, planning, retrieval routing, and streaming architecture of the **Clinical Agent** in **TextBook RAG**.
+This document details the reasoning, planning, retrieval routing, and streaming architecture of the **CliniSource Clinical Agent**.
 
 ---
 
 ## 1. Clinical Reasoning Philosophy
 
-General-purpose conversational AI models frequently stumble in medical question-answering because they jump directly to generating prose before structuring a diagnostic differential or verifying textbook ground truth.
+General-purpose conversational AI models frequently stumble in medical question-answering because they jump directly to generating prose before structuring a diagnostic differential or verifying ground truth against the clinical reference canon.
 
-In TextBook RAG, the agent mimics an **Attending Physician**:
+In CliniSource, the agent mimics an **Attending Physician**:
 1. **Analyze First**: Formulate diagnostic hypotheses, identify the physiological organ systems involved, and generate precise medical search terms.
 2. **Retrieve Authoritative Evidence**: Query the medical textbook library using specialized full-text search tools.
 3. **Verify Every Claim**: Every diagnostic recommendation or pharmacological dosage must be tied to an explicit, verified textbook passage.
