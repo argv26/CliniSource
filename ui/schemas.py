@@ -31,4 +31,5 @@ class ChatResponse(BaseModel):
     tool_calls: list[dict[str, Any]]
     follow_ups: list[str]
     figures: list[dict[str, Any]] = []
+    referenced_books: list[dict[str, Any]] = []
 

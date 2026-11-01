@@ -81,73 +81,84 @@
       <button id="btn-new-chat" class="w-full py-2.5 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 font-semibold text-xs transition duration-150 shadow-sm shadow-blue-500/20 active:scale-95" aria-label="Start new consultation">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         <span>New Consultation</span>
-        <span class="text-[10px] text-blue-200 border border-blue-400/40 rounded px-1.5 py-0.2 ml-auto font-mono bg-blue-700/60">Ctrl K</span>
+        <span class="text-xs text-blue-200 border border-blue-400/40 rounded px-1.5 py-0.5 ml-auto font-mono bg-blue-700/60">Ctrl K</span>
       </button>
     </div>
 
-    <!-- Recent Consultations (Session History) -->
-    <div class="flex-1 overflow-y-auto px-3 py-2 flex flex-col min-h-0">
+    <!-- Recent Consultations (Session History) - Scroll Container 1 -->
+    <div id="sidebar-sessions-container" class="flex-1 min-h-[160px] overflow-hidden flex flex-col px-3 py-2">
       <div class="px-2 py-1.5 flex items-center justify-between mb-1">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Recent Consultations</span>
-        <span id="sessions-count-badge" class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full font-mono">0</span>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Recent Consultations</span>
+        <span id="sessions-count-badge" class="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full font-mono">0</span>
       </div>
       <div id="sessions-list" class="space-y-1 flex-1 overflow-y-auto pr-0.5">
-        <div id="sessions-loading" class="p-3 text-center text-xs text-slate-400 animate-pulse">
+        <div id="sessions-loading" class="p-3 text-center text-xs text-slate-500 animate-pulse">
           Loading history...
         </div>
       </div>
-      <div id="sessions-empty" class="hidden p-4 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 my-2">
-        <svg class="w-5 h-5 mx-auto text-slate-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <div id="sessions-empty" class="hidden p-4 text-center text-xs text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200 my-2">
+        <svg class="w-5 h-5 mx-auto text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
         </svg>
         <span>No past consultations yet</span>
       </div>
     </div>
 
-    <!-- Textbook Scope & Library Manager -->
-    <div class="px-3 py-2.5 border-t border-slate-200 bg-slate-50/70 space-y-2">
-      <div class="flex items-center justify-between">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <!-- Textbook Scope & Active Library - Scroll Container 2 -->
+    <div id="sidebar-library-container" class="flex-1 min-h-[180px] overflow-hidden flex flex-col border-t border-slate-200 bg-slate-50/70">
+      <div class="px-3 pt-2.5 pb-1.5 flex items-center justify-between gap-1">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
           </svg>
-          Textbook Scope
-        </span>
-        <button id="btn-select-all-books" type="button" class="text-[10px] text-blue-600 hover:text-blue-800 font-semibold transition active:scale-95" title="Include all textbooks in search">
-          Select All
-        </button>
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-600 truncate">Active Scope</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span id="sidebar-book-count-badge" class="text-xs font-bold text-blue-700 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full font-mono">2 Active</span>
+          <button id="btn-select-all-books" type="button" class="btn-compact-touch text-xs text-blue-600 hover:text-blue-800 font-semibold transition active:scale-95" title="Include all textbooks in search">
+            All
+          </button>
+        </div>
       </div>
 
       <!-- Scope Toast / Validation Warning -->
-      <div id="scope-warning-toast" class="hidden p-2 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-800 flex items-center gap-1.5 animate-in fade-in duration-150">
+      <div id="scope-warning-toast" class="hidden mx-3 mb-1.5 p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center gap-1.5 animate-in fade-in duration-150">
         <svg class="w-3.5 h-3.5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
         </svg>
         <span id="scope-warning-text">At least 1 textbook must remain active.</span>
       </div>
 
-      <!-- Book List with Interactive Toggle Switches -->
-      <div id="library-list" class="space-y-1.5 pt-0.5 text-xs max-h-52 overflow-y-auto pr-0.5" role="group" aria-label="Target Textbooks">
-        <div class="animate-pulse text-slate-400 text-xs py-2 text-center">Loading catalogue...</div>
+      <!-- Book List with Independent Vertical Scrolling -->
+      <div id="library-list" class="flex-1 overflow-y-auto px-3 py-1 space-y-1.5 text-xs pr-1.5" role="group" aria-label="Target Textbooks">
+        <div class="animate-pulse text-slate-500 text-xs py-2 text-center">Loading catalogue...</div>
+      </div>
+
+      <!-- Manage Full Library Quick Link -->
+      <div class="p-2.5 pt-1.5 border-t border-slate-200/60 bg-white/50">
+        <button id="btn-open-full-library" type="button" class="w-full py-2 px-2.5 rounded-lg text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200/70 flex items-center justify-center gap-1.5 transition active:scale-95 shadow-2xs min-h-[38px]">
+          <span>Manage Full Library</span>
+          <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </button>
       </div>
     </div>
 
     <!-- Footer Engine Status -->
-    <div class="p-2.5 bg-slate-100/80 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
+    <div class="p-2.5 bg-slate-100/80 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></span>
         <span id="engine-badge" class="font-semibold text-slate-700">SQLite FTS5 Active</span>
       </div>
-      <span class="text-slate-400 font-mono text-[10px]">v1.0</span>
+      <span class="text-slate-500 font-mono text-xs">v1.0</span>
     </div>
   </aside>
 
-  <!-- MAIN CHAT FEED -->
+  <!-- MAIN CONTAINER (CONSULTATION & LIBRARY MANAGER) -->
   <main class="flex-1 flex flex-col min-w-0 bg-slate-50 relative">
 
-    <!-- Top Navigation Header -->
-    <header class="h-14 border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between bg-white/90 backdrop-blur z-10">
-      <div class="flex items-center gap-3">
+    <!-- Top Navigation Header with View Switcher Tabs -->
+    <header class="h-14 border-b border-slate-200 px-3 sm:px-6 flex items-center justify-between bg-white/95 backdrop-blur z-10">
+      <div class="flex items-center gap-2 sm:gap-4">
         <!-- Mobile Menu Toggle Button -->
         <button id="btn-mobile-menu" class="md:hidden p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition active:scale-95" aria-label="Toggle navigation menu">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -155,50 +166,79 @@
           </svg>
         </button>
 
-        <div class="flex items-center gap-2 text-xs">
-          <span class="text-slate-500 font-medium hidden sm:inline">Context:</span>
-          <span id="active-book-indicator" class="font-semibold text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full truncate max-w-[160px] sm:max-w-xs">
+        <!-- Top Header Navigation Tabs (Consultation vs Library Manager) -->
+        <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-semibold" role="tablist" aria-label="Main Views">
+          <button
+            id="tab-view-consultation"
+            type="button"
+            class="px-3 py-1.5 rounded-lg bg-white text-blue-600 shadow-2xs font-bold transition flex items-center gap-1.5 active:scale-95 min-h-[36px]"
+            role="tab"
+            aria-selected="true"
+          >
+            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            <span class="hidden sm:inline">Consultation</span>
+            <span class="sm:hidden">Chat</span>
+          </button>
+          <button
+            id="tab-view-library"
+            type="button"
+            class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 active:scale-95 min-h-[36px]"
+            role="tab"
+            aria-selected="false"
+          >
+            <svg class="w-3.5 h-3.5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            <span class="hidden sm:inline">Library Manager</span>
+            <span class="sm:hidden">Library</span>
+          </button>
+        </div>
+
+        <!-- Consultation Scope Indicator Pill (visible on medium+ screens) -->
+        <div id="header-scope-wrapper" class="hidden xl:flex items-center gap-2 text-xs">
+          <span class="text-slate-500 font-medium">Scope:</span>
+          <span id="active-book-indicator" class="font-semibold text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full truncate max-w-[180px]">
             All Textbooks
           </span>
         </div>
       </div>
+
       <div class="flex items-center gap-2">
         <!-- Daily Quota Badge -->
         <div id="quota-badge-container" class="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-medium text-slate-600 flex items-center gap-1.5 shadow-2xs" title="Daily queries remaining">
-          <!-- Bolt SVG -->
-          <svg class="w-3.5 h-3.5 text-amber-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <svg class="w-3.5 h-3.5 text-amber-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
           </svg>
-          <span id="quota-text" class="font-mono">50/50 left</span>
+          <span id="quota-text" class="font-mono">
+            <span class="hidden sm:inline">50/50 left</span>
+            <span class="sm:hidden">50</span>
+          </span>
         </div>
+
         <!-- Toggle Evidence Button -->
-        <button id="btn-toggle-evidence" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition shadow-sm active:scale-95" aria-label="Toggle evidence library">
-          <!-- Book/Layers SVG -->
-          <svg class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <button id="btn-toggle-evidence" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition shadow-sm active:scale-95 min-h-[36px]" aria-label="Toggle evidence library">
+          <svg class="w-4 h-4 text-slate-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
             <path d="M6 6h10"/>
             <path d="M6 10h10"/>
           </svg>
           <span class="hidden sm:inline">Evidence Library</span>
-          <span id="evidence-count-badge" class="bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.2 rounded-full text-[10px] font-mono font-bold">0</span>
+          <span id="evidence-count-badge" class="bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.2 rounded-full text-xs font-mono font-bold">0</span>
         </button>
 
         <!-- User Identity Menu Button -->
         <div class="relative" id="auth-dropdown-wrapper">
-          <button id="btn-auth-trigger" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-xs font-semibold text-blue-700 flex items-center gap-1.5 transition active:scale-95 shadow-2xs" aria-label="User account" aria-expanded="false" aria-haspopup="true">
-            <!-- User Icon SVG -->
-            <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <button id="btn-auth-trigger" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-xs font-semibold text-blue-700 flex items-center gap-1.5 transition active:scale-95 shadow-2xs min-h-[36px]" aria-label="User account" aria-expanded="false" aria-haspopup="true">
+            <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            <span id="auth-user-label" class="truncate max-w-[100px] sm:max-w-[140px]">Sign In / Guest</span>
+            <span id="auth-user-label" class="truncate max-w-[90px] sm:max-w-[140px]">Sign In / Guest</span>
           </button>
 
           <!-- User Dropdown Menu -->
           <div id="auth-user-menu" class="hidden absolute right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl p-2 z-50 text-xs animate-in fade-in zoom-in-95 duration-100" role="menu">
             <div class="px-3 py-2 border-b border-slate-100 mb-1">
               <p class="font-bold text-slate-800 truncate" id="auth-menu-username">Not Signed In</p>
-              <p class="text-[11px] text-slate-500 font-mono" id="auth-menu-status">Ephemeral Session</p>
+              <p class="text-xs text-slate-500 font-mono" id="auth-menu-status">Ephemeral Session</p>
             </div>
             <button id="btn-menu-open-auth" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 flex items-center gap-2 transition" role="menuitem">
               <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
@@ -213,91 +253,266 @@
       </div>
     </header>
 
-    <!-- Chat Messages Scroll Container -->
-    <div id="messages-container" class="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-6" aria-live="polite">
+    <!-- VIEW 1: CONSULTATION (CHAT & STREAM) -->
+    <div id="view-consultation" class="flex-1 flex flex-col min-h-0 overflow-hidden relative">
 
-      <!-- Hero Welcome State (Shown when no messages) -->
-      <div id="hero-welcome" class="max-w-2xl mx-auto my-8 sm:my-12 text-center space-y-6">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 mx-auto flex items-center justify-center shadow-lg shadow-blue-500/20 text-white" aria-hidden="true">
-          <!-- Stethoscope SVG -->
-          <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/>
-            <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/>
-            <circle cx="20" cy="10" r="2"/>
-          </svg>
-        </div>
-        <div class="space-y-2">
-          <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Structure-Aware Medical Textbook RAG</h2>
-          <p class="text-sm text-slate-600 leading-relaxed max-w-lg mx-auto">
-            Ask complex clinical, anatomical, or endocrine questions. Every answer is grounded in the indexed textbook outline with verified page citations and interactive follow-ups.
-          </p>
+      <!-- Chat Messages Scroll Container -->
+      <div id="messages-container" class="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-6" aria-live="polite">
+
+        <!-- Hero Welcome State (Shown when no messages) -->
+        <div id="hero-welcome" class="max-w-2xl mx-auto my-8 sm:my-12 text-center space-y-6">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 mx-auto flex items-center justify-center shadow-lg shadow-blue-500/20 text-white" aria-hidden="true">
+            <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/>
+              <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/>
+              <circle cx="20" cy="10" r="2"/>
+            </svg>
+          </div>
+          <div class="space-y-2">
+            <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Structure-Aware Medical Textbook RAG</h2>
+            <p class="text-sm text-slate-600 leading-relaxed max-w-lg mx-auto">
+              Ask complex clinical, anatomical, or endocrine questions. Every answer is grounded in the indexed textbook outline with verified page citations and interactive follow-ups.
+            </p>
+          </div>
+
+          <!-- Sample clickable cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left pt-2" id="hero-cards">
+            <!-- Populated by JS -->
+          </div>
         </div>
 
-        <!-- Sample clickable cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left pt-2" id="hero-cards">
-          <!-- Populated by JS -->
-        </div>
       </div>
 
+      <!-- Floating Scroll-to-Bottom Button -->
+      <button
+        id="btn-scroll-bottom"
+        type="button"
+        aria-label="Scroll to newest messages"
+        class="hidden fixed bottom-24 right-6 sm:right-8 z-30 p-2.5 rounded-full bg-white/95 text-slate-700 shadow-lg border border-slate-200 hover:bg-slate-50 hover:text-blue-600 transition duration-150 active:scale-95 items-center justify-center backdrop-blur group"
+        title="Jump to latest messages (Down Arrow)"
+      >
+        <svg class="w-4 h-4 text-slate-600 group-hover:text-blue-600 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19" stroke-width="2.5" stroke-linecap="round"></line>
+          <polyline points="19 12 12 19 5 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        </svg>
+      </button>
+
+      <!-- Bottom Input Area -->
+      <div class="p-3 sm:p-4 border-t border-slate-200 bg-white/95 backdrop-blur">
+        <div class="max-w-3xl mx-auto relative">
+          <form id="chat-form" class="relative flex items-end bg-white border border-slate-300 rounded-2xl p-1.5 sm:p-2 transition shadow-sm">
+            <textarea
+              id="chat-input"
+              rows="1"
+              placeholder="Ask a medical question (e.g., adrenal zones, thyroid synthesis)..."
+              aria-label="Clinical inquiry text input"
+              class="w-full bg-transparent text-sm text-slate-900 placeholder-slate-400 px-3 py-2.5 focus:outline-none resize-none max-h-40 min-h-[44px] leading-relaxed font-sans"
+            ></textarea>
+            <button
+              type="submit"
+              id="btn-send"
+              disabled
+              aria-label="Send clinical inquiry"
+              class="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0 transition duration-150 disabled:opacity-35 disabled:cursor-not-allowed ml-1.5 shadow-sm active:scale-95 min-w-[42px] min-h-[42px] flex items-center justify-center"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="19" x2="12" y2="5"></line>
+                <polyline points="5 12 12 5 19 12"></polyline>
+              </svg>
+            </button>
+            <button
+              type="button"
+              id="btn-stop"
+              aria-label="Stop generating response"
+              class="hidden p-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white flex-shrink-0 transition duration-150 ml-1.5 shadow-sm active:scale-95 min-w-[42px] min-h-[42px] items-center justify-center gap-1.5 text-xs font-semibold"
+            >
+              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+              </svg>
+              <span class="hidden sm:inline">Stop</span>
+            </button>
+          </form>
+          <div class="flex items-center justify-between text-xs text-slate-500 mt-2 px-1">
+            <span class="truncate">Verified textbook citations. Click on any <span class="text-blue-600 font-mono font-bold">[#]</span> citation pill to view source evidence.</span>
+            <span class="hidden sm:inline font-mono text-xs text-slate-500 flex-shrink-0 ml-2">↵ Send &nbsp;•&nbsp; ⇧↵ Newline</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Floating Scroll-to-Bottom Button -->
-    <button
-      id="btn-scroll-bottom"
-      type="button"
-      aria-label="Scroll to newest messages"
-      class="hidden fixed bottom-24 right-6 sm:right-8 z-30 p-2.5 rounded-full bg-white/95 text-slate-700 shadow-lg border border-slate-200 hover:bg-slate-50 hover:text-blue-600 transition duration-150 active:scale-95 items-center justify-center backdrop-blur group"
-      title="Jump to latest messages (Down Arrow)"
-    >
-      <svg class="w-4 h-4 text-slate-600 group-hover:text-blue-600 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <line x1="12" y1="5" x2="12" y2="19" stroke-width="2.5" stroke-linecap="round"></line>
-        <polyline points="19 12 12 19 5 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
-      </svg>
-    </button>
+    <!-- VIEW 2: DEDICATED FULL-VIEW LIBRARY MANAGER -->
+    <div id="view-library" class="flex-1 overflow-y-auto p-4 sm:p-8 hidden bg-slate-50">
+      <div class="max-w-5xl mx-auto space-y-6">
 
-    <!-- Bottom Input Area -->
-    <div class="p-3 sm:p-4 border-t border-slate-200 bg-white/95 backdrop-blur">
-      <div class="max-w-3xl mx-auto relative">
-        <form id="chat-form" class="relative flex items-end bg-white border border-slate-300 rounded-2xl p-1.5 sm:p-2 transition shadow-sm">
-          <textarea
-            id="chat-input"
-            rows="1"
-            placeholder="Ask a medical question (e.g., adrenal zones, thyroid synthesis)..."
-            aria-label="Clinical inquiry text input"
-            class="w-full bg-transparent text-sm text-slate-900 placeholder-slate-400 px-3 py-2.5 focus:outline-none resize-none max-h-40 min-h-[44px] leading-relaxed font-sans"
-          ></textarea>
+        <!-- Top Header & Metrics Banner -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div class="space-y-1.5 max-w-xl">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-1">
+              <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              <span>Textbook Repository & Curriculum Manager</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Curate Your Medical Library</h2>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Customize your personal study collection for clinical consultations. Active books define the search scope and reasoning context.
+            </p>
+          </div>
+
+          <!-- Quick Metrics Badges -->
+          <div class="flex items-center gap-3 w-full md:w-auto">
+            <div class="flex-1 md:flex-initial p-3 rounded-xl bg-slate-50 border border-slate-200 text-center min-w-[105px]">
+              <div class="text-xs font-bold text-slate-600 uppercase tracking-wider">My Library</div>
+              <div id="stat-user-books" class="text-lg font-bold text-slate-800 font-mono mt-0.5">0</div>
+            </div>
+            <div class="flex-1 md:flex-initial p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center min-w-[105px]">
+              <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Active Scope</div>
+              <div id="stat-active-books" class="text-lg font-bold text-emerald-800 font-mono mt-0.5">0</div>
+            </div>
+            <div class="flex-1 md:flex-initial p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-center min-w-[105px]">
+              <div class="text-xs font-bold text-indigo-800 uppercase tracking-wider">Global Catalog</div>
+              <div id="stat-global-books" class="text-lg font-bold text-indigo-800 font-mono mt-0.5">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtabs: My Study Library vs Explore Global Catalog -->
+        <div class="border-b border-slate-200 flex items-center justify-between gap-4">
+          <div class="flex gap-2 sm:gap-4" role="tablist">
+            <button
+              id="subtab-my-library"
+              type="button"
+              class="pb-3 px-2 text-xs sm:text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition flex items-center gap-2 min-h-[44px]"
+              role="tab"
+              aria-selected="true"
+            >
+              <span>My Study Library</span>
+              <span id="subtab-my-library-count" class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-mono font-bold">0</span>
+            </button>
+            <button
+              id="subtab-global-catalog"
+              type="button"
+              class="pb-3 px-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 min-h-[44px]"
+              role="tab"
+              aria-selected="false"
+            >
+              <span>Explore Global Catalog</span>
+              <span id="subtab-global-catalog-count" class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-full font-mono font-bold">0</span>
+            </button>
+          </div>
+
           <button
-            type="submit"
-            id="btn-send"
-            disabled
-            aria-label="Send clinical inquiry"
-            class="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0 transition duration-150 disabled:opacity-35 disabled:cursor-not-allowed ml-1.5 shadow-sm active:scale-95 min-w-[42px] min-h-[42px] flex items-center justify-center"
-          >
-            <!-- Upward Send Arrow SVG -->
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="12" y1="19" x2="12" y2="5"></line>
-              <polyline points="5 12 12 5 19 12"></polyline>
-            </svg>
-          </button>
-          <button
+            id="btn-return-consultation"
             type="button"
-            id="btn-stop"
-            aria-label="Stop generating response"
-            class="hidden p-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white flex-shrink-0 transition duration-150 ml-1.5 shadow-sm active:scale-95 min-w-[42px] min-h-[42px] items-center justify-center gap-1.5 text-xs font-semibold"
+            class="hidden sm:inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-semibold mb-2 transition active:scale-95"
           >
-            <!-- Square Stop Icon SVG -->
-            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="5" y="5" width="14" height="14" rx="2"></rect>
-            </svg>
-            <span class="hidden sm:inline">Stop</span>
+            <span>Back to Consultation</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </button>
-        </form>
-        <div class="flex items-center justify-between text-[11px] text-slate-500 mt-2 px-1">
-          <span class="truncate">Verified textbook citations. Click on any <span class="text-blue-600 font-mono font-bold">[#]</span> citation pill to view source evidence.</span>
-          <span class="hidden sm:inline font-mono text-[10px] text-slate-400 flex-shrink-0 ml-2">↵ Send &nbsp;•&nbsp; ⇧↵ Newline</span>
         </div>
+
+        <!-- TAB PANEL 1: MY STUDY LIBRARY -->
+        <div id="subpanel-my-library" class="space-y-4">
+          <!-- Action Bar -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:px-4 rounded-xl border border-slate-200 shadow-2xs">
+            <div class="text-xs text-slate-600">
+              <span class="font-semibold text-slate-800">Consultation Scope:</span> Toggle individual textbooks to include or exclude them from search results.
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                id="btn-lib-activate-all"
+                type="button"
+                class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition active:scale-95 min-h-[36px]"
+              >
+                Activate All
+              </button>
+              <button
+                id="btn-lib-deactivate-all"
+                type="button"
+                class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition active:scale-95 min-h-[36px]"
+              >
+                Deactivate All
+              </button>
+              <button
+                id="btn-lib-goto-global"
+                type="button"
+                class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition active:scale-95 flex items-center gap-1.5 shadow-2xs min-h-[36px]"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Add Books</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- My Library Grid -->
+          <div id="my-library-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-6 text-center text-xs text-slate-500 bg-white rounded-xl border border-slate-200 animate-pulse col-span-2">
+              Loading your study library...
+            </div>
+          </div>
+
+          <!-- Empty Library Notice -->
+          <div id="my-library-empty" class="hidden p-8 text-center bg-white rounded-2xl border border-dashed border-slate-300 space-y-3">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            </div>
+            <h3 class="text-sm font-bold text-slate-800">Your Study Library is Empty</h3>
+            <p class="text-xs text-slate-600 max-w-sm mx-auto">
+              Add textbooks from the Global Catalog to enable multi-volume clinical search.
+            </p>
+            <button
+              id="btn-empty-browse-global"
+              type="button"
+              class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition active:scale-95 inline-flex items-center gap-2 shadow-sm min-h-[44px]"
+            >
+              <span>Explore Global Catalog</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB PANEL 2: EXPLORE GLOBAL CATALOG -->
+        <div id="subpanel-global-catalog" class="space-y-4 hidden">
+          <!-- Search & Filter Bar -->
+          <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="relative w-full sm:max-w-md">
+              <svg class="w-4 h-4 text-slate-500 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input
+                id="global-catalog-search"
+                type="text"
+                placeholder="Search global repository by title, specialty, or keywords..."
+                class="w-full pl-9 pr-8 py-2 text-xs rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
+              />
+              <button id="btn-clear-global-search" type="button" class="hidden absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 p-0.5 rounded-full transition" aria-label="Clear search input">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="flex items-center gap-3 self-end sm:self-center">
+              <div class="text-xs text-slate-600 items-center gap-1.5 hidden md:flex">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>All indexed textbooks accessible to all users</span>
+              </div>
+              <button
+                id="btn-open-upload-modal"
+                type="button"
+                class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition active:scale-95 flex items-center gap-1.5 shadow-xs min-h-[36px]"
+                aria-label="Upload new textbook PDF"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                <span>Upload Textbook</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Grouped Specialty Accordions / Catalog List -->
+          <div id="global-catalog-list" class="space-y-4">
+            <div class="p-6 text-center text-xs text-slate-500 bg-white rounded-xl border border-slate-200 animate-pulse">
+              Loading global repository catalog...
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
+
   </main>
 
   <!-- RIGHT EVIDENCE DRAWER -->
@@ -406,7 +621,7 @@
             placeholder="e.g. dr_watson"
             class="w-full text-xs px-3 py-2.5 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
           />
-          <p id="auth-username-hint" class="text-[11px] text-slate-400 mt-1 hidden">At least 3 characters, letters and numbers</p>
+          <p id="auth-username-hint" class="text-xs text-slate-500 mt-1 hidden">At least 3 characters, letters and numbers</p>
         </div>
 
         <div>
@@ -447,7 +662,7 @@
             <polyline points="21 15 16 10 5 21"/>
           </svg>
           <h3 id="lightbox-title" class="font-bold text-xs sm:text-sm text-slate-900 truncate">Textbook Diagram</h3>
-          <span id="lightbox-page-badge" class="text-[10px] font-mono text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-full flex-shrink-0">p. 0</span>
+          <span id="lightbox-page-badge" class="text-xs font-mono text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-full flex-shrink-0">p. 0</span>
         </div>
         <button id="btn-close-lightbox" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer" aria-label="Close figure lightbox">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -469,7 +684,162 @@
     </div>
   </div>
 
+  <!-- UPLOAD TEXTBOOK MODAL -->
+  <div id="modal-upload-book" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs hidden transition-opacity duration-200" role="dialog" aria-modal="true" aria-labelledby="modal-upload-title">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]">
+      
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-xs">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          </div>
+          <div>
+            <h3 id="modal-upload-title" class="font-bold text-sm text-slate-900">Upload New Textbook</h3>
+            <p class="text-xs text-slate-500">Add medical textbooks to the Global Library</p>
+          </div>
+        </div>
+        <button id="btn-close-upload-modal" class="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition active:scale-95" aria-label="Close upload modal">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
+        
+        <!-- Global Sharing Notice & Duration Disclaimer -->
+        <div class="p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3 text-xs text-blue-900 leading-relaxed">
+          <svg class="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div class="space-y-1">
+            <p><span class="font-bold">Global Shared Library:</span> This textbook will be indexed into the shared Global Library and made accessible to all users across consultations.</p>
+            <p class="text-blue-800"><span class="font-semibold">Processing Notice:</span> Complete textbook ingestion (structure extraction, multi-column reading layout, chunking, and database indexing) runs in the background and may take a few minutes depending on volume length. You can continue using consultations while ingestion completes.</p>
+          </div>
+        </div>
+
+        <!-- Initial Upload Form (hidden during/after ingestion) -->
+        <form id="form-upload-book" class="space-y-4">
+          <!-- Dropzone -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">PDF Textbook File <span class="text-rose-500">*</span></label>
+            <div id="upload-dropzone" class="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-xl p-5 text-center transition cursor-pointer bg-slate-50/50 hover:bg-emerald-50/20">
+              <input id="input-upload-file" type="file" accept=".pdf,application/pdf" class="hidden" />
+              <div id="dropzone-empty-state" class="space-y-2">
+                <svg class="w-8 h-8 mx-auto text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                <p class="text-xs text-slate-600 font-medium">Click to browse or drag and drop your textbook PDF here</p>
+                <p class="text-xs text-slate-500">PDF format with searchable digital text layer</p>
+              </div>
+              <div id="dropzone-file-state" class="hidden flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-lg">
+                <div class="flex items-center gap-2 truncate">
+                  <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  <span id="selected-file-name" class="text-xs font-semibold text-slate-800 truncate">document.pdf</span>
+                  <span id="selected-file-size" class="text-xs text-slate-500 font-mono">(0 MB)</span>
+                </div>
+                <button id="btn-remove-selected-file" type="button" class="text-xs text-rose-500 hover:text-rose-700 font-medium p-1 min-h-[36px]" aria-label="Change selected file">Change</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Textbook Title -->
+          <div>
+            <label for="input-upload-title" class="block text-xs font-semibold text-slate-700 mb-1.5">Textbook Title <span class="text-rose-500">*</span></label>
+            <input id="input-upload-title" type="text" placeholder="e.g. Cornea: Fundamentals, Diagnosis and Management" required class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition" />
+            <p id="upload-title-duplicate-warning" class="hidden text-xs text-amber-600 font-medium mt-1">⚠️ A textbook with this title already exists in the Global Library.</p>
+          </div>
+
+          <!-- Free-Text Specialty Input with Suggestions -->
+          <div>
+            <label for="input-upload-specialty" class="block text-xs font-semibold text-slate-700 mb-1.5">Medical Specialty / Category</label>
+            <input id="input-upload-specialty" type="text" placeholder="e.g. Ophthalmology, Internal Medicine, Cardiology" list="specialty-suggestions" class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition" />
+            <datalist id="specialty-suggestions">
+              <option value="Ophthalmology">
+              <option value="Internal Medicine">
+              <option value="Cardiology">
+              <option value="Endocrinology & Metabolism">
+              <option value="Anatomy & Physiology">
+              <option value="Neurology">
+              <option value="Pathology">
+              <option value="Pharmacology">
+              <option value="Pediatrics">
+              <option value="Surgery">
+            </datalist>
+            <p class="text-xs text-slate-500 mt-1">Type any specialty or subspecialty; used to categorize the book in the catalog.</p>
+          </div>
+
+          <!-- Inline Error State -->
+          <div id="upload-form-error" class="hidden p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700"></div>
+
+          <!-- Form Actions -->
+          <div class="pt-2 flex items-center justify-end gap-2.5">
+            <button id="btn-cancel-upload" type="button" class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 text-xs font-semibold transition min-h-[44px]">Cancel</button>
+            <button id="btn-submit-upload" type="submit" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition active:scale-95 flex items-center gap-2 shadow-xs min-h-[44px]">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              <span>Begin Ingestion</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Live Ingestion Stepper View (Shown when processing or completed/failed) -->
+        <div id="upload-progress-view" class="hidden space-y-4 py-2">
+          <div class="flex items-center justify-between text-xs">
+            <span id="upload-progress-stage-label" class="font-bold text-slate-800">Validating PDF...</span>
+            <span id="upload-progress-percent" class="font-mono font-bold text-emerald-600">0%</span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+            <div id="upload-progress-bar" class="h-full bg-emerald-500 transition-all duration-300 ease-out" style="width: 0%"></div>
+          </div>
+
+          <!-- 4-Stage Stepper Pills -->
+          <div class="grid grid-cols-4 gap-1 text-xs text-center text-slate-500 font-medium">
+            <div id="step-pill-validate" class="py-1 px-1 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">1. Verify</div>
+            <div id="step-pill-toc" class="py-1 px-1 rounded-md bg-slate-100 text-slate-500">2. Outline</div>
+            <div id="step-pill-extract" class="py-1 px-1 rounded-md bg-slate-100 text-slate-500">3. Chunks</div>
+            <div id="step-pill-ready" class="py-1 px-1 rounded-md bg-slate-100 text-slate-500">4. Ready</div>
+          </div>
+
+          <!-- Active Progress Message -->
+          <p id="upload-progress-message" class="text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200 leading-relaxed font-sans">
+            Analyzing document structure and layout...
+          </p>
+
+          <!-- Reassuring Failure Notification Card -->
+          <div id="upload-failure-card" class="hidden p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2.5 text-xs">
+            <div class="flex items-center gap-2 text-rose-700 font-bold">
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              <span>Ingestion Unsuccessful</span>
+            </div>
+            <p id="upload-failure-reason" class="text-rose-800 leading-relaxed"></p>
+            <div class="p-2.5 bg-white/70 rounded-lg text-slate-700 text-xs border border-rose-100">
+              <span class="font-semibold text-rose-800">Technical Team Status:</span> Our technical team has been logged with this diagnostic report and is working on a fix.
+            </div>
+            <div class="pt-1 flex justify-end">
+              <button id="btn-try-another-upload" type="button" class="px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg font-semibold transition active:scale-95 min-h-[36px]">
+                Try Another PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Success Notification Card -->
+          <div id="upload-success-card" class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-3 text-xs">
+            <div class="flex items-center gap-2 text-emerald-800 font-bold">
+              <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Ingestion Completed Successfully!</span>
+            </div>
+            <p id="upload-success-detail" class="text-emerald-900 leading-relaxed"></p>
+            <div class="flex justify-end gap-2 pt-1">
+              <button id="btn-done-upload" type="button" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition active:scale-95 shadow-xs min-h-[44px]">
+                Done & View Catalog
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- App Script with cache-busting -->
-  <script src="/static/app.js?v=2.0.1"></script>
+  <script src="/static/app.js?v=3.2.0"></script>
 </body>
 </html>

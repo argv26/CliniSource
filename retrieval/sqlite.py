@@ -396,6 +396,13 @@ class SqliteEngine(BaseEngine):
 
     def list_books(self) -> list[dict[str, Any]]:
         cur = self.conn.cursor()
+        cols = [c[1] for c in cur.execute("PRAGMA table_info(books);").fetchall()]
+        if "specialty" in cols:
+            rows = cur.execute("SELECT id, slug, title, total_pages, specialty FROM books ORDER BY id ASC;").fetchall()
+            return [
+                {"id": r[0], "slug": r[1], "title": r[2], "total_pages": r[3], "specialty": r[4]}
+                for r in rows
+            ]
         rows = cur.execute("SELECT id, slug, title, total_pages FROM books ORDER BY id ASC;").fetchall()
         return [
             {"id": r[0], "slug": r[1], "title": r[2], "total_pages": r[3]}

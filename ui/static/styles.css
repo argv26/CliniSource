@@ -315,6 +315,164 @@ input:focus-visible {
   transform: scale(0.97);
 }
 
+/* 10. Referenced Textbooks Badges */
+.referenced-books-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+/* 11. Dual-Scroll Sidebar & Library Manager Styles */
+#sidebar-sessions-container,
+#sidebar-library-container {
+  min-height: 140px;
+  max-height: 50%;
+}
+
+#sessions-list::-webkit-scrollbar,
+#library-list::-webkit-scrollbar,
+#view-library::-webkit-scrollbar {
+  width: 5px;
+}
+#sessions-list::-webkit-scrollbar-thumb,
+#library-list::-webkit-scrollbar-thumb,
+#view-library::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+/* Library Manager Cards & Accordions */
+.library-card {
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.15s ease;
+}
+.library-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.08);
+  transform: translateY(-1px);
+}
+
+.specialty-accordion-header {
+  user-select: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.specialty-accordion-header:hover {
+  background-color: #f1f5f9;
+}
+.specialty-chevron {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.specialty-accordion-header.collapsed .specialty-chevron {
+  transform: rotate(-90deg);
+}
+.specialty-body {
+  transition: opacity 0.2s ease, max-height 0.25s ease;
+}
+.specialty-body.collapsed {
+  display: none;
+}
+
+/* 12. Touch Target Expanders (SKILL-Ui Priority 2 - Min 44x44px) */
+.toggle-switch {
+  position: relative;
+}
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: -12px;
+  bottom: -12px;
+  left: -8px;
+  right: -8px;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.btn-compact-touch {
+  position: relative;
+}
+.btn-compact-touch::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  left: -10px;
+  right: -10px;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* 13. Horizontal Figures Slider & Carousel */
+.figures-slider-container {
+  position: relative;
+  width: 100%;
+}
+
+.figures-slider {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+  padding-top: 0.25rem;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.figures-slider::-webkit-scrollbar {
+  height: 5px;
+}
+.figures-slider::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 9999px;
+}
+.figures-slider::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.figures-slider::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.figures-slider > .figure-card {
+  flex: 0 0 250px;
+  max-width: 270px;
+  scroll-snap-align: start;
+}
+
+.btn-slider-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+.btn-slider-chevron::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  left: -8px;
+  right: -8px;
+  min-width: 44px;
+  min-height: 44px;
+}
+.btn-slider-chevron:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.btn-slider-chevron:active {
+  transform: scale(0.92);
+}
+
 /* 9. Accessible Reduced Motion (SKILL-Ui Rule 7) */
 @media (prefers-reduced-motion: reduce) {
   *,

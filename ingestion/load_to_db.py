@@ -257,18 +257,33 @@ class SqliteBackend:
         )
         self.conn.commit()
 
-    def load_book(self, book_slug: str, sections: list[dict], chunks: list[dict]):
-        title = book_slug.replace("_", " ").replace("-", " ").title()
+    def load_book(
+        self,
+        book_slug: str,
+        sections: list[dict],
+        chunks: list[dict],
+        title: str | None = None,
+        specialty: str | None = None,
+    ):
+        if not title:
+            title = book_slug.replace("_", " ").replace("-", " ").title()
         total_pages = max((c.get("page_end", 0) for c in chunks), default=1)
 
         cur = self.conn.cursor()
+        cols = [c[1] for c in cur.execute("PRAGMA table_info(books);").fetchall()]
+        if "specialty" not in cols:
+            cur.execute("ALTER TABLE books ADD COLUMN specialty TEXT;")
+
         cur.execute(
             """
-            INSERT INTO books (slug, title, total_pages)
-            VALUES (?, ?, ?)
-            ON CONFLICT(slug) DO UPDATE SET total_pages=excluded.total_pages;
+            INSERT INTO books (slug, title, total_pages, specialty)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(slug) DO UPDATE SET
+                title=excluded.title,
+                total_pages=excluded.total_pages,
+                specialty=coalesce(excluded.specialty, books.specialty);
             """,
-            (book_slug, title, total_pages),
+            (book_slug, title, total_pages, specialty),
         )
 
         sec_rows = [

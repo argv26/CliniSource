@@ -63,24 +63,24 @@ def _sanitize_medical_typography(text: str) -> str:
 
     # 3. Convert common LaTeX mathematical symbols to clean Unicode
     latex_syms = [
-        (r"\\(?:ge|geq)\b", "≥"),
-        (r"\\(?:le|leq)\b", "≤"),
-        (r"\\sim\b", "~"),
-        (r"\\pm\b", "±"),
-        (r"\\times\b", "×"),
-        (r"\\(?:mu|micro)\b", "μ"),
-        (r"\\alpha\b", "α"),
-        (r"\\beta\b", "β"),
-        (r"\\gamma\b", "γ"),
-        (r"\\(?:Delta|delta)\b", "Δ"),
-        (r"\\(?:degree|circ)\b", "°"),
+        (r"\\(?:ge|geq)(?![a-zA-Z])", "≥"),
+        (r"\\(?:le|leq)(?![a-zA-Z])", "≤"),
+        (r"\\sim(?![a-zA-Z])", "~"),
+        (r"\\pm(?![a-zA-Z])", "±"),
+        (r"\\times(?![a-zA-Z])", "×"),
+        (r"\\(?:mu|micro)(?![a-zA-Z])", "μ"),
+        (r"\\alpha(?![a-zA-Z])", "α"),
+        (r"\\beta(?![a-zA-Z])", "β"),
+        (r"\\gamma(?![a-zA-Z])", "γ"),
+        (r"\\(?:Delta|delta)(?![a-zA-Z])", "Δ"),
+        (r"\\(?:degree|circ)(?![a-zA-Z])", "°"),
     ]
     for pattern, replacement in latex_syms:
         text = re.sub(pattern, replacement, text)
 
-    # 4. Unwrap single dollar math delimiters wrapping clinical units, expressions, or receptors
-    # e.g. $pH < 7.3$, $< 15 mmol/L$, $200–250 mg/dL$, $TR\beta2$ -> $TRβ2$ -> TRβ2
-    text = re.sub(r"\$([A-Za-z0-9\s\.\<\>\=\-\+~±×μ\u0370-\u03ff°%/–—\(\)]+)\$", r"\1", text)
+    # 4. Unwrap single dollar math delimiters wrapping clinical units, expressions, hormones or receptors
+    # e.g. $pH < 7.3$, $< 15 mmol/L$, $200–250 mg/dL$, $TR\beta2$ -> TRβ2
+    text = re.sub(r"\$([^\$\n]+)\$", r"\1", text)
 
     # 5. Clean up any leftover empty brackets or redundant whitespace
     text = re.sub(r"\(\s*\)", "", text)

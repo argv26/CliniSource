@@ -12,7 +12,8 @@ from agent.offline import (
     parse_follow_ups,
     run_offline_synthesizer_turn,
 )
-from agent.prompts import SYSTEM_PROMPT
+from agent.planner import AttendingPlanner, ClinicalPlan
+from agent.prompts import INVARIANT_SYSTEM_PROMPT, SYSTEM_PROMPT
 from agent.providers import run_gemini_turn, run_openai_turn
 from agent.sanitizers import (
     _clean_chunk_prose,
@@ -24,6 +25,7 @@ from agent.tools_spec import TOOL_DEFINITIONS, execute_tool
 from context.manager import ContextManager
 from context.models import CitationRecord
 from retrieval.parallel import _execute_parallel_retrieval
+from retrieval.router import SemanticBookRouter, extract_referenced_books
 from retrieval.tools import search_figures
 
 __all__ = [
@@ -41,10 +43,20 @@ __all__ = [
 class AgentOrchestrator:
     """Orchestrates multi-turn conversation, structure-aware tool invocation, and LLM responses."""
 
-    def __init__(self, context_manager: ContextManager | None = None):
+    def __init__(
+        self,
+        context_manager: ContextManager | None = None,
+        planner: AttendingPlanner | None = None,
+        router: SemanticBookRouter | None = None,
+    ):
         self.context_manager = context_manager or ContextManager()
         self.gemini_api_key = os.environ.get("GEMINI_API_KEY")
         self.openai_api_key = os.environ.get("OPENAI_API_KEY")
+        self.planner = planner or AttendingPlanner(
+            api_key=self.gemini_api_key,
+            openai_api_key=self.openai_api_key,
+        )
+        self.router = router or SemanticBookRouter()
 
     def _parse_follow_ups(self, text: str) -> tuple[str, list[str]]:
         return parse_follow_ups(text)
@@ -151,21 +163,31 @@ class AgentOrchestrator:
                 ],
             }
 
-        # 3. Check for configured LLM or fallback to Smart Retrieval Synthesizer
+        # 3. Formulate Pre-Step Clinical Plan
+        plan = self.planner.plan(user_message=user_message, active_books=active_books)
+
+        # 4. Route textbook scope (honoring explicit user selection if specified)
+        routed_books = self.router.route(query=user_message, plan=plan, user_selected_books=active_books)
+
+        # 5. Check for configured LLM or fallback to Smart Retrieval Synthesizer
         if self.gemini_api_key:
             try:
-                turn_result = self._run_gemini_turn(session_id, user_message, book_slug=book_slug, active_books=active_books)
+                turn_result = self._run_gemini_turn(session_id, user_message, book_slug=book_slug, active_books=routed_books)
             except Exception as e:
                 print(f"[AgentOrchestrator] Gemini LLM unavailable ({e}). Falling back to local smart synthesizer.")
-                turn_result = self._run_offline_synthesizer_turn(session_id, user_message, book_slug=book_slug, active_books=active_books)
+                turn_result = self._run_offline_synthesizer_turn(session_id, user_message, book_slug=book_slug, active_books=routed_books)
         elif self.openai_api_key:
             try:
-                turn_result = self._run_openai_turn(session_id, user_message, book_slug=book_slug, active_books=active_books)
+                turn_result = self._run_openai_turn(session_id, user_message, book_slug=book_slug, active_books=routed_books)
             except Exception as e:
                 print(f"[AgentOrchestrator] OpenAI LLM unavailable ({e}). Falling back to local smart synthesizer.")
-                turn_result = self._run_offline_synthesizer_turn(session_id, user_message, book_slug=book_slug, active_books=active_books)
+                turn_result = self._run_offline_synthesizer_turn(session_id, user_message, book_slug=book_slug, active_books=routed_books)
         else:
-            turn_result = self._run_offline_synthesizer_turn(session_id, user_message, book_slug=book_slug, active_books=active_books)
+            turn_result = self._run_offline_synthesizer_turn(session_id, user_message, book_slug=book_slug, active_books=routed_books)
+
+        turn_result["plan"] = plan.to_dict()
+        session = self.context_manager.get_or_create_session(session_id)
+        turn_result["referenced_books"] = extract_referenced_books(list(session.citations.values()))
 
         # 4. Secondary Figure Retrieval: Fetch 3-4 matching figure captions for visual evidence
         if "figures" not in turn_result or not turn_result["figures"]:
@@ -218,10 +240,11 @@ class AgentOrchestrator:
                 yield {"event": "token", "data": {"delta": (w + " ") if i < len(words) - 1 else w}}
                 time.sleep(0.01)
 
+            yield {"event": "referenced_books", "data": []}
             yield {"event": "citations", "data": []}
             yield {"event": "figures", "data": []}
             yield {"event": "follow_ups", "data": follow_ups}
-            yield {"event": "done", "data": {"reply": reply}}
+            yield {"event": "done", "data": {"reply": reply, "referenced_books": []}}
             self.context_manager.add_assistant_message(session_id, reply)
             return
 
@@ -240,10 +263,11 @@ class AgentOrchestrator:
                 yield {"event": "token", "data": {"delta": (w + " ") if i < len(words) - 1 else w}}
                 time.sleep(0.01)
 
+            yield {"event": "referenced_books", "data": []}
             yield {"event": "citations", "data": []}
             yield {"event": "figures", "data": []}
             yield {"event": "follow_ups", "data": follow_ups}
-            yield {"event": "done", "data": {"reply": reply}}
+            yield {"event": "done", "data": {"reply": reply, "referenced_books": []}}
             self.context_manager.add_assistant_message(session_id, reply)
             return
 
@@ -270,20 +294,37 @@ class AgentOrchestrator:
                 yield {"event": "token", "data": {"delta": (w + " ") if i < len(words) - 1 else w}}
                 time.sleep(0.01)
 
+            yield {"event": "referenced_books", "data": []}
             yield {"event": "citations", "data": []}
             yield {"event": "figures", "data": []}
             yield {"event": "follow_ups", "data": follow_ups}
-            yield {"event": "done", "data": {"reply": reply}}
+            yield {"event": "done", "data": {"reply": reply, "referenced_books": []}}
             self.context_manager.add_assistant_message(session_id, reply)
             return
 
         # 3. Clinical Query: Progressive breadcrumb status
+        yield {"event": "status", "data": {"text": "Formulating clinical diagnosis plan..."}}
+
+        plan = self.planner.plan(
+            user_message=user_message,
+            active_books=active_books,
+        )
+        yield {"event": "plan", "data": plan.to_dict()}
+
+        # 4. Semantic Book Routing (User sovereign selection preserved)
+        routed_books = self.router.route(
+            query=user_message,
+            plan=plan,
+            user_selected_books=active_books,
+        )
+
         yield {"event": "status", "data": {"text": "Searching medical textbooks..."}}
 
+        search_target_queries = plan.search_queries if plan.search_queries else [user_message]
         retrieval = _execute_parallel_retrieval(
-            query=user_message,
+            query=search_target_queries,
             book_slug=book_slug,
-            allowed_books=active_books,
+            allowed_books=routed_books,
             chunk_limit=6,
             section_limit=2,
             figure_limit=4,
@@ -325,6 +366,11 @@ class AgentOrchestrator:
         ]
 
         yield {"event": "tools", "data": tool_activity}
+        
+        # Parallel Figure Resolution: Emit figures early so UI thumbnail gallery renders while LLM text streams
+        if figures_result:
+            yield {"event": "figures", "data": figures_result}
+            
         yield {"event": "status", "data": {"text": "Synthesizing clinical answer..."}}
 
         session = self.context_manager.get_or_create_session(session_id)
@@ -352,7 +398,7 @@ class AgentOrchestrator:
 
                 messages = self.context_manager.assemble_prompt(
                     session_id=session_id,
-                    system_prompt=SYSTEM_PROMPT,
+                    system_prompt=INVARIANT_SYSTEM_PROMPT,
                 )
                 contents = []
                 for m in messages:
@@ -373,7 +419,7 @@ class AgentOrchestrator:
                             model=model,
                             contents=contents,
                             config=types.GenerateContentConfig(
-                                system_instruction=SYSTEM_PROMPT,
+                                system_instruction=INVARIANT_SYSTEM_PROMPT,
                             ),
                         )
                         for chunk in stream_response:
@@ -407,7 +453,9 @@ class AgentOrchestrator:
 
         self.context_manager.add_assistant_message(session_id, clean_reply)
 
+        referenced_books = extract_referenced_books(list(current_citations.values()))
+        yield {"event": "referenced_books", "data": referenced_books}
         yield {"event": "citations", "data": [c.to_dict() for c in current_citations.values()]}
         yield {"event": "figures", "data": figures_result}
         yield {"event": "follow_ups", "data": follow_ups}
-        yield {"event": "done", "data": {"reply": clean_reply}}
+        yield {"event": "done", "data": {"reply": clean_reply, "referenced_books": referenced_books}}

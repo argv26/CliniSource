@@ -61,6 +61,78 @@ const sessionsLoading = document.getElementById("sessions-loading");
 const sessionsEmpty = document.getElementById("sessions-empty");
 const sessionsCountBadge = document.getElementById("sessions-count-badge");
 
+// View Switcher & Dedicated Library Manager Elements
+const tabViewConsultation = document.getElementById("tab-view-consultation");
+const tabViewLibrary = document.getElementById("tab-view-library");
+const viewConsultation = document.getElementById("view-consultation");
+const viewLibrary = document.getElementById("view-library");
+const btnOpenFullLibrary = document.getElementById("btn-open-full-library");
+const btnReturnConsultation = document.getElementById("btn-return-consultation");
+const sidebarBookCountBadge = document.getElementById("sidebar-book-count-badge");
+const statUserBooks = document.getElementById("stat-user-books");
+const statActiveBooks = document.getElementById("stat-active-books");
+const statGlobalBooks = document.getElementById("stat-global-books");
+const subtabMyLibrary = document.getElementById("subtab-my-library");
+const subtabGlobalCatalog = document.getElementById("subtab-global-catalog");
+const subpanelMyLibrary = document.getElementById("subpanel-my-library");
+const subpanelGlobalCatalog = document.getElementById("subpanel-global-catalog");
+const subtabMyLibraryCount = document.getElementById("subtab-my-library-count");
+const subtabGlobalCatalogCount = document.getElementById("subtab-global-catalog-count");
+const myLibraryGrid = document.getElementById("my-library-grid");
+const myLibraryEmpty = document.getElementById("my-library-empty");
+const globalCatalogSearch = document.getElementById("global-catalog-search");
+const btnClearGlobalSearch = document.getElementById("btn-clear-global-search");
+const globalCatalogList = document.getElementById("global-catalog-list");
+const btnLibActivateAll = document.getElementById("btn-lib-activate-all");
+const btnLibDeactivateAll = document.getElementById("btn-lib-deactivate-all");
+const btnLibGotoGlobal = document.getElementById("btn-lib-goto-global");
+const btnEmptyBrowseGlobal = document.getElementById("btn-empty-browse-global");
+
+// Upload Textbook Modal Elements
+const btnOpenUploadModal = document.getElementById("btn-open-upload-modal");
+const modalUploadBook = document.getElementById("modal-upload-book");
+const btnCloseUploadModal = document.getElementById("btn-close-upload-modal");
+const btnCancelUpload = document.getElementById("btn-cancel-upload");
+const formUploadBook = document.getElementById("form-upload-book");
+const uploadDropzone = document.getElementById("upload-dropzone");
+const inputUploadFile = document.getElementById("input-upload-file");
+const dropzoneEmptyState = document.getElementById("dropzone-empty-state");
+const dropzoneFileState = document.getElementById("dropzone-file-state");
+const selectedFileName = document.getElementById("selected-file-name");
+const selectedFileSize = document.getElementById("selected-file-size");
+const btnRemoveSelectedFile = document.getElementById("btn-remove-selected-file");
+const inputUploadTitle = document.getElementById("input-upload-title");
+const inputUploadSpecialty = document.getElementById("input-upload-specialty");
+const uploadTitleDuplicateWarning = document.getElementById("upload-title-duplicate-warning");
+const uploadFormError = document.getElementById("upload-form-error");
+const btnSubmitUpload = document.getElementById("btn-submit-upload");
+
+// Upload Progress & Notification Elements
+const uploadProgressView = document.getElementById("upload-progress-view");
+const uploadProgressStageLabel = document.getElementById("upload-progress-stage-label");
+const uploadProgressPercent = document.getElementById("upload-progress-percent");
+const uploadProgressBar = document.getElementById("upload-progress-bar");
+const uploadProgressMessage = document.getElementById("upload-progress-message");
+const stepPillValidate = document.getElementById("step-pill-validate");
+const stepPillToc = document.getElementById("step-pill-toc");
+const stepPillExtract = document.getElementById("step-pill-extract");
+const stepPillReady = document.getElementById("step-pill-ready");
+const uploadFailureCard = document.getElementById("upload-failure-card");
+const uploadFailureReason = document.getElementById("upload-failure-reason");
+const btnTryAnotherUpload = document.getElementById("btn-try-another-upload");
+const uploadSuccessCard = document.getElementById("upload-success-card");
+const uploadSuccessDetail = document.getElementById("upload-success-detail");
+const btnDoneUpload = document.getElementById("btn-done-upload");
+
+let selectedUploadFile = null;
+let currentIngestionJobId = null;
+let ingestionPollInterval = null;
+
+let globalCatalogData = [];
+let currentView = "consultation"; // "consultation" | "library"
+let currentLibrarySubtab = "my-library"; // "my-library" | "global-catalog"
+let globalSearchQuery = "";
+
 // Responsive Mobile Sidebar Elements
 const appSidebar = document.getElementById("app-sidebar");
 const sidebarBackdrop = document.getElementById("sidebar-backdrop");
@@ -193,43 +265,59 @@ function setupMarkdown() {
   }
 }
 
-// Fetch library catalogue & initialize toggle state
+// =============================================================================
+// User Library, Global Catalog & Multi-View Navigation
+// =============================================================================
+
+// Fetch user library and global catalogue & initialize toggle state
 async function fetchBooks() {
   try {
-    const res = await fetch("/api/books");
+    const res = await fetch("/api/user/library");
     const data = await res.json();
-    if (data.books && data.books.length > 0) {
-      cachedBooks = data.books;
+    if (data.library) {
+      cachedBooks = data.library;
+      globalCatalogData = data.global_catalog || [];
 
-      // Restore active books from localStorage or default to all
-      let saved = null;
-      try {
-        saved = JSON.parse(localStorage.getItem("textbook_rag_active_books"));
-      } catch (e) {}
-
-      if (Array.isArray(saved) && saved.length > 0) {
-        activeBooksSet = new Set(saved.filter(slug => cachedBooks.some(b => b.slug === slug)));
-        if (activeBooksSet.size === 0) {
-          activeBooksSet = new Set(cachedBooks.map(b => b.slug));
-        }
-      } else {
-        activeBooksSet = new Set(cachedBooks.map(b => b.slug));
-      }
+      // Update activeBooksSet from server state
+      activeBooksSet = new Set(cachedBooks.filter(b => b.is_active).map(b => b.slug));
 
       renderBookToggles();
+      updateSidebarBadge();
       updateScopeIndicator();
+      updateLibraryStats();
+      renderMyLibraryGrid();
+      renderGlobalCatalogList();
     }
   } catch (err) {
-    console.error("Failed to load books:", err);
+    console.error("Failed to load user library:", err);
     if (libraryList) {
-      libraryList.innerHTML = '<div class="text-xs text-rose-500 font-medium py-2 text-center">Error loading library catalogue</div>';
+      libraryList.innerHTML = '<div class="text-xs text-rose-500 font-medium py-2 text-center">Error loading library</div>';
     }
   }
+}
+
+function updateSidebarBadge() {
+  if (sidebarBookCountBadge) {
+    sidebarBookCountBadge.textContent = `${activeBooksSet.size} Active`;
+  }
+}
+
+function updateLibraryStats() {
+  if (statUserBooks) statUserBooks.textContent = cachedBooks.length;
+  if (statActiveBooks) statActiveBooks.textContent = activeBooksSet.size;
+  if (statGlobalBooks) statGlobalBooks.textContent = globalCatalogData.length;
+  if (subtabMyLibraryCount) subtabMyLibraryCount.textContent = cachedBooks.length;
+  if (subtabGlobalCatalogCount) subtabGlobalCatalogCount.textContent = globalCatalogData.length;
 }
 
 function renderBookToggles() {
   if (!libraryList) return;
   libraryList.innerHTML = "";
+
+  if (cachedBooks.length === 0) {
+    libraryList.innerHTML = '<div class="text-xs text-slate-400 py-3 text-center">No textbooks in study library</div>';
+    return;
+  }
 
   cachedBooks.forEach(b => {
     const isActive = activeBooksSet.has(b.slug);
@@ -247,11 +335,11 @@ function renderBookToggles() {
           <div class="font-semibold text-xs text-slate-800 leading-snug line-clamp-2" title="${escapeHtml(b.title)}">
             ${escapeHtml(b.title)}
           </div>
-          <div class="flex items-center gap-2 mt-1.5 text-[10px]">
-            <span class="text-slate-500 font-mono">${b.total_pages.toLocaleString()} pp</span>
+          <div class="flex items-center gap-2 mt-1.5 text-xs">
+            <span class="text-slate-600 font-mono">${b.total_pages ? b.total_pages.toLocaleString() + ' pp' : ''}</span>
             ${isActive 
-              ? '<span class="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-1.5 py-0.2 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Active</span>'
-              : '<span class="inline-flex items-center gap-1 font-medium text-slate-400 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>Excluded</span>'
+              ? '<span class="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Active</span>'
+              : '<span class="inline-flex items-center gap-1 font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Excluded</span>'
             }
           </div>
         </div>
@@ -281,19 +369,93 @@ function renderBookToggles() {
   });
 }
 
-function handleToggleBook(slug) {
-  if (activeBooksSet.has(slug)) {
-    if (activeBooksSet.size <= 1) {
-      showScopeWarning("At least 1 textbook must remain active for clinical search.");
-      return;
-    }
-    activeBooksSet.delete(slug);
-  } else {
-    activeBooksSet.add(slug);
+async function handleToggleBook(slug, targetState = null) {
+  const isCurrentlyActive = activeBooksSet.has(slug);
+  const nextState = targetState !== null ? targetState : !isCurrentlyActive;
+
+  if (!nextState && activeBooksSet.size <= 1 && isCurrentlyActive) {
+    showScopeWarning("At least 1 textbook must remain active for clinical search.");
+    return;
   }
+
+  if (nextState) {
+    activeBooksSet.add(slug);
+  } else {
+    activeBooksSet.delete(slug);
+  }
+
+  const found = cachedBooks.find(b => b.slug === slug);
+  if (found) found.is_active = nextState;
+
   saveActiveBooks();
   renderBookToggles();
+  updateSidebarBadge();
   updateScopeIndicator();
+  updateLibraryStats();
+  renderMyLibraryGrid();
+
+  try {
+    await fetch("/api/user/library/toggle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, is_active: nextState })
+    });
+  } catch (e) {
+    console.warn("Failed to persist book toggle to server:", e);
+  }
+}
+
+async function handleAddBookToLibrary(slug) {
+  try {
+    const res = await fetch("/api/user/library/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug })
+    });
+    if (res.ok) {
+      await fetchBooks();
+    }
+  } catch (e) {
+    console.error("Failed to add book:", e);
+  }
+}
+
+async function handleRemoveBookFromLibrary(slug) {
+  if (cachedBooks.length <= 1) {
+    showScopeWarning("Cannot remove the only textbook in your study library.");
+    return;
+  }
+  try {
+    const res = await fetch("/api/user/library/remove", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug })
+    });
+    if (res.ok) {
+      await fetchBooks();
+    }
+  } catch (e) {
+    console.error("Failed to remove book:", e);
+  }
+}
+
+async function handleToggleAllBooks(activeState) {
+  if (!activeState && cachedBooks.length > 0) {
+    showScopeWarning("At least 1 textbook must remain active for clinical search.");
+    return;
+  }
+  try {
+    const res = await fetch("/api/user/library/toggle-all", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active: activeState })
+    });
+    if (res.ok) {
+      await fetchBooks();
+    }
+  } catch (e) {
+    console.error("Failed to toggle all books:", e);
+  }
 }
 
 function showScopeWarning(msg) {
@@ -318,18 +480,549 @@ function updateScopeIndicator() {
   if (!activeBookIndicator || cachedBooks.length === 0) return;
   if (activeBooksSet.size === cachedBooks.length) {
     activeBookIndicator.textContent = `All Textbooks (${cachedBooks.length})`;
-    activeBookIndicator.className = "font-semibold text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full truncate max-w-[160px] sm:max-w-xs";
+    activeBookIndicator.className = "font-semibold text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full truncate max-w-[180px]";
     activeBookIndicator.title = "All textbooks active";
   } else if (activeBooksSet.size === 1) {
     const activeSlug = Array.from(activeBooksSet)[0];
     const found = cachedBooks.find(b => b.slug === activeSlug);
     activeBookIndicator.textContent = found ? found.title : "1 Textbook";
     activeBookIndicator.title = found ? found.title : "";
-    activeBookIndicator.className = "font-semibold text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full truncate max-w-[160px] sm:max-w-xs";
+    activeBookIndicator.className = "font-semibold text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full truncate max-w-[180px]";
   } else {
-    activeBookIndicator.textContent = `${activeBooksSet.size} of ${cachedBooks.length} Books Active`;
+    activeBookIndicator.textContent = `${activeBooksSet.size} of ${cachedBooks.length} Active`;
     activeBookIndicator.title = `${activeBooksSet.size} books active`;
-    activeBookIndicator.className = "font-semibold text-indigo-800 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full truncate max-w-[160px] sm:max-w-xs";
+    activeBookIndicator.className = "font-semibold text-indigo-800 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full truncate max-w-[180px]";
+  }
+}
+
+function switchView(targetView) {
+  currentView = targetView;
+  if (targetView === "library") {
+    viewConsultation?.classList.add("hidden");
+    viewLibrary?.classList.remove("hidden");
+
+    tabViewConsultation?.classList.remove("bg-white", "text-blue-600", "shadow-2xs", "font-bold");
+    tabViewConsultation?.classList.add("text-slate-600", "hover:text-slate-900");
+    tabViewConsultation?.setAttribute("aria-selected", "false");
+
+    tabViewLibrary?.classList.add("bg-white", "text-blue-600", "shadow-2xs", "font-bold");
+    tabViewLibrary?.classList.remove("text-slate-600", "hover:text-slate-900");
+    tabViewLibrary?.setAttribute("aria-selected", "true");
+
+    fetchBooks();
+  } else {
+    viewLibrary?.classList.add("hidden");
+    viewConsultation?.classList.remove("hidden");
+
+    tabViewLibrary?.classList.remove("bg-white", "text-blue-600", "shadow-2xs", "font-bold");
+    tabViewLibrary?.classList.add("text-slate-600", "hover:text-slate-900");
+    tabViewLibrary?.setAttribute("aria-selected", "false");
+
+    tabViewConsultation?.classList.add("bg-white", "text-blue-600", "shadow-2xs", "font-bold");
+    tabViewConsultation?.classList.remove("text-slate-600", "hover:text-slate-900");
+    tabViewConsultation?.setAttribute("aria-selected", "true");
+  }
+}
+
+function switchLibrarySubtab(subtab) {
+  currentLibrarySubtab = subtab;
+  if (subtab === "global-catalog") {
+    subpanelMyLibrary?.classList.add("hidden");
+    subpanelGlobalCatalog?.classList.remove("hidden");
+
+    subtabMyLibrary?.classList.remove("text-blue-600", "border-blue-600", "font-bold");
+    subtabMyLibrary?.classList.add("text-slate-500", "font-semibold");
+    subtabMyLibrary?.setAttribute("aria-selected", "false");
+
+    subtabGlobalCatalog?.classList.add("text-blue-600", "border-blue-600", "font-bold");
+    subtabGlobalCatalog?.classList.remove("text-slate-500", "font-semibold");
+    subtabGlobalCatalog?.setAttribute("aria-selected", "true");
+  } else {
+    subpanelGlobalCatalog?.classList.add("hidden");
+    subpanelMyLibrary?.classList.remove("hidden");
+
+    subtabGlobalCatalog?.classList.remove("text-blue-600", "border-blue-600", "font-bold");
+    subtabGlobalCatalog?.classList.add("text-slate-500", "font-semibold");
+    subtabGlobalCatalog?.setAttribute("aria-selected", "false");
+
+    subtabMyLibrary?.classList.add("text-blue-600", "border-blue-600", "font-bold");
+    subtabMyLibrary?.classList.remove("text-slate-500", "font-semibold");
+    subtabMyLibrary?.setAttribute("aria-selected", "true");
+  }
+}
+
+function renderMyLibraryGrid() {
+  if (!myLibraryGrid) return;
+  if (!cachedBooks || cachedBooks.length === 0) {
+    myLibraryGrid.innerHTML = "";
+    myLibraryEmpty?.classList.remove("hidden");
+    return;
+  }
+  myLibraryEmpty?.classList.add("hidden");
+  myLibraryGrid.innerHTML = "";
+
+  cachedBooks.forEach(b => {
+    const isActive = activeBooksSet.has(b.slug);
+    const card = document.createElement("div");
+    card.className = `library-card p-5 rounded-2xl bg-white border ${isActive ? 'border-blue-200 shadow-sm' : 'border-slate-200 opacity-80'} flex flex-col justify-between gap-4 transition duration-150`;
+
+    card.innerHTML = `
+      <div class="space-y-2">
+        <div class="flex items-start justify-between gap-2">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${isActive ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">
+            <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-blue-600' : 'bg-slate-400'}"></span>
+            ${escapeHtml(b.specialty || 'General Medicine')}
+          </span>
+          <span class="text-xs font-mono text-slate-500">${b.total_pages ? b.total_pages.toLocaleString() + ' pp' : ''}</span>
+        </div>
+        <h3 class="font-bold text-sm sm:text-base text-slate-900 leading-snug">${escapeHtml(b.title)}</h3>
+        <p class="text-xs text-slate-600 leading-relaxed line-clamp-3">${escapeHtml(b.description || '')}</p>
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            role="switch"
+            aria-checked="${isActive}"
+            class="toggle-switch relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${isActive ? 'bg-emerald-500' : 'bg-slate-300'}"
+          >
+            <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? 'translate-x-4' : 'translate-x-0'}"></span>
+          </button>
+          <span class="text-xs font-semibold ${isActive ? 'text-emerald-700' : 'text-slate-500'}">
+            ${isActive ? 'Active in Scope' : 'Inactive'}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          class="btn-remove-book text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition min-h-[36px]"
+          title="Remove from My Study Library"
+        >
+          Remove
+        </button>
+      </div>
+    `;
+
+    card.querySelector(".toggle-switch")?.addEventListener("click", () => handleToggleBook(b.slug));
+    card.querySelector(".btn-remove-book")?.addEventListener("click", () => handleRemoveBookFromLibrary(b.slug));
+    myLibraryGrid.appendChild(card);
+  });
+}
+
+function renderGlobalCatalogList() {
+  if (!globalCatalogList) return;
+  const query = (globalSearchQuery || "").trim().toLowerCase();
+
+  let filtered = globalCatalogData;
+  if (query) {
+    filtered = globalCatalogData.filter(b =>
+      b.title.toLowerCase().includes(query) ||
+      (b.specialty && b.specialty.toLowerCase().includes(query)) ||
+      (b.description && b.description.toLowerCase().includes(query))
+    );
+  }
+
+  if (filtered.length === 0) {
+    globalCatalogList.innerHTML = `
+      <div class="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-600 text-xs">
+        No textbooks matched "<strong>${escapeHtml(query)}</strong>". Try searching for endocrine, anatomy, or hormone.
+      </div>
+    `;
+    return;
+  }
+
+  // Group by specialty
+  const grouped = {};
+  filtered.forEach(b => {
+    const spec = b.specialty || "General Medicine";
+    if (!grouped[spec]) grouped[spec] = [];
+    grouped[spec].push(b);
+  });
+
+  globalCatalogList.innerHTML = "";
+
+  Object.entries(grouped).forEach(([specialty, books]) => {
+    const section = document.createElement("div");
+    section.className = "bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs";
+
+    const header = document.createElement("button");
+    header.type = "button";
+    header.className = "specialty-accordion-header w-full px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-left transition";
+    header.setAttribute("aria-expanded", "true");
+    header.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-blue-600 flex-shrink-0"></span>
+        <h3 class="font-bold text-xs sm:text-sm text-slate-800">${escapeHtml(specialty)}</h3>
+        <span class="text-xs font-mono text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-full font-semibold">${books.length} volume${books.length > 1 ? 's' : ''}</span>
+      </div>
+      <svg class="specialty-chevron w-4 h-4 text-slate-500 transform transition-transform duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    `;
+
+    const body = document.createElement("div");
+    body.className = "specialty-body p-4 grid grid-cols-1 md:grid-cols-2 gap-4";
+
+    header.addEventListener("click", () => {
+      const isCollapsed = body.classList.toggle("collapsed");
+      header.classList.toggle("collapsed", isCollapsed);
+      header.setAttribute("aria-expanded", (!isCollapsed).toString());
+    });
+
+    books.forEach(b => {
+      const inLib = cachedBooks.some(cb => cb.slug === b.slug);
+      const card = document.createElement("div");
+      card.className = "p-4 rounded-xl border border-slate-200 hover:border-slate-300 bg-slate-50/50 flex flex-col justify-between gap-3 transition";
+
+      card.innerHTML = `
+        <div class="space-y-1.5">
+          <div class="flex items-start justify-between gap-2">
+            <h4 class="font-bold text-xs sm:text-sm text-slate-900 leading-snug">${escapeHtml(b.title)}</h4>
+            <span class="text-xs font-mono text-slate-500 flex-shrink-0">${b.total_pages ? b.total_pages.toLocaleString() + ' pp' : ''}</span>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed line-clamp-2">${escapeHtml(b.description || '')}</p>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end">
+          ${inLib
+            ? `<span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg min-h-[36px]">
+                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span>In My Library</span>
+              </span>`
+            : `<button type="button" class="btn-add-catalog text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg shadow-2xs transition active:scale-95 flex items-center gap-1.5 min-h-[36px]">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Add to My Library</span>
+              </button>`
+          }
+        </div>
+      `;
+
+      card.querySelector(".btn-add-catalog")?.addEventListener("click", () => handleAddBookToLibrary(b.slug));
+      body.appendChild(card);
+    });
+
+    section.appendChild(header);
+    section.appendChild(body);
+    globalCatalogList.appendChild(section);
+  });
+}
+
+// =============================================================================
+// Upload Textbook Modal & Background Ingestion Controller
+// =============================================================================
+
+function openUploadModal() {
+  if (!modalUploadBook) return;
+  resetUploadModal();
+  modalUploadBook.classList.remove("hidden");
+  if (inputUploadTitle) inputUploadTitle.focus();
+}
+
+function closeUploadModal() {
+  if (!modalUploadBook) return;
+  if (ingestionPollInterval) {
+    clearInterval(ingestionPollInterval);
+    ingestionPollInterval = null;
+  }
+  modalUploadBook.classList.add("hidden");
+}
+
+function resetUploadModal() {
+  selectedUploadFile = null;
+  currentIngestionJobId = null;
+  if (ingestionPollInterval) {
+    clearInterval(ingestionPollInterval);
+    ingestionPollInterval = null;
+  }
+
+  if (inputUploadFile) inputUploadFile.value = "";
+  if (inputUploadTitle) inputUploadTitle.value = "";
+  if (inputUploadSpecialty) inputUploadSpecialty.value = "";
+
+  if (dropzoneEmptyState) dropzoneEmptyState.classList.remove("hidden");
+  if (dropzoneFileState) dropzoneFileState.classList.add("hidden");
+  if (uploadTitleDuplicateWarning) uploadTitleDuplicateWarning.classList.add("hidden");
+  if (uploadFormError) {
+    uploadFormError.textContent = "";
+    uploadFormError.classList.add("hidden");
+  }
+
+  if (formUploadBook) formUploadBook.classList.remove("hidden");
+  if (uploadProgressView) uploadProgressView.classList.add("hidden");
+  if (uploadFailureCard) uploadFailureCard.classList.add("hidden");
+  if (uploadSuccessCard) uploadSuccessCard.classList.add("hidden");
+
+  if (uploadProgressBar) uploadProgressBar.style.width = "0%";
+  if (uploadProgressPercent) uploadProgressPercent.textContent = "0%";
+  if (uploadProgressStageLabel) uploadProgressStageLabel.textContent = "Validating PDF...";
+  if (uploadProgressMessage) uploadProgressMessage.textContent = "Analyzing document structure and layout...";
+
+  resetStepperPills();
+  if (btnSubmitUpload) {
+    btnSubmitUpload.disabled = false;
+    btnSubmitUpload.classList.remove("opacity-50", "cursor-not-allowed");
+  }
+}
+
+function resetStepperPills() {
+  const pills = [
+    { el: stepPillValidate, active: true },
+    { el: stepPillToc, active: false },
+    { el: stepPillExtract, active: false },
+    { el: stepPillReady, active: false },
+  ];
+  pills.forEach(({ el, active }) => {
+    if (!el) return;
+    if (active) {
+      el.className = "py-1 px-1 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200";
+    } else {
+      el.className = "py-1 px-1 rounded-md bg-slate-100 text-slate-500 font-medium";
+    }
+  });
+}
+
+function handleFileSelection(file) {
+  if (!file) return;
+  if (!file.name.toLowerCase().endsWith(".pdf")) {
+    showUploadError("Please select a valid PDF file (.pdf).");
+    return;
+  }
+
+  selectedUploadFile = file;
+  if (uploadFormError) uploadFormError.classList.add("hidden");
+
+  if (selectedFileName) selectedFileName.textContent = file.name;
+  if (selectedFileSize) {
+    const mb = (file.size / (1024 * 1024)).toFixed(1);
+    selectedFileSize.textContent = `(${mb} MB)`;
+  }
+
+  if (dropzoneEmptyState) dropzoneEmptyState.classList.add("hidden");
+  if (dropzoneFileState) dropzoneFileState.classList.remove("hidden");
+
+  // Derive title from filename if title is currently empty
+  if (inputUploadTitle && !inputUploadTitle.value.trim()) {
+    const rawName = file.name.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ").trim();
+    inputUploadTitle.value = rawName;
+    checkDuplicateTitle(rawName);
+  }
+}
+
+function checkDuplicateTitle(titleText) {
+  if (!uploadTitleDuplicateWarning) return;
+  const clean = titleText.trim().toLowerCase();
+  if (!clean || clean.length < 3) {
+    uploadTitleDuplicateWarning.classList.add("hidden");
+    return;
+  }
+
+  const isDuplicate = globalCatalogData.some(b => {
+    const bTitle = (b.title || "").toLowerCase();
+    const bSlug = (b.slug || "").toLowerCase();
+    return bTitle === clean || bSlug === clean || (clean.length > 12 && bTitle.includes(clean));
+  });
+
+  if (isDuplicate) {
+    uploadTitleDuplicateWarning.classList.remove("hidden");
+  } else {
+    uploadTitleDuplicateWarning.classList.add("hidden");
+  }
+}
+
+function showUploadError(msg) {
+  if (!uploadFormError) return;
+  uploadFormError.textContent = msg;
+  uploadFormError.classList.remove("hidden");
+}
+
+async function handleUploadSubmit(e) {
+  e.preventDefault();
+  if (uploadFormError) uploadFormError.classList.add("hidden");
+
+  if (!selectedUploadFile) {
+    showUploadError("Please select a PDF textbook to upload.");
+    return;
+  }
+
+  const title = inputUploadTitle ? inputUploadTitle.value.trim() : "";
+  if (!title) {
+    showUploadError("Textbook title is required.");
+    inputUploadTitle?.focus();
+    return;
+  }
+
+  const specialty = inputUploadSpecialty ? inputUploadSpecialty.value.trim() : "General Medicine";
+
+  // Build FormData payload
+  const formData = new FormData();
+  formData.append("file", selectedUploadFile);
+  formData.append("title", title);
+  formData.append("specialty", specialty || "General Medicine");
+
+  if (btnSubmitUpload) {
+    btnSubmitUpload.disabled = true;
+    btnSubmitUpload.classList.add("opacity-50", "cursor-not-allowed");
+  }
+
+  try {
+    const res = await fetch("/api/books/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (res.status === 409) {
+      const err = await res.json();
+      showUploadError(err.detail || "A textbook with this title or slug already exists in the Global Library.");
+      if (btnSubmitUpload) {
+        btnSubmitUpload.disabled = false;
+        btnSubmitUpload.classList.remove("opacity-50", "cursor-not-allowed");
+      }
+      return;
+    }
+
+    if (!res.ok) {
+      const err = await res.json();
+      showUploadError(err.detail || "Upload failed. Please check the file format and try again.");
+      if (btnSubmitUpload) {
+        btnSubmitUpload.disabled = false;
+        btnSubmitUpload.classList.remove("opacity-50", "cursor-not-allowed");
+      }
+      return;
+    }
+
+    const data = await res.json();
+    currentIngestionJobId = data.job_id;
+
+    // Transition form to progress stepper view
+    if (formUploadBook) formUploadBook.classList.add("hidden");
+    if (uploadProgressView) uploadProgressView.classList.remove("hidden");
+
+    startIngestionPolling(data.job_id);
+
+  } catch (err) {
+    console.error("Upload network error:", err);
+    showUploadError("Network error occurred during upload. Please try again.");
+    if (btnSubmitUpload) {
+      btnSubmitUpload.disabled = false;
+      btnSubmitUpload.classList.remove("opacity-50", "cursor-not-allowed");
+    }
+  }
+}
+
+function startIngestionPolling(jobId) {
+  if (ingestionPollInterval) {
+    clearInterval(ingestionPollInterval);
+  }
+
+  const poll = async () => {
+    try {
+      const res = await fetch(`/api/books/ingestion/${encodeURIComponent(jobId)}`);
+      if (!res.ok) return;
+      const job = await res.json();
+
+      updateProgressUI(job);
+
+      if (job.status === "completed") {
+        clearInterval(ingestionPollInterval);
+        ingestionPollInterval = null;
+        showUploadSuccess(job);
+        // Refresh catalog in background
+        fetchUserLibrary();
+      } else if (job.status === "failed") {
+        clearInterval(ingestionPollInterval);
+        ingestionPollInterval = null;
+        showUploadFailure(job);
+      }
+    } catch (e) {
+      console.warn("Polling error for ingestion job:", e);
+    }
+  };
+
+  // Immediate poll, then every 1.5s
+  poll();
+  ingestionPollInterval = setInterval(poll, 1500);
+}
+
+function updateProgressUI(job) {
+  const percent = job.progress_percent || 0;
+  if (uploadProgressPercent) uploadProgressPercent.textContent = `${percent}%`;
+  if (uploadProgressBar) uploadProgressBar.style.width = `${percent}%`;
+  if (uploadProgressMessage) uploadProgressMessage.textContent = job.message || "Processing textbook...";
+  if (uploadProgressStageLabel) uploadProgressStageLabel.textContent = formatStageLabel(job.stage, percent);
+
+  // Update Stepper Pills
+  updateStepperPills(percent);
+}
+
+function formatStageLabel(stage, percent) {
+  switch (stage) {
+    case "validating": return "1. Validating PDF & Text Layer...";
+    case "toc": return "2. Extracting Table of Contents & Structure...";
+    case "extraction": return "3. Extracting Reading-Order Text...";
+    case "chunking": return "4. Generating Structured Chunks...";
+    case "indexing": return "5. Indexing Database & Search...";
+    case "completed": return "✓ Ingestion Complete!";
+    case "failed": return "⚠️ Ingestion Halted";
+    default: return `${percent}% Processing...`;
+  }
+}
+
+function updateStepperPills(percent) {
+  const setPill = (el, state) => {
+    if (!el) return;
+    if (state === "done") {
+      el.className = "py-1 px-1 rounded-md bg-emerald-100 text-emerald-800 font-bold border border-emerald-300";
+    } else if (state === "active") {
+      el.className = "py-1 px-1 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200 animate-pulse";
+    } else {
+      el.className = "py-1 px-1 rounded-md bg-slate-100 text-slate-500 font-medium";
+    }
+  };
+
+  if (percent >= 100) {
+    setPill(stepPillValidate, "done");
+    setPill(stepPillToc, "done");
+    setPill(stepPillExtract, "done");
+    setPill(stepPillReady, "done");
+  } else if (percent >= 75) {
+    setPill(stepPillValidate, "done");
+    setPill(stepPillToc, "done");
+    setPill(stepPillExtract, "done");
+    setPill(stepPillReady, "active");
+  } else if (percent >= 35) {
+    setPill(stepPillValidate, "done");
+    setPill(stepPillToc, "done");
+    setPill(stepPillExtract, "active");
+    setPill(stepPillReady, "idle");
+  } else if (percent >= 15) {
+    setPill(stepPillValidate, "done");
+    setPill(stepPillToc, "active");
+    setPill(stepPillExtract, "idle");
+    setPill(stepPillReady, "idle");
+  } else {
+    setPill(stepPillValidate, "active");
+    setPill(stepPillToc, "idle");
+    setPill(stepPillExtract, "idle");
+    setPill(stepPillReady, "idle");
+  }
+}
+
+function showUploadSuccess(job) {
+  if (uploadSuccessCard) {
+    uploadSuccessCard.classList.remove("hidden");
+  }
+  if (uploadSuccessDetail) {
+    const pp = job.total_pages ? `${job.total_pages.toLocaleString()} pages` : "";
+    const chk = job.chunks_count ? `${job.chunks_count.toLocaleString()} passages` : "";
+    uploadSuccessDetail.textContent = `Successfully indexed "${job.title}" (${[pp, chk].filter(Boolean).join(", ")}) into Global Library under ${job.specialty}. It is now available to browse and add to your active Study Library.`;
+  }
+}
+
+function showUploadFailure(job) {
+  if (uploadFailureCard) {
+    uploadFailureCard.classList.remove("hidden");
+  }
+  if (uploadFailureReason) {
+    uploadFailureReason.textContent = job.user_error_message || job.message || "An unexpected error occurred during textbook processing.";
   }
 }
 
@@ -357,10 +1050,10 @@ function renderStarterPrompts() {
       card.className = "p-4 rounded-xl bg-white hover:bg-blue-50/40 border border-slate-200 hover:border-blue-300 text-left transition duration-200 group flex flex-col justify-between shadow-sm hover:shadow active:scale-95";
       card.innerHTML = `
         <div class="font-bold text-xs text-slate-800 group-hover:text-blue-600 transition">${escapeHtml(p.label)}</div>
-        <div class="text-[11px] text-slate-600 line-clamp-2 mt-1.5 leading-relaxed">${escapeHtml(p.query)}</div>
-        <div class="mt-3 text-[10px] text-blue-600 font-bold flex items-center gap-1.5">
+        <div class="text-xs text-slate-600 line-clamp-2 mt-1.5 leading-relaxed">${escapeHtml(p.query)}</div>
+        <div class="mt-3 text-xs text-blue-600 font-bold flex items-center gap-1.5">
           <span>Ask question</span>
-          <svg class="w-3 h-3 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <svg class="w-3.5 h-3.5 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
         </div>
@@ -426,7 +1119,7 @@ function renderSessionsList(sessions) {
         </svg>
         <div class="min-w-0 flex-1">
           <div class="truncate leading-snug">${escapeHtml(s.title)}</div>
-          <div class="text-[10px] text-slate-400 font-normal mt-0.5 flex items-center gap-1.5">
+          <div class="text-xs text-slate-500 font-normal mt-0.5 flex items-center gap-1.5">
             <span>${timeAgo}</span>
             ${s.message_count > 0 ? `<span>• ${s.message_count} turns</span>` : ''}
           </div>
@@ -604,13 +1297,152 @@ function bindEvents() {
     updateSendButtonState();
   });
 
+  // View Navigation & Library Manager listeners
+  if (tabViewConsultation) {
+    tabViewConsultation.addEventListener("click", () => switchView("consultation"));
+  }
+  if (tabViewLibrary) {
+    tabViewLibrary.addEventListener("click", () => switchView("library"));
+  }
+  if (btnOpenFullLibrary) {
+    btnOpenFullLibrary.addEventListener("click", () => {
+      switchView("library");
+      closeSidebar();
+    });
+  }
+  if (btnReturnConsultation) {
+    btnReturnConsultation.addEventListener("click", () => switchView("consultation"));
+  }
+  if (subtabMyLibrary) {
+    subtabMyLibrary.addEventListener("click", () => switchLibrarySubtab("my-library"));
+  }
+  if (subtabGlobalCatalog) {
+    subtabGlobalCatalog.addEventListener("click", () => switchLibrarySubtab("global-catalog"));
+  }
+  if (btnLibGotoGlobal) {
+    btnLibGotoGlobal.addEventListener("click", () => switchLibrarySubtab("global-catalog"));
+  }
+  if (btnEmptyBrowseGlobal) {
+    btnEmptyBrowseGlobal.addEventListener("click", () => switchLibrarySubtab("global-catalog"));
+  }
+  if (btnLibActivateAll) {
+    btnLibActivateAll.addEventListener("click", () => handleToggleAllBooks(true));
+  }
+  if (btnLibDeactivateAll) {
+    btnLibDeactivateAll.addEventListener("click", () => handleToggleAllBooks(false));
+  }
+  if (globalCatalogSearch) {
+    globalCatalogSearch.addEventListener("input", (e) => {
+      globalSearchQuery = e.target.value;
+      if (btnClearGlobalSearch) {
+        if (globalSearchQuery.trim()) {
+          btnClearGlobalSearch.classList.remove("hidden");
+        } else {
+          btnClearGlobalSearch.classList.add("hidden");
+        }
+      }
+      renderGlobalCatalogList();
+    });
+  }
+  if (btnClearGlobalSearch) {
+    btnClearGlobalSearch.addEventListener("click", () => {
+      if (globalCatalogSearch) {
+        globalCatalogSearch.value = "";
+        globalSearchQuery = "";
+        globalCatalogSearch.focus();
+      }
+      btnClearGlobalSearch.classList.add("hidden");
+      renderGlobalCatalogList();
+    });
+  }
+
+  // Upload Textbook Modal listeners
+  if (btnOpenUploadModal) {
+    btnOpenUploadModal.addEventListener("click", openUploadModal);
+  }
+  if (btnCloseUploadModal) {
+    btnCloseUploadModal.addEventListener("click", closeUploadModal);
+  }
+  if (btnCancelUpload) {
+    btnCancelUpload.addEventListener("click", closeUploadModal);
+  }
+  if (modalUploadBook) {
+    modalUploadBook.addEventListener("click", (e) => {
+      if (e.target === modalUploadBook) {
+        closeUploadModal();
+      }
+    });
+  }
+
+  // Dropzone drag-and-drop & file picker
+  if (uploadDropzone && inputUploadFile) {
+    uploadDropzone.addEventListener("click", (e) => {
+      if (e.target !== btnRemoveSelectedFile && !btnRemoveSelectedFile?.contains(e.target)) {
+        inputUploadFile.click();
+      }
+    });
+
+    inputUploadFile.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleFileSelection(e.target.files[0]);
+      }
+    });
+
+    uploadDropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      uploadDropzone.classList.add("border-emerald-500", "bg-emerald-50/30");
+    });
+
+    uploadDropzone.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+      uploadDropzone.classList.remove("border-emerald-500", "bg-emerald-50/30");
+    });
+
+    uploadDropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      uploadDropzone.classList.remove("border-emerald-500", "bg-emerald-50/30");
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFileSelection(e.dataTransfer.files[0]);
+      }
+    });
+  }
+
+  if (btnRemoveSelectedFile) {
+    btnRemoveSelectedFile.addEventListener("click", (e) => {
+      e.stopPropagation();
+      selectedUploadFile = null;
+      if (inputUploadFile) inputUploadFile.value = "";
+      if (dropzoneEmptyState) dropzoneEmptyState.classList.remove("hidden");
+      if (dropzoneFileState) dropzoneFileState.classList.add("hidden");
+    });
+  }
+
+  if (inputUploadTitle) {
+    inputUploadTitle.addEventListener("input", (e) => {
+      checkDuplicateTitle(e.target.value);
+    });
+  }
+
+  if (formUploadBook) {
+    formUploadBook.addEventListener("submit", handleUploadSubmit);
+  }
+
+  if (btnTryAnotherUpload) {
+    btnTryAnotherUpload.addEventListener("click", resetUploadModal);
+  }
+
+  if (btnDoneUpload) {
+    btnDoneUpload.addEventListener("click", () => {
+      closeUploadModal();
+      switchView("library");
+      switchLibrarySubtab("global-catalog");
+    });
+  }
+
   // Select All Books handler
   if (btnSelectAllBooks) {
     btnSelectAllBooks.addEventListener("click", () => {
-      cachedBooks.forEach(b => activeBooksSet.add(b.slug));
-      saveActiveBooks();
-      renderBookToggles();
-      updateScopeIndicator();
+      handleToggleAllBooks(true);
     });
   }
 
@@ -630,6 +1462,10 @@ function bindEvents() {
       }
       if (authModal && !authModal.classList.contains("hidden")) {
         closeAuthModal();
+        return;
+      }
+      if (modalUploadBook && !modalUploadBook.classList.contains("hidden")) {
+        closeUploadModal();
         return;
       }
       if (isAwaitingResponse) {
@@ -1017,11 +1853,13 @@ async function submitQuery(queryText) {
   let assistantWrapper = null;
   let proseContainer = null;
   let toolsContainer = null;
+  let referencedBooksContainer = null;
   let rawTextBuffer = "";
   let toolsData = [];
   let citationsData = [];
   let figuresData = [];
   let followUpsData = [];
+  let referencedBooksData = [];
 
   try {
     const res = await fetch("/api/chat/stream", {
@@ -1080,6 +1918,11 @@ async function submitQuery(queryText) {
           if (typingLabel && payload.text) {
             typingLabel.textContent = payload.text;
           }
+        } else if (eventName === "referenced_books") {
+          referencedBooksData = Array.isArray(payload) ? payload : [];
+          if (referencedBooksContainer) {
+            renderReferencedBooksHtml(referencedBooksContainer, referencedBooksData);
+          }
         } else if (eventName === "tools") {
           toolsData = Array.isArray(payload) ? payload : [];
           if (toolsContainer) {
@@ -1096,7 +1939,11 @@ async function submitQuery(queryText) {
             assistantWrapper = mounted.wrapper;
             proseContainer = mounted.proseContainer;
             toolsContainer = mounted.toolsContainer;
+            referencedBooksContainer = mounted.referencedBooksContainer;
             messagesContainer.appendChild(assistantWrapper);
+            if (referencedBooksData.length > 0) {
+              renderReferencedBooksHtml(referencedBooksContainer, referencedBooksData);
+            }
             if (toolsData.length > 0) {
               renderToolsHtml(toolsContainer, toolsData);
             }
@@ -1130,6 +1977,9 @@ async function submitQuery(queryText) {
             appendFollowUpsToWrapper(assistantWrapper, followUpsData);
           }
         } else if (eventName === "done") {
+          if (payload.referenced_books && referencedBooksContainer) {
+            renderReferencedBooksHtml(referencedBooksContainer, payload.referenced_books);
+          }
           if (payload.reply && proseContainer) {
             const finalSanitized = sanitizeMedicalText(payload.reply);
             let finalHtml = window.marked ? marked.parse(finalSanitized) : finalSanitized;
@@ -1156,7 +2006,7 @@ async function submitQuery(queryText) {
       }
       if (assistantWrapper) {
         const stoppedBadge = document.createElement("div");
-        stoppedBadge.className = "text-[11px] text-slate-400 italic mt-2 border-t border-slate-100 pt-2 flex items-center gap-1.5";
+        stoppedBadge.className = "text-xs text-slate-400 italic mt-2 border-t border-slate-100 pt-2 flex items-center gap-1.5";
         stoppedBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>Generation stopped by user.</span>`;
         assistantWrapper.querySelector(".space-y-2")?.appendChild(stoppedBadge);
       }
@@ -1215,6 +2065,7 @@ function createStreamingAssistantBubble() {
       ${AVATAR_SVG}
     </div>
     <div class="flex-1 max-w-3xl bg-white border border-slate-200 rounded-2xl rounded-tl-none sm:rounded-tl-sm px-5 py-4 shadow-sm space-y-2">
+      <div class="referenced-books-container"></div>
       <div class="tools-container"></div>
       <div class="prose-custom"></div>
       <div class="figures-container"></div>
@@ -1225,9 +2076,33 @@ function createStreamingAssistantBubble() {
     wrapper,
     proseContainer: wrapper.querySelector(".prose-custom"),
     toolsContainer: wrapper.querySelector(".tools-container"),
+    referencedBooksContainer: wrapper.querySelector(".referenced-books-container"),
     figuresContainer: wrapper.querySelector(".figures-container"),
     followUpsContainer: wrapper.querySelector(".follow-ups-container"),
   };
+}
+
+function renderReferencedBooksHtml(container, books) {
+  if (!container || !books || books.length === 0) {
+    if (container) container.innerHTML = "";
+    return;
+  }
+  const badges = books.map(b => {
+    const pageInfo = b.pages ? ` <span class="text-indigo-600 font-medium">(${escapeHtml(b.pages)})</span>` : '';
+    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs">
+      <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+      <span>${escapeHtml(b.title)}</span>${pageInfo}
+    </span>`;
+  }).join("");
+
+  container.innerHTML = `
+    <div class="flex flex-wrap items-center gap-2 pb-2 mb-2 border-b border-slate-100">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-500 mr-0.5">Referenced Textbooks:</span>
+      ${badges}
+    </div>
+  `;
 }
 
 function renderToolsHtml(container, tools) {
@@ -1272,19 +2147,19 @@ function appendFiguresToWrapper(wrapper, figures) {
               loading="lazy" 
               onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" 
             />
-            <div class="hidden text-slate-400 text-xs flex flex-col items-center gap-1 p-2 text-center">
-              <svg class="w-6 h-6 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              <span class="text-[10px]">Textbook Diagram</span>
+            <div class="hidden text-slate-500 text-xs flex flex-col items-center gap-1 p-2 text-center">
+              <svg class="w-6 h-6 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span class="text-xs">Textbook Diagram</span>
             </div>
-            <span class="absolute bottom-1.5 right-1.5 bg-slate-900/70 text-white text-[9px] px-1.5 py-0.5 rounded backdrop-blur-xs font-mono">p. ${fig.page_start}</span>
+            <span class="absolute bottom-1.5 right-1.5 bg-slate-900/70 text-white text-xs px-1.5 py-0.5 rounded backdrop-blur-xs font-mono">p. ${fig.page_start}</span>
           </div>
 
           <div class="flex items-center justify-between gap-1 mb-1">
-            <span class="font-bold text-[11px] text-slate-800 group-hover:text-blue-700 truncate">${escapeHtml(figTitle)}</span>
+            <span class="font-bold text-xs text-slate-800 group-hover:text-blue-700 truncate">${escapeHtml(figTitle)}</span>
           </div>
-          <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed font-sans mb-1">${escapeHtml(cleanCaption)}</p>
+          <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed font-sans mb-1">${escapeHtml(cleanCaption)}</p>
         </div>
-        <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
           <span class="truncate max-w-[150px]">${escapeHtml(bookTitle)}</span>
           <span class="text-blue-600 font-semibold group-hover:underline flex items-center gap-0.5">Enlarge 🔍</span>
         </div>
@@ -1292,15 +2167,56 @@ function appendFiguresToWrapper(wrapper, figures) {
     `;
   }).join("");
 
-  container.innerHTML = `
-    <div class="mt-4 pt-3 border-t border-slate-100">
-      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
-        <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span>Related Textbook Figures & Diagrams (${figures.length})</span>
+  const isSlider = figures.length > 2;
+
+  if (isSlider) {
+    container.innerHTML = `
+      <div class="mt-4 pt-3 border-t border-slate-100">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span>Related Textbook Figures & Diagrams (${figures.length})</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs text-slate-500 font-mono hidden sm:inline">Scroll &rarr;</span>
+            <button type="button" class="btn-slider-chevron btn-slide-figures-left" aria-label="Slide figures left" title="Previous figure">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button type="button" class="btn-slider-chevron btn-slide-figures-right" aria-label="Slide figures right" title="Next figure">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="figures-slider">${cards}</div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${cards}</div>
-    </div>
-  `;
+    `;
+
+    const slider = container.querySelector(".figures-slider");
+    if (slider) {
+      const leftBtn = container.querySelector(".btn-slide-figures-left");
+      const rightBtn = container.querySelector(".btn-slide-figures-right");
+      if (leftBtn) {
+        leftBtn.addEventListener("click", () => {
+          slider.scrollBy({ left: -260, behavior: "smooth" });
+        });
+      }
+      if (rightBtn) {
+        rightBtn.addEventListener("click", () => {
+          slider.scrollBy({ left: 260, behavior: "smooth" });
+        });
+      }
+    }
+  } else {
+    container.innerHTML = `
+      <div class="mt-4 pt-3 border-t border-slate-100">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Related Textbook Figures & Diagrams (${figures.length})</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${cards}</div>
+      </div>
+    `;
+  }
 
   container.querySelectorAll(".figure-card").forEach(card => {
     card.addEventListener("click", () => {
@@ -1328,7 +2244,7 @@ function appendFollowUpsToWrapper(wrapper, followUps) {
 
   container.innerHTML = `
     <div class="mt-4 pt-3 border-t border-slate-100">
-      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Explore Related Clinical Questions</div>
+      <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Explore Related Clinical Questions</div>
       <div class="flex flex-col sm:flex-row flex-wrap gap-2">${chips}</div>
     </div>
   `;
@@ -1389,6 +2305,27 @@ function appendAssistantMessage(data) {
   let formattedHtml = window.marked ? marked.parse(sanitizedReply) : sanitizedReply;
   formattedHtml = formatCitationBadges(formattedHtml);
 
+  // Referenced Books Header
+  let refBooksHtml = "";
+  const refBooks = data.referenced_books || [];
+  if (refBooks && refBooks.length > 0) {
+    const badges = refBooks.map(b => {
+      const pageInfo = b.pages ? ` <span class="text-indigo-600 font-medium">(${escapeHtml(b.pages)})</span>` : '';
+      return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs">
+        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <span>${escapeHtml(b.title)}</span>${pageInfo}
+      </span>`;
+    }).join("");
+    refBooksHtml = `
+      <div class="flex flex-wrap items-center gap-2 pb-2 mb-2 border-b border-slate-100">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 mr-0.5">Referenced Textbooks:</span>
+        ${badges}
+      </div>
+    `;
+  }
+
   // Tool pills HTML with bolt SVG
   let toolsHtml = "";
   if (data.tool_calls && data.tool_calls.length > 0) {
@@ -1421,7 +2358,7 @@ function appendAssistantMessage(data) {
     }).join("");
     followUpsHtml = `
       <div class="mt-4 pt-3 border-t border-slate-100">
-        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Explore Related Clinical Questions</div>
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Explore Related Clinical Questions</div>
         <div class="flex flex-col sm:flex-row flex-wrap gap-2">${chips}</div>
       </div>
     `;
@@ -1455,17 +2392,17 @@ function appendAssistantMessage(data) {
               />
               <div class="hidden text-slate-400 text-xs flex flex-col items-center gap-1 p-2 text-center">
                 <svg class="w-6 h-6 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <span class="text-[10px]">Textbook Diagram</span>
+                <span class="text-xs">Textbook Diagram</span>
               </div>
               <span class="absolute bottom-1.5 right-1.5 bg-slate-900/70 text-white text-[9px] px-1.5 py-0.5 rounded backdrop-blur-xs font-mono">p. ${fig.page_start}</span>
             </div>
 
             <div class="flex items-center justify-between gap-1 mb-1">
-              <span class="font-bold text-[11px] text-slate-800 group-hover:text-blue-700 truncate">${escapeHtml(figTitle)}</span>
+              <span class="font-bold text-xs text-slate-800 group-hover:text-blue-700 truncate">${escapeHtml(figTitle)}</span>
             </div>
-            <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed font-sans mb-1">${escapeHtml(cleanCaption)}</p>
+            <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed font-sans mb-1">${escapeHtml(cleanCaption)}</p>
           </div>
-          <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
             <span class="truncate max-w-[150px]">${escapeHtml(bookTitle)}</span>
             <span class="text-blue-600 font-semibold group-hover:underline flex items-center gap-0.5">Enlarge 🔍</span>
           </div>
@@ -1475,7 +2412,7 @@ function appendAssistantMessage(data) {
 
     figuresHtml = `
       <div class="mt-4 pt-3 border-t border-slate-100">
-        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           <span>Related Textbook Figures & Diagrams (${data.figures.length})</span>
         </div>
@@ -1489,6 +2426,7 @@ function appendAssistantMessage(data) {
       ${AVATAR_SVG}
     </div>
     <div class="flex-1 max-w-3xl bg-white border border-slate-200 rounded-2xl rounded-tl-none sm:rounded-tl-sm px-5 py-4 shadow-sm space-y-2">
+      ${refBooksHtml}
       ${toolsHtml}
       <div class="prose-custom">
         ${formattedHtml}
@@ -1545,7 +2483,7 @@ async function renderMermaidDiagrams(container) {
     const card = document.createElement("div");
     card.className = "my-4 rounded-xl border border-slate-200 bg-slate-50/70 p-3 shadow-2xs overflow-hidden";
     card.innerHTML = `
-      <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-400">
+      <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 text-xs uppercase font-bold text-slate-400">
         <span class="flex items-center gap-1.5 text-blue-700">
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
           Clinical Decision Algorithm / Pathway
@@ -1632,19 +2570,19 @@ async function showFigureInDrawer(chunkId) {
             <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             Textbook Figure
           </span>
-          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-medium">
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold">
             Visual Illustration
           </span>
         </div>
 
         <!-- Textbook Figure Image Preview -->
         <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-          <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 px-1 mb-1.5">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700 px-1 mb-1.5">
             <span class="flex items-center gap-1.5">
               <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
               <span>Textbook Diagram</span>
             </span>
-            <button type="button" class="text-blue-600 hover:text-blue-800 text-[10px] font-semibold cursor-pointer flex items-center gap-0.5" onclick="openLightboxForChunk('${escapeHtml(chunkId)}')">
+            <button type="button" class="text-blue-600 hover:text-blue-800 text-xs font-semibold cursor-pointer flex items-center gap-0.5" onclick="openLightboxForChunk('${escapeHtml(chunkId)}')">
               <span>Enlarge</span> &nearr;
             </button>
           </div>
@@ -1655,7 +2593,7 @@ async function showFigureInDrawer(chunkId) {
 
         <!-- Source Book -->
         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-          <div class="flex items-center gap-1.5 text-[10px] uppercase font-bold text-slate-400 mb-1">
+          <div class="flex items-center gap-1.5 text-xs uppercase font-bold text-slate-400 mb-1">
             <svg class="w-3.5 h-3.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             <span>Textbook Volume</span>
           </div>
@@ -1664,18 +2602,18 @@ async function showFigureInDrawer(chunkId) {
 
         <!-- Hierarchy / Heading Path -->
         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-          <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Section Location</div>
+          <div class="text-xs uppercase font-bold text-slate-400 mb-1">Section Location</div>
           <div class="text-blue-700 font-semibold leading-relaxed">${escapeHtml(figData.heading_path || "Textbook Section")}</div>
         </div>
 
         <!-- Page info -->
         <div class="grid grid-cols-2 gap-2">
           <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-            <div class="text-[10px] uppercase font-bold text-slate-400">Printed Page</div>
+            <div class="text-xs uppercase font-bold text-slate-400">Printed Page</div>
             <div class="text-sm font-bold text-slate-900 mt-0.5">p. ${figData.page_start}</div>
           </div>
           <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-            <div class="text-[10px] uppercase font-bold text-slate-400">Content Type</div>
+            <div class="text-xs uppercase font-bold text-slate-400">Content Type</div>
             <div class="text-xs font-semibold text-slate-800 mt-1 flex items-center gap-1">
               <span class="inline-block w-2 h-2 rounded-full bg-blue-500"></span>
               <span>FIGURE CAPTION</span>
@@ -1685,9 +2623,9 @@ async function showFigureInDrawer(chunkId) {
 
         <!-- Passage Text -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-2">
-          <div class="flex items-center justify-between text-[10px] uppercase font-bold text-slate-400">
+          <div class="flex items-center justify-between text-xs uppercase font-bold text-slate-400">
             <span>Verified Figure Caption</span>
-            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold text-[10px]">VERIFIED FIGURE</span>
+            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold text-xs">VERIFIED FIGURE</span>
           </div>
           <div class="text-slate-700 leading-relaxed font-sans text-xs max-h-80 overflow-y-auto whitespace-pre-wrap bg-slate-50 p-3 rounded-lg border border-slate-200">
             ${escapeHtml(cleanText)}
@@ -1737,7 +2675,7 @@ async function showCitationInDrawer(citId) {
         <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-bold font-mono">
           Citation [${cit.citation_id}]
         </span>
-        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-medium">
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium">
           <svg class="w-3 h-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
           Authoritative Evidence
         </span>
@@ -1745,7 +2683,7 @@ async function showCitationInDrawer(citId) {
 
       <!-- Source Book -->
       <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-        <div class="flex items-center gap-1.5 text-[10px] uppercase font-bold text-slate-400 mb-1">
+        <div class="flex items-center gap-1.5 text-xs uppercase font-bold text-slate-400 mb-1">
           <svg class="w-3.5 h-3.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
           <span>Textbook Volume</span>
         </div>
@@ -1754,18 +2692,18 @@ async function showCitationInDrawer(citId) {
 
       <!-- Hierarchy / Heading Path -->
       <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-        <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Chapter & Topic Breadcrumb</div>
+        <div class="text-xs uppercase font-bold text-slate-400 mb-1">Chapter & Topic Breadcrumb</div>
         <div class="text-blue-700 font-semibold leading-relaxed">${escapeHtml(cit.heading_path || "Chapter Subsection")}</div>
       </div>
 
       <!-- Clean Clinical Reference Info (Developer Section ID replaced with Clinical Focus) -->
       <div class="grid grid-cols-2 gap-2">
         <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-          <div class="text-[10px] uppercase font-bold text-slate-400">Printed Page</div>
+          <div class="text-xs uppercase font-bold text-slate-400">Printed Page</div>
           <div class="text-sm font-bold text-slate-900 mt-0.5">p. ${cit.page_start}${cit.page_start !== cit.page_end ? `–${cit.page_end}` : ''}</div>
         </div>
         <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-          <div class="text-[10px] uppercase font-bold text-slate-400">Source Type</div>
+          <div class="text-xs uppercase font-bold text-slate-400">Source Type</div>
           <div class="text-xs font-semibold text-slate-800 mt-1 flex items-center gap-1 text-slate-700">
             <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
             <span>Core Textbook</span>
@@ -1775,9 +2713,9 @@ async function showCitationInDrawer(citId) {
 
       <!-- Passage Text -->
       <div id="drawer-passage-box" class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-2">
-        <div class="flex items-center justify-between text-[10px] uppercase font-bold text-slate-400">
+        <div class="flex items-center justify-between text-xs uppercase font-bold text-slate-400">
           <span>Verified Passage Excerpt</span>
-          <span id="drawer-chunk-type" class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold text-[10px]">VERIFIED EXCERPT</span>
+          <span id="drawer-chunk-type" class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold text-xs">VERIFIED EXCERPT</span>
         </div>
         <div id="drawer-chunk-text" class="text-slate-700 leading-relaxed font-sans text-xs max-h-80 overflow-y-auto whitespace-pre-wrap bg-slate-50 p-3 rounded-lg border border-slate-200">
           Fetching chunk details from database...
@@ -1811,12 +2749,12 @@ async function showCitationInDrawer(citId) {
           const figPreview = document.createElement("div");
           figPreview.className = "bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs overflow-hidden mb-3";
           figPreview.innerHTML = `
-            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 px-1 mb-1.5">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700 px-1 mb-1.5">
               <span class="flex items-center gap-1.5">
                 <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                 <span>Textbook Figure Visual</span>
               </span>
-              <button type="button" class="text-blue-600 hover:text-blue-800 text-[10px] font-semibold cursor-pointer flex items-center gap-0.5" onclick="openLightboxForChunk('${escapeHtml(cit.chunk_id)}')">
+              <button type="button" class="text-blue-600 hover:text-blue-800 text-xs font-semibold cursor-pointer flex items-center gap-0.5" onclick="openLightboxForChunk('${escapeHtml(cit.chunk_id)}')">
                 <span>Enlarge</span> &nearr;
               </button>
             </div>

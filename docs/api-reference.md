@@ -116,10 +116,12 @@ Processes a synchronous conversational turn.
 Processes a conversational turn with Server-Sent Events (SSE).
 - **Request Body**: Same as `/api/chat`.
 - **Response `text/event-stream` Events**:
+  - `event: plan` — `{ "diagnostic_hypotheses": [ ... ], "organ_systems": [ ... ], "search_queries": [ ... ] }`
   - `event: status` — `{ "text": "Searching medical textbooks..." }`
   - `event: tools` — `[{ "name": "search_chunks", ... }]`
   - `event: token` — `{ "delta": "word " }`
   - `event: citations` — `[ ... ]`
+  - `event: referenced_books` — `[{ "slug": "...", "title": "...", "specialty": "...", "pages": "pp. 45, 60–64" }]`
   - `event: figures` — `[ ... ]`
   - `event: follow_ups` — `[ ... ]`
   - `event: done` — `{ "reply": "..." }`
@@ -137,7 +139,70 @@ Returns remaining daily request quota for the caller.
 
 ---
 
-## 4. Content & Diagram Endpoints
+## 4. User Library & Dynamic Ingestion Endpoints
+
+### `GET /api/user/library`
+Retrieves the active user's personal curated library ("My Study Library") with individual consultation active switches and the complete Global Catalog.
+- **Response `200 OK`**:
+  ```json
+  {
+    "library": [
+      { "slug": "Harrison_2025_22nd_Edition", "title": "Harrison's Principles of Internal Medicine", "specialty": "Internal Medicine", "is_active": true }
+    ],
+    "global_catalog": [ ... ]
+  }
+  ```
+
+### `POST /api/user/library/add`
+Adds an indexed book from the Global Catalog to the user's personal library.
+- **Request Body**: `{ "book_slug": "Harrison_2025_22nd_Edition" }`
+
+### `POST /api/user/library/remove`
+Removes a book from the user's personal library.
+- **Request Body**: `{ "book_slug": "Harrison_2025_22nd_Edition" }`
+
+### `POST /api/user/library/toggle`
+Toggles or sets the active consultation state for a textbook in the user's library.
+- **Request Body**: `{ "book_slug": "Harrison_2025_22nd_Edition", "is_active": false }`
+
+### `POST /api/user/library/toggle-all`
+Activates or deactivates all textbooks in the user's personal library simultaneously.
+- **Request Body**: `{ "is_active": true }`
+
+### `POST /api/books/upload`
+Uploads a textbook PDF and starts non-blocking background extraction and FTS5 indexing.
+- **Form Data**:
+  - `file`: PDF binary stream
+  - `title`: Textbook title string
+  - `specialty`: Clinical specialty (e.g., "Internal Medicine")
+- **Response `202 Accepted`**:
+  ```json
+  {
+    "job_id": "3c8a9942-...",
+    "title": "Harrison's Principles of Internal Medicine",
+    "status": "pending",
+    "message": "Upload accepted. Ingestion started in background."
+  }
+  ```
+
+### `GET /api/books/ingestion/{job_id}`
+Polls asynchronous ingestion progress and stage information.
+- **Response `200 OK`**:
+  ```json
+  {
+    "job_id": "3c8a9942-...",
+    "status": "running",
+    "stage": "chunking",
+    "progress_percent": 65,
+    "message": "Extracted 4273 pages. Generating bounded semantic chunks...",
+    "chunks_count": 0,
+    "user_error_message": null
+  }
+  ```
+
+---
+
+## 5. Content & Diagram Endpoints
 
 ### `GET /api/books`
 Lists indexed textbooks and page statistics.

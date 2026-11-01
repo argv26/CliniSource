@@ -13,6 +13,8 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
+from storage.object_store import get_storage_provider
+
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "ui" / "static" / "figures_cache"
 DB_PATH = ROOT / "textbook_rag.db"
@@ -119,6 +121,11 @@ def get_figure_image_path(chunk_id: str) -> Path | None:
     Returns:
         Path to the cached image on disk, or None if extraction is unavailable.
     """
+    store = get_storage_provider()
+    existing_path = store.get_figure_path(chunk_id)
+    if existing_path and existing_path.exists() and existing_path.stat().st_size > 0:
+        return existing_path
+
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     target_cache_file = CACHE_DIR / f"{chunk_id}.jpg"
     if target_cache_file.exists() and target_cache_file.stat().st_size > 0:

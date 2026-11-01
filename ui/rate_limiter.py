@@ -4,6 +4,7 @@ from __future__ import annotations
 import datetime
 import os
 import sqlite3
+import threading
 from pathlib import Path
 from typing import Tuple
 
@@ -14,6 +15,8 @@ DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent / "textbook_rag.db"
 
 class DailyRateLimiter:
     """Tracks daily query usage per client IP/session using SQLite for persistence across restarts."""
+
+    _lock = threading.Lock()
 
     def __init__(self, db_path: Path = DEFAULT_DB_PATH, default_limit: int = 50):
         self.db_path = db_path
@@ -71,29 +74,31 @@ class DailyRateLimiter:
 
         today = self.today_str()
 
-        with self._get_conn() as conn:
-            cur = conn.cursor()
-            cur.execute(
-                "SELECT count FROM daily_usage WHERE client_id = ? AND day = ?;",
-                (client_id, today),
-            )
-            row = cur.fetchone()
-            current_count = row[0] if row else 0
+        with self._lock:
+            with self._get_conn() as conn:
+                conn.execute("BEGIN IMMEDIATE;")
+                cur = conn.cursor()
+                cur.execute(
+                    "SELECT count FROM daily_usage WHERE client_id = ? AND day = ?;",
+                    (client_id, today),
+                )
+                row = cur.fetchone()
+                current_count = row[0] if row else 0
 
-            if current_count >= limit:
-                return False, current_count, 0
+                if current_count >= limit:
+                    return False, current_count, 0
 
-            new_count = current_count + 1
-            cur.execute(
-                """
-                INSERT INTO daily_usage (client_id, day, count)
-                VALUES (?, ?, ?)
-                ON CONFLICT(client_id, day) DO UPDATE SET count = ?;
-                """,
-                (client_id, today, new_count, new_count),
-            )
-            remaining = max(0, limit - new_count)
-            return True, new_count, remaining
+                new_count = current_count + 1
+                cur.execute(
+                    """
+                    INSERT INTO daily_usage (client_id, day, count)
+                    VALUES (?, ?, ?)
+                    ON CONFLICT(client_id, day) DO UPDATE SET count = ?;
+                    """,
+                    (client_id, today, new_count, new_count),
+                )
+                remaining = max(0, limit - new_count)
+                return True, new_count, remaining
 
     def get_remaining(self, client_id: str) -> Tuple[int, int]:
         """Gets (current_count, remaining) for a client without incrementing."""

@@ -188,6 +188,8 @@ def api_chat_stream(req: ChatRequest, request: Request, response: Response):
         final_tools = []
         final_follow_ups = []
         final_figures = []
+        final_plan = {}
+        final_referenced_books = []
         final_reply_from_done = ""
 
         try:
@@ -205,6 +207,10 @@ def api_chat_stream(req: ChatRequest, request: Request, response: Response):
 
                 if event_name == "token":
                     accumulated_tokens.append(data_obj.get("delta", ""))
+                elif event_name == "plan":
+                    final_plan = data_obj
+                elif event_name == "referenced_books":
+                    final_referenced_books = data_obj
                 elif event_name == "tools":
                     final_tools = data_obj
                 elif event_name == "citations":
