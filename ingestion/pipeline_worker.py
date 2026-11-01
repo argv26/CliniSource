@@ -14,6 +14,7 @@ import hashlib
 import json
 import logging
 import re
+import shutil
 import sqlite3
 import threading
 import time
@@ -37,6 +38,8 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DB_PATH = (ROOT_DIR / "clinisource.db") if (ROOT_DIR / "clinisource.db").exists() else (ROOT_DIR / "textbook_rag.db")
 UPLOAD_STAGING_DIR = ROOT_DIR / "temp" / "uploads"
 UPLOAD_STAGING_DIR.mkdir(parents=True, exist_ok=True)
+PERMANENT_BOOKS_DIR = ROOT_DIR / "ingestion" / "test-books"
+PERMANENT_BOOKS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # =============================================================================
@@ -643,9 +646,14 @@ def run_ingestion_pipeline(
                 doc.close()
             except Exception:
                 pass
-        # Clean up temporary uploaded PDF only if inside staging directory
+        # Preserve uploaded PDF in permanent books directory for diagram extraction before unlinking staging file
         if pdf_file.exists() and (UPLOAD_STAGING_DIR in pdf_file.parents or "uploads" in str(pdf_file)):
             try:
+                if book_slug:
+                    PERMANENT_BOOKS_DIR.mkdir(parents=True, exist_ok=True)
+                    dest_pdf = PERMANENT_BOOKS_DIR / f"{book_slug}.pdf"
+                    if not dest_pdf.exists():
+                        shutil.copy2(pdf_file, dest_pdf)
                 pdf_file.unlink()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"Failed to copy/unlink staged PDF {pdf_file}: {e}")

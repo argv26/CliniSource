@@ -130,24 +130,20 @@ clinisource/
 
 ---
 
-## 5. Agent Orchestration & Clinical Planning
+## 5. Universal Agent Orchestration & Presentation Layer
 
-1. **AttendingPlanner Pre-Step Reasoning**:
-   - Clinical inquiries trigger `AttendingPlanner` before tool dispatch.
-   - Generates differential diagnoses, affected organ systems, and targeted medical search terms.
-   - Emits structured `event: plan` over the SSE stream for immediate physician feedback.
-2. **Invariant System Prompt & Prompt Caching**:
-   - The clinical persona and core citation integrity rules (`INVARIANT_SYSTEM_PROMPT`) are placed as a static, immutable prefix.
-   - Facilitates provider-side prompt caching (Gemini Context Caching) to reduce per-turn token latencies.
-3. **Execution Strategy & Zero Multimodal Inference**:
-   - Textbook figures are pre-cropped and stored in Object Storage; 0 multimodal vision tokens are sent to LLMs, saving token budget and latency.
-   - When `GEMINI_API_KEY` is present, multi-turn ReAct loops run via Google GenAI (`gemini-flash-lite-latest`).
-   - If keys are omitted or offline, `agent/offline.py` synthesizes answers with 100% availability.
-4. **Semantic Book Routing**:
-   - User Selection Sovereignty: When a user selects a subset of books, only those books are queried.
-   - All Books Smart Routing: Analyzes query tokens and clinical plan against `BOOK_SPECIALTY_PROFILES` to rank and route to the top 1–2 most relevant volumes.
-5. **Medical Typography & Citation Normalization**:
-   - Raw LaTeX tags and hormone math delimiters are sanitized into clean Unicode.
+1. **Direct Answer First & Reference On-Demand**:
+   - Generic or conceptual queries (e.g., greetings, broad definitions) are answered immediately in 2–3 crisp paragraphs with **0 search latency and 0 tool calls**.
+   - Specific statutory, clinical, or scientific inquiries trigger tool retrieval on demand.
+2. **Universal 3-Tool ReAct Pattern**:
+   - `get_textbook_structure`: Returns hierarchical outline (Titles, Chapters, Sections) matching query terms.
+   - `get_relevant_chunks`: Retrieves granular passages and text blocks with 1-based citation IDs.
+   - `get_media_and_tables`: Surfaces authentic figures, diagram plates, and tables with semantic descriptions.
+3. **Structured Tables (Zero Synthetic Flowcharts)**:
+   - Synthetic flowcharts (Mermaid) are eliminated to prevent parser crashes and bomb icons.
+   - Multi-step logic, criteria, and classifications are rendered in clean, responsive Markdown tables or numbered decision sequences ($1 \rightarrow 2 \rightarrow 3$).
+4. **Visual Presentation Layer & Typography Normalization**:
+   - Automatically cleans up math/LaTeX artifacts, strips trailing dollar signs (`15$`, `35$`), normalizes ion and mathematical typography (`Na⁺/K⁺-ATPase`, `Mg²⁺`, `≥`, `≤`), and auto-balances bold markers.
    - Out-of-catalog bracketed references are converted to plaintext `(Ref X)` so only verified textbook passages become clickable interactive citation pills.
 
 ---

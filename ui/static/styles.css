@@ -173,21 +173,41 @@ input:focus-visible {
 }
 .prose-custom table {
   width: 100%;
-  border-collapse: collapse;
-  margin: 0.85rem 0;
-  font-size: 0.825rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1rem 0;
+  border-radius: 0.625rem;
+  border: 1px solid #cbd5e1;
+  font-size: 0.85rem;
   color: #1e293b;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 .prose-custom th,
 .prose-custom td {
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  padding: 0.65rem 0.85rem;
   text-align: left;
+}
+.prose-custom th:last-child,
+.prose-custom td:last-child {
+  border-right: none;
+}
+.prose-custom tr:last-child td {
+  border-bottom: none;
 }
 .prose-custom th {
   background-color: #f8fafc;
   color: #0f172a;
   font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border-bottom: 2px solid #cbd5e1;
+}
+.prose-custom tr:nth-child(even) td {
+  background-color: #fbfcfe;
 }
 
 /* Monospace Code & Formula Styling */

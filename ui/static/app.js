@@ -251,18 +251,6 @@ function setupMarkdown() {
       gfm: true
     });
   }
-  if (window.mermaid) {
-    try {
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: "neutral",
-        securityLevel: "loose",
-        fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, sans-serif"
-      });
-    } catch (e) {
-      console.warn("Mermaid init failed:", e);
-    }
-  }
 }
 
 // =============================================================================
@@ -1989,9 +1977,6 @@ async function submitQuery(queryText) {
             proseContainer.innerHTML = finalHtml;
             attachCitationBadgeListeners(assistantWrapper);
           }
-          if (assistantWrapper) {
-            renderMermaidDiagrams(assistantWrapper);
-          }
           fetchQuota();
           fetchSessions();
         } else if (eventName === "error") {
@@ -2294,7 +2279,15 @@ function sanitizeMedicalText(text) {
     .replace(/\\(?:Delta|delta)\b/g, "Δ")
     .replace(/\\(?:degree|circ)\b/g, "°")
     // 4. Unwrap single dollar math delimiters around clinical lab values/units
-    .replace(/\$([A-Za-z0-9\s\.\<\>\=\-\+~±×μμβ°%/–—]+)\$/g, "$1");
+    .replace(/\$([A-Za-z0-9\s\.\<\>\=\-\+~±×μμβ°%/–—]+)\$/g, "$1")
+    // 5. Strip stray trailing dollar signs from numbers (e.g. 15$, 35$)
+    .replace(/(\d+)\$/g, "$1")
+    // 6. Standardize ion and enzyme typography
+    .replace(/Na\^?\+\/K\^?\+\-?ATPase/gi, "Na⁺/K⁺-ATPase")
+    .replace(/\bMg\^?2\+\b/g, "Mg²⁺")
+    .replace(/\bCa\^?2\+\b/g, "Ca²⁺")
+    // 7. Auto-balance unclosed bold markers at line endings
+    .replace(/^(\s*[\*•\-\d\.]+\s*)\*\*([^\*\n]+)$/gm, "$1**$2**");
 }
 
 // Append Assistant Message with Tool Pills, Clickable Citations, and Follow-ups
@@ -2438,9 +2431,6 @@ function appendAssistantMessage(data) {
     </div>
   `;
 
-  // Render any Mermaid.js flowcharts into SVGs
-  renderMermaidDiagrams(wrapper);
-
   // Attach citation click events
   wrapper.querySelectorAll(".citation-badge").forEach(btn => {
     btn.addEventListener("click", (e) => {
@@ -2467,43 +2457,6 @@ function appendAssistantMessage(data) {
   });
 
   messagesContainer.appendChild(wrapper);
-}
-
-// Render Mermaid.js flowchart code blocks into styled interactive SVGs
-async function renderMermaidDiagrams(container) {
-  if (!window.mermaid) return;
-  const blocks = container.querySelectorAll("pre > code.language-mermaid");
-  if (!blocks || blocks.length === 0) return;
-
-  for (let i = 0; i < blocks.length; i++) {
-    const codeEl = blocks[i];
-    const preEl = codeEl.parentElement;
-    const rawCode = codeEl.textContent.trim();
-    if (!rawCode) continue;
-
-    const uniqueId = `mermaid-${Date.now()}-${i}`;
-    const card = document.createElement("div");
-    card.className = "my-4 rounded-xl border border-slate-200 bg-slate-50/70 p-3 shadow-2xs overflow-hidden";
-    card.innerHTML = `
-      <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 text-xs uppercase font-bold text-slate-400">
-        <span class="flex items-center gap-1.5 text-blue-700">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-          Clinical Decision Algorithm / Pathway
-        </span>
-        <span class="font-mono text-[9px] text-slate-400">Mermaid SVG</span>
-      </div>
-      <div class="mermaid-target flex justify-center overflow-x-auto py-2" id="${uniqueId}"></div>
-    `;
-
-    try {
-      const { svg } = await mermaid.render(`svg-${uniqueId}`, rawCode);
-      const target = card.querySelector(".mermaid-target");
-      if (target) target.innerHTML = svg;
-      preEl.replaceWith(card);
-    } catch (err) {
-      console.warn("Mermaid render error:", err);
-    }
-  }
 }
 
 // Figure Lightbox Functions

@@ -66,7 +66,7 @@ def _resolve_pdf_path(book_slug: str) -> Path | None:
             if "endocrinology" in p.name.lower() or "williams" in p.name.lower():
                 return p
 
-    return candidates[0] if candidates else None
+    return None
 
 
 def _generate_card_image(target_path: Path, book_slug: str, page_start: int | None, raw_text: str) -> Path | None:
@@ -160,19 +160,9 @@ def get_figure_image_path(chunk_id: str) -> Path | None:
         except ImportError:
             return _generate_card_image(target_cache_file, book_slug, page_start, raw_text)
 
-    # Convert printed page number to 0-based PDF page index
-    pm = _get_page_map(book_slug)
-    pdf_page_idx = None
-    if pm and page_start is not None:
-        try:
-            # pm.printed_to_pdf returns 1-based page number
-            pdf_page_idx = pm.printed_to_pdf(int(page_start)) - 1
-        except Exception:
-            pass
-
-    if pdf_page_idx is None:
-        # Fallback to direct page_start - 1
-        pdf_page_idx = max(0, int(page_start) - 1) if page_start else 0
+    # chunks.page_start is stored as the 1-based physical PDF page.
+    # Convert directly to 0-based PDF page index without applying printed-to-pdf offset.
+    pdf_page_idx = max(0, int(page_start) - 1) if page_start else 0
 
     try:
         doc = pymupdf.open(str(pdf_path))
@@ -180,9 +170,9 @@ def get_figure_image_path(chunk_id: str) -> Path | None:
             pdf_page_idx = min(len(doc) - 1, max(0, pdf_page_idx))
         page = doc[pdf_page_idx]
 
-        # Extract figure label token from text (e.g. "FIGURE 20.12", "Figure 1.1")
+        # Extract figure label token from text (e.g. "FIGURE 20.12", "Figure 1.1", "• Fig. 16.2", "Fig. 16.2")
         fig_token = None
-        match = re.search(r"\b(FIGURE\s+[\d\.]+[A-Za-z]?)\b", raw_text, re.IGNORECASE)
+        match = re.search(r"(?:[•·\-\*]\s*)?(FIG(?:URE)?\.?\s*[\d\.]+[A-Za-z]?)", raw_text, re.IGNORECASE)
         if match:
             fig_token = match.group(1).strip()
 
@@ -190,13 +180,17 @@ def get_figure_image_path(chunk_id: str) -> Path | None:
         if fig_token:
             rects = page.search_for(fig_token)
             if not rects:
-                # Try simple format e.g. "Figure 1.1" vs "FIGURE 1.1"
+                # Try simple format e.g. "Figure 1.1" vs "FIGURE 1.1" vs "Fig. 1.1"
                 rects = page.search_for(fig_token.upper())
+            if not rects and "FIG" in fig_token.upper():
+                # Try with period or without period (e.g., "Fig 16.2" vs "Fig. 16.2")
+                alt_token = fig_token.replace(".", "") if "." in fig_token else fig_token.replace("Fig ", "Fig. ")
+                rects = page.search_for(alt_token)
             if rects:
                 r = rects[0]
-                # OpenStax & Williams textbooks: figure is typically positioned above the caption
-                y_top = max(0, r.y0 - 450)
-                y_bottom = min(page.rect.y1, r.y1 + 100)
+                # In textbooks, figure plate is typically positioned above or below the caption block
+                y_top = max(0, r.y0 - 500)
+                y_bottom = min(page.rect.y1, r.y1 + 120)
                 clip_rect = pymupdf.Rect(page.rect.x0, y_top, page.rect.x1, y_bottom)
 
         # Check for large embedded image object on the page

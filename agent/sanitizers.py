@@ -74,6 +74,8 @@ def _sanitize_medical_typography(text: str) -> str:
         (r"\\gamma(?![a-zA-Z])", "γ"),
         (r"\\(?:Delta|delta)(?![a-zA-Z])", "Δ"),
         (r"\\(?:degree|circ)(?![a-zA-Z])", "°"),
+        (r">=", "≥"),
+        (r"<=", "≤"),
     ]
     for pattern, replacement in latex_syms:
         text = re.sub(pattern, replacement, text)
@@ -82,9 +84,24 @@ def _sanitize_medical_typography(text: str) -> str:
     # e.g. $pH < 7.3$, $< 15 mmol/L$, $200–250 mg/dL$, $TR\beta2$ -> TRβ2
     text = re.sub(r"\$([^\$\n]+)\$", r"\1", text)
 
-    # 5. Clean up any leftover empty brackets or redundant whitespace
+    # 5. Strip stray trailing dollar signs attached to numbers (e.g. 15$, 35$)
+    text = re.sub(r"(\d+)\$", r"\1", text)
+
+    # 6. Standardize ion and enzyme typography
+    text = re.sub(r"Na\^?\+\/K\^?\+\-?ATPase", "Na⁺/K⁺-ATPase", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bMg\^?2\+(?!\w)", "Mg²⁺", text)
+    text = re.sub(r"\bCa\^?2\+(?!\w)", "Ca²⁺", text)
+    text = re.sub(r"\bK\^?\+(?!\w)", "K⁺", text)
+
+    # 7. Auto-balance unclosed bold markers at line endings
+    text = re.sub(r"^(\s*[\*•\-\d\.]+\s*)\*\*([^\*\n]+)$", r"\1**\2**", text, flags=re.MULTILINE)
+
+    # 8. Clean up any leftover empty brackets or redundant whitespace
     text = re.sub(r"\(\s*\)", "", text)
     return text
+
+
+_sanitize_universal_typography = _sanitize_medical_typography
 
 
 def _sanitize_citations(reply: str, valid_citation_ids: set[int]) -> str:
