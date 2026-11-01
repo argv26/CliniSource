@@ -4,6 +4,7 @@ FROM python:3.11-slim as base
 # Prevent Python from writing .pyc files and enable unbuffered logging
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
     PORT=7860 \
     DAILY_REQUEST_LIMIT=50
 
@@ -23,10 +24,15 @@ COPY ingestion/ ./ingestion/
 COPY retrieval/ ./retrieval/
 COPY context/ ./context/
 COPY agent/ ./agent/
+COPY storage/ ./storage/
 COPY ui/ ./ui/
 COPY run_pipeline.py .
 COPY textbook_rag.db .
 COPY README.md .
+
+# Create temporary upload & cache directories
+RUN mkdir -p /app/temp/uploads && \
+    mkdir -p /app/ui/static/figures_cache
 
 # Create non-root user for security (UID 1000 standard for Hugging Face Spaces)
 RUN useradd -m -u 1000 appuser && \
@@ -37,7 +43,7 @@ EXPOSE 7860
 
 # Health check to ensure web server is responding
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:7860/ || exit 1
+    CMD curl -f http://localhost:${PORT:-7860}/api/quota || exit 1
 
 # Start FastAPI application on port 7860 (Hugging Face standard) or PORT env var
 CMD ["sh", "-c", "uvicorn ui.app:app --host 0.0.0.0 --port ${PORT:-7860}"]

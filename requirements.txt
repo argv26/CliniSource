@@ -11,6 +11,7 @@ pgvector>=0.3.0                 # pgvector Python client (optional — for produ
 # ─── Web Framework ───────────────────────────────────────────────────────────
 fastapi>=0.115.0
 uvicorn>=0.30.0
+python-multipart>=0.0.12
 
 # ─── LLM SDKs (optional — app works offline without these) ──────────────────
 google-genai>=2.0.0             # Google Gemini
