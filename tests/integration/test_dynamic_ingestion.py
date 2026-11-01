@@ -136,26 +136,39 @@ def test_dynamic_ingestion_end_to_end(client: TestClient, tmp_path: Path):
     assert final_status["sections_count"] >= 3
     assert final_status["chunks_count"] >= 2
 
-    # 1. Verify book appears in GET /api/books
-    books_res = client.get("/api/books")
-    assert books_res.status_code == 200
-    all_books = books_res.json()["books"]
-    matched_book = next((b for b in all_books if b["title"] == book_title), None)
-    assert matched_book is not None, f"Uploaded book {book_title} not found in /api/books"
-    assert matched_book["total_pages"] == 3
+    try:
+        # 1. Verify book appears in GET /api/books
+        books_res = client.get("/api/books")
+        assert books_res.status_code == 200
+        all_books = books_res.json()["books"]
+        matched_book = next((b for b in all_books if b["title"] == book_title), None)
+        assert matched_book is not None, f"Uploaded book {book_title} not found in /api/books"
+        assert matched_book["total_pages"] == 3
 
-    # 2. Verify book appears in GET /api/user/library global catalog
-    lib_res = client.get("/api/user/library")
-    assert lib_res.status_code == 200
-    catalog = lib_res.json()["global_catalog"]
-    matched_catalog_book = next((b for b in catalog if b["title"] == book_title), None)
-    assert matched_catalog_book is not None
-    assert matched_catalog_book["specialty"] == book_specialty
+        # 2. Verify book appears in GET /api/user/library global catalog
+        lib_res = client.get("/api/user/library")
+        assert lib_res.status_code == 200
+        catalog = lib_res.json()["global_catalog"]
+        matched_catalog_book = next((b for b in catalog if b["title"] == book_title), None)
+        assert matched_catalog_book is not None
+        assert matched_catalog_book["specialty"] == book_specialty
 
-    # 3. Verify chunk search finds the ingested content
-    hits = search_chunks("physiologic pacemaker healthy heart", book_slug=matched_book["slug"], limit=3)
-    assert len(hits) > 0
-    assert "pacemaker" in hits[0]["text"].lower()
+        # 3. Verify chunk search finds the ingested content
+        hits = search_chunks("physiologic pacemaker healthy heart", book_slug=matched_book["slug"], limit=3)
+        assert len(hits) > 0
+        assert "pacemaker" in hits[0]["text"].lower()
+    finally:
+        # Clean up test book from production database
+        import sqlite3
+        from ingestion.pipeline_worker import DEFAULT_DB_PATH
+        conn = sqlite3.connect(str(DEFAULT_DB_PATH))
+        test_slug = matched_book["slug"] if matched_book else f"Testbook_of_Cardiology_{int(time.time())}"
+        conn.execute("DELETE FROM chunks_fts WHERE book_slug LIKE 'Testbook_of_Cardiology%';")
+        conn.execute("DELETE FROM chunks WHERE book_slug LIKE 'Testbook_of_Cardiology%';")
+        conn.execute("DELETE FROM sections WHERE book_slug LIKE 'Testbook_of_Cardiology%';")
+        conn.execute("DELETE FROM books WHERE slug LIKE 'Testbook_of_Cardiology%';")
+        conn.commit()
+        conn.close()
 
 
 def test_scanned_pdf_failure_classification(tmp_path: Path):
