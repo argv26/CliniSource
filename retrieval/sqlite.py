@@ -14,7 +14,7 @@ from retrieval.models import ChunkHit, SectionContent, SectionHit
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
-DEFAULT_SQLITE_PATH = (ROOT / "clinisource.db") if (ROOT / "clinisource.db").exists() else (ROOT / "textbook_rag.db")
+DEFAULT_SQLITE_PATH = (ROOT / "clinisource.db") if ((ROOT / "clinisource.db").exists() and (ROOT / "clinisource.db").stat().st_size > 0) else (ROOT / "textbook_rag.db")
 
 
 class SqliteEngine(BaseEngine):

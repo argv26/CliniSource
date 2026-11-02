@@ -3,7 +3,7 @@ ui/diagrams.py
 
 High-performance Medical Diagram Extraction & Caching Engine for CliniSource.
 Extracts high-resolution visual figures, diagrams, and anatomical plates directly
-from source textbook PDFs using PyMuPDF and PageMap offset calibration.
+from source textbook PDFs using PyMuPDF and universal column-aware plate bounding.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from storage.object_store import get_storage_provider
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "ui" / "static" / "figures_cache"
-DB_PATH = (ROOT / "clinisource.db") if (ROOT / "clinisource.db").exists() else (ROOT / "textbook_rag.db")
+DB_PATH = (ROOT / "clinisource.db") if ((ROOT / "clinisource.db").exists() and (ROOT / "clinisource.db").stat().st_size > 0) else (ROOT / "textbook_rag.db")
 BOOKS_DIR = ROOT / "ingestion" / "test-books"
 PROFILES_DIR = ROOT / "ingestion" / "analysis-result"
 
@@ -79,8 +79,13 @@ def _resolve_pdf_path(book_slug: str) -> Path | None:
     return None
 
 
-def _generate_card_image(target_path: Path, book_slug: str, page_start: int | None, raw_text: str) -> Path | None:
-    """Generates a visual clinical reference card JPEG when raw PDF is absent."""
+def extract_clean_figure_rect(page: Any, fig_token: str) -> Any | None:
+    """Universal column-aware plate-bounding algorithm for medical textbook figures.
+
+    Detects the visual plate (drawings, charts, or embedded raster images) and caption
+    while strictly isolating multi-column layouts to exclude adjacent text columns.
+    Returns None if no authentic visual diagram plate is present on the page.
+    """
     try:
         import pymupdf
     except ImportError:
@@ -89,37 +94,166 @@ def _generate_card_image(target_path: Path, book_slug: str, page_start: int | No
         except ImportError:
             return None
 
-    try:
-        doc = pymupdf.open()
-        page = doc.new_page(width=720, height=480)
-        # Background & border
-        page.draw_rect(pymupdf.Rect(0, 0, 720, 480), color=(0.93, 0.95, 0.98), fill=(0.96, 0.98, 1.0))
-        page.draw_rect(pymupdf.Rect(20, 20, 700, 460), color=(0.82, 0.86, 0.92), fill=(1.0, 1.0, 1.0))
-        # Top banner
-        page.draw_rect(pymupdf.Rect(20, 20, 700, 80), color=(0.15, 0.35, 0.8), fill=(0.15, 0.35, 0.8))
+    pw = page.rect.width
+    ph = page.rect.height
 
-        clean_book = (book_slug or "Textbook").replace("_", " ").replace("-", " ").title()
-        page.insert_text((40, 56), f"CLINICAL TEXTBOOK REFERENCE  •  {clean_book}", fontsize=12, color=(1.0, 1.0, 1.0))
+    # 1. Identify Caption Block (must be an authentic caption heading, not an in-text parenthetical citation)
+    blocks = page.get_text("blocks")
+    caption_block = None
 
-        if page_start:
-            page.draw_rect(pymupdf.Rect(580, 36, 680, 66), color=(0.1, 0.25, 0.6), fill=(0.1, 0.25, 0.6))
-            page.insert_text((600, 56), f"Page {page_start}", fontsize=12, color=(1.0, 1.0, 1.0))
+    token_clean = fig_token.strip()
+    m = re.search(r"(\d+)\s*[\.\-]\s*(\d+[a-zA-Z]?)", token_clean)
+    if m:
+        num_pattern = rf"{m.group(1)}\s*[\.\-]\s*{m.group(2)}"
+    else:
+        num_pattern = re.escape(token_clean)
 
-        match = re.search(r"\b(FIGURE\s+[\d\.]+[A-Za-z]?|Fig\.\s*[\d\.]+)\b", raw_text, re.IGNORECASE)
-        fig_title = match.group(0).upper() if match else "TEXTBOOK FIGURE & DIAGRAM"
-        page.insert_text((40, 120), fig_title, fontsize=18, color=(0.12, 0.18, 0.3))
+    pattern = re.compile(
+        rf"(?:^|[•·■\-\*\n\r\t])\s*(?:FIG(?:URE)?\.?\s*){num_pattern}(?!\s*\))(?:\b|\s|[\.:\u2000-\u200b])",
+        re.IGNORECASE,
+    )
 
-        clean_text = re.sub(r"(\w+)-\s*\n\s*(\w+)", r"\1\2", raw_text)
-        clean_text = re.sub(r"\s+", " ", clean_text).strip()
-        page.insert_textbox(pymupdf.Rect(40, 140, 680, 430), clean_text, fontsize=12, color=(0.25, 0.3, 0.38))
+    for b in blocks:
+        text = b[4]
+        if pattern.search(text):
+            caption_block = pymupdf.Rect(b[:4])
+            break
 
-        pix = page.get_pixmap(dpi=130)
-        pix.save(str(target_path), "jpeg", jpg_quality=85)
-        doc.close()
-        return target_path
-    except Exception as e:
-        print(f"[ui.diagrams] Card fallback error: {e}")
+    # If pattern didn't match directly, check for blocks starting with the figure token
+    if not caption_block:
+        for b in blocks:
+            text = b[4].strip()
+            if re.match(rf"^(?:[•·■\-\*]\s*)?(?:FIG(?:URE)?\.?\s*){num_pattern}", text, re.IGNORECASE):
+                caption_block = pymupdf.Rect(b[:4])
+                break
+
+    if not caption_block:
         return None
+
+    # 2. Determine Column Boundaries
+    if caption_block.x1 <= 0.58 * pw and caption_block.width < 0.55 * pw:
+        col_x0 = max(15.0, caption_block.x0 - 15.0)
+        col_x1 = min(pw * 0.52, max(caption_block.x1 + 10.0, pw * 0.48))
+        is_column = "LEFT"
+    elif caption_block.x0 >= 0.42 * pw and caption_block.width < 0.55 * pw:
+        col_x0 = max(pw * 0.48, min(caption_block.x0 - 10.0, pw * 0.52))
+        col_x1 = min(pw - 15.0, caption_block.x1 + 15.0)
+        is_column = "RIGHT"
+    else:
+        col_x0 = max(15.0, caption_block.x0 - 15.0)
+        col_x1 = min(pw - 15.0, caption_block.x1 + 15.0)
+        is_column = "FULL"
+
+    # 3. Check for embedded raster images in this column / region
+    matching_img_rect = None
+    for img_info in page.get_images():
+        xref = img_info[0]
+        img_rect_list = page.get_image_rects(xref)
+        for ir in img_rect_list:
+            if ir.width < 40 or ir.height < 40:
+                continue
+            # Column horizontal boundary checks
+            if is_column == "LEFT" and ir.x0 > col_x1:
+                continue
+            if is_column == "RIGHT" and ir.x1 < col_x0:
+                continue
+
+            overlap = min(ir.x1, col_x1) - max(ir.x0, col_x0)
+            if overlap > 25 or (is_column == "FULL" and ir.width > 180):
+                # Vertical proximity to caption (above within 500 pt, or below within 200 pt)
+                dist_above = caption_block.y0 - ir.y1
+                dist_below = ir.y0 - caption_block.y1
+                if (-25 <= dist_above <= 500) or (-25 <= dist_below <= 200):
+                    if matching_img_rect is None:
+                        matching_img_rect = ir
+                    else:
+                        matching_img_rect = matching_img_rect | ir
+
+    if matching_img_rect:
+        final_rect = matching_img_rect | caption_block
+        if is_column == "LEFT":
+            return pymupdf.Rect(
+                max(page.rect.x0, col_x0 - 6),
+                max(page.rect.y0, final_rect.y0 - 6),
+                min(pw * 0.52, final_rect.x1 + 6),
+                min(page.rect.y1, final_rect.y1 + 6),
+            )
+        elif is_column == "RIGHT":
+            return pymupdf.Rect(
+                max(pw * 0.48, final_rect.x0 - 6),
+                max(page.rect.y0, final_rect.y0 - 6),
+                min(page.rect.x1, col_x1 + 6),
+                min(page.rect.y1, final_rect.y1 + 6),
+            )
+        else:
+            return pymupdf.Rect(
+                max(page.rect.x0, final_rect.x0 - 6),
+                max(page.rect.y0, final_rect.y0 - 6),
+                min(page.rect.x1, final_rect.x1 + 6),
+                min(page.rect.y1, final_rect.y1 + 6),
+            )
+
+    # 4. Check for vector drawings in this column (charts, graphs, clinical pathways)
+    drawings = page.get_drawings()
+    col_drawings = []
+    for d in drawings:
+        dr = d["rect"]
+        if is_column == "LEFT" and dr.x1 > col_x1:
+            continue
+        if is_column == "RIGHT" and dr.x0 < col_x0:
+            continue
+        if dr.y0 < 38 or dr.y1 > ph - 30:
+            continue
+        # Proximity: drawing above caption (up to 480 pt)
+        if 10 < caption_block.y0 - dr.y0 < 480 and dr.y1 <= caption_block.y0 + 25:
+            col_drawings.append(dr)
+        # Proximity: drawing below caption (up to 380 pt)
+        elif 0 < dr.y0 - caption_block.y1 < 380 and dr.y0 >= caption_block.y1 - 15:
+            col_drawings.append(dr)
+
+    if col_drawings:
+        draw_union = col_drawings[0]
+        for dr in col_drawings[1:]:
+            draw_union = draw_union | dr
+
+        # Include text blocks strictly within the chart and column
+        for b in blocks:
+            br = pymupdf.Rect(b[:4])
+            if is_column == "LEFT" and br.x1 > col_x1:
+                continue
+            if is_column == "RIGHT" and br.x0 < col_x0:
+                continue
+            if (draw_union.y0 - 15 <= br.y0 and br.y1 <= caption_block.y1 + 10) or \
+               (caption_block.y0 - 10 <= br.y0 and br.y1 <= draw_union.y1 + 15):
+                if br.y0 > 38 and br.y1 < ph - 30:
+                    draw_union = draw_union | br
+
+        final_rect = draw_union | caption_block
+        if is_column == "LEFT":
+            return pymupdf.Rect(
+                max(page.rect.x0, col_x0 - 6),
+                max(page.rect.y0, final_rect.y0 - 6),
+                min(pw * 0.52, final_rect.x1 + 6),
+                min(page.rect.y1, final_rect.y1 + 6),
+            )
+        elif is_column == "RIGHT":
+            return pymupdf.Rect(
+                max(pw * 0.48, final_rect.x0 - 6),
+                max(page.rect.y0, final_rect.y0 - 6),
+                min(page.rect.x1, col_x1 + 6),
+                min(page.rect.y1, final_rect.y1 + 6),
+            )
+        else:
+            return pymupdf.Rect(
+                max(page.rect.x0, final_rect.x0 - 6),
+                max(page.rect.y0, final_rect.y0 - 6),
+                min(page.rect.x1, final_rect.x1 + 6),
+                min(page.rect.y1, final_rect.y1 + 6),
+            )
+
+    # 5. Strictly reject: If neither raster image nor vector drawings exist,
+    # DO NOT EMIT AN IMAGE. Zero random text fallbacks.
+    return None
 
 
 def has_figure_image(chunk_id: str) -> bool:
@@ -138,7 +272,12 @@ def has_figure_image(chunk_id: str) -> bool:
 
 
 def get_figure_image_path(chunk_id: str) -> Path | None:
-    """Resolves or generates a cached JPEG image for a textbook figure chunk.
+    """Resolves or extracts a cached JPEG image for a textbook figure chunk.
+
+    Guarantees:
+    - Tight cropping around visual diagrams/plates.
+    - Zero bleed into adjacent columns.
+    - Rejection (returns None) for chunks without visual plates (no random text).
 
     Args:
         chunk_id: The chunk identifier from the CliniSource database.
@@ -148,12 +287,12 @@ def get_figure_image_path(chunk_id: str) -> Path | None:
     """
     store = get_storage_provider()
     existing_path = store.get_figure_path(chunk_id)
-    if existing_path and existing_path.exists() and existing_path.stat().st_size > 0:
+    if existing_path and existing_path.exists() and existing_path.stat().st_size >= 5000:
         return existing_path
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     target_cache_file = CACHE_DIR / f"{chunk_id}.jpg"
-    if target_cache_file.exists() and target_cache_file.stat().st_size > 0:
+    if target_cache_file.exists() and target_cache_file.stat().st_size >= 5000:
         return target_cache_file
 
     if not DB_PATH.exists():
@@ -185,8 +324,6 @@ def get_figure_image_path(chunk_id: str) -> Path | None:
         except ImportError:
             return None
 
-    # chunks.page_start is stored as the 1-based physical PDF page.
-    # Convert directly to 0-based PDF page index without applying printed-to-pdf offset.
     pdf_page_idx = max(0, int(page_start) - 1) if page_start else 0
 
     try:
@@ -195,61 +332,28 @@ def get_figure_image_path(chunk_id: str) -> Path | None:
             pdf_page_idx = min(len(doc) - 1, max(0, pdf_page_idx))
         page = doc[pdf_page_idx]
 
-        # Extract figure label token from text (e.g. "FIGURE 20.12", "Figure 1.1", "• Fig. 16.2", "Fig. 16.2")
-        fig_token = None
-        match = re.search(r"(?:[•·\-\*]\s*)?(FIG(?:URE)?\.?\s*[\d\.]+[A-Za-z]?)", raw_text, re.IGNORECASE)
-        if match:
-            fig_token = match.group(1).strip()
-
-        clip_rect = None
-        if fig_token:
-            rects = page.search_for(fig_token)
-            if not rects:
-                # Try simple format e.g. "Figure 1.1" vs "FIGURE 1.1" vs "Fig. 1.1"
-                rects = page.search_for(fig_token.upper())
-            if not rects and "FIG" in fig_token.upper():
-                # Try with period or without period (e.g., "Fig 16.2" vs "Fig. 16.2")
-                alt_token = fig_token.replace(".", "") if "." in fig_token else fig_token.replace("Fig ", "Fig. ")
-                rects = page.search_for(alt_token)
-            if rects:
-                r = rects[0]
-                # In textbooks, figure plate is typically positioned above or below the caption block
-                y_top = max(0, r.y0 - 500)
-                y_bottom = min(page.rect.y1, r.y1 + 120)
-                clip_rect = pymupdf.Rect(page.rect.x0, y_top, page.rect.x1, y_bottom)
-
-        # Check for large embedded image object on the page
-        embedded_imgs = page.get_images()
-        dominant_img_xref = None
-        for img_info in embedded_imgs:
-            xref = img_info[0]
-            width, height = img_info[2], img_info[3]
-            if width >= 300 and height >= 200:
-                dominant_img_xref = xref
-                break
-
-        # Priority 1: Cropped page rendering around figure caption
-        if clip_rect and clip_rect.height > 100:
-            pix = page.get_pixmap(clip=clip_rect, dpi=130)
-            pix.save(str(target_cache_file), "jpeg", jpg_quality=85)
+        # Extract figure label token from text
+        match = re.search(
+            r"\b(FIGURE\s+[\d\.]+[A-Za-z]?|Fig\.\s*[\d\.]+|FIGURE\s+[\d\-]+[A-Za-z]?|Fig\.\s*[\d\-]+[A-Za-z]?)\b",
+            raw_text,
+            re.IGNORECASE,
+        )
+        if not match:
             doc.close()
-            return target_cache_file
+            return None
 
-        # Priority 2: Raw embedded image extraction
-        if dominant_img_xref:
-            extracted = doc.extract_image(dominant_img_xref)
-            if extracted and extracted.get("image"):
-                target_cache_file.write_bytes(extracted["image"])
-                doc.close()
-                return target_cache_file
+        fig_token = match.group(1).strip()
+        rect = extract_clean_figure_rect(page, fig_token)
+        if not rect:
+            doc.close()
+            return None
 
-        # Priority 3: Full high-resolution page rendering
-        pix = page.get_pixmap(dpi=120)
-        pix.save(str(target_cache_file), "jpeg", jpg_quality=85)
+        # Render high-resolution crisp crop (180 DPI)
+        pix = page.get_pixmap(clip=rect, dpi=180)
+        pix.save(str(target_cache_file), "jpeg", jpg_quality=92)
         doc.close()
         return target_cache_file
 
     except Exception as e:
         print(f"Failed to extract figure {chunk_id}: {e}")
         return None
-

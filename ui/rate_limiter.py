@@ -11,7 +11,7 @@ from typing import Tuple
 from fastapi import Request
 
 _ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_DB_PATH = (_ROOT / "clinisource.db") if (_ROOT / "clinisource.db").exists() else (_ROOT / "textbook_rag.db")
+DEFAULT_DB_PATH = (_ROOT / "clinisource.db") if ((_ROOT / "clinisource.db").exists() and (_ROOT / "clinisource.db").stat().st_size > 0) else (_ROOT / "textbook_rag.db")
 
 
 class DailyRateLimiter:

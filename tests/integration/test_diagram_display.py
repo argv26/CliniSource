@@ -95,4 +95,4 @@ def test_diagram_display():
     print("=" * 60)
 
 if __name__ == "__main__":
-    run_tests()
+    test_diagram_display()

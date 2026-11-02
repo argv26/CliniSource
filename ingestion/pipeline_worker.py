@@ -35,7 +35,7 @@ from storage.object_store import get_storage_provider
 logger = logging.getLogger("ingestion.worker")
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-DEFAULT_DB_PATH = (ROOT_DIR / "clinisource.db") if (ROOT_DIR / "clinisource.db").exists() else (ROOT_DIR / "textbook_rag.db")
+DEFAULT_DB_PATH = (ROOT_DIR / "clinisource.db") if ((ROOT_DIR / "clinisource.db").exists() and (ROOT_DIR / "clinisource.db").stat().st_size > 0) else (ROOT_DIR / "textbook_rag.db")
 UPLOAD_STAGING_DIR = ROOT_DIR / "temp" / "uploads"
 UPLOAD_STAGING_DIR.mkdir(parents=True, exist_ok=True)
 PERMANENT_BOOKS_DIR = ROOT_DIR / "ingestion" / "test-books"
@@ -351,41 +351,29 @@ def _extract_page_text_blocks(doc: Any) -> list[dict[str, Any]]:
 
 
 def _crop_figure_from_page(doc: Any, page_num: int, fig_caption: str) -> bytes | None:
-    """Extracts high-resolution cropped diagram JPEG bytes from the PDF page."""
+    """Extracts high-resolution cropped diagram JPEG bytes from the PDF page using universal plate bounding."""
     if not doc:
         return None
     try:
+        from ui.diagrams import extract_clean_figure_rect
+
         page_idx = max(0, min(page_num - 1, len(doc) - 1))
         page = doc[page_idx]
 
-        match = re.search(r"\b(FIGURE\s+[\d\.]+[A-Za-z]?|Fig\.\s*[\d\.]+)\b", fig_caption, re.IGNORECASE)
-        fig_token = match.group(1).strip() if match else None
+        match = re.search(
+            r"\b(FIGURE\s+[\d\.]+[A-Za-z]?|Fig\.\s*[\d\.]+|FIGURE\s+[\d\-]+[A-Za-z]?|Fig\.\s*[\d\-]+[A-Za-z]?)\b",
+            fig_caption,
+            re.IGNORECASE,
+        )
+        if not match:
+            return None
 
-        clip_rect = None
-        if fig_token:
-            rects = page.search_for(fig_token)
-            if not rects:
-                rects = page.search_for(fig_token.upper())
-            if rects:
-                r = rects[0]
-                y_top = max(0, r.y0 - 450)
-                y_bottom = min(page.rect.y1, r.y1 + 100)
-                clip_rect = pymupdf.Rect(page.rect.x0, y_top, page.rect.x1, y_bottom)
+        fig_token = match.group(1).strip()
+        rect = extract_clean_figure_rect(page, fig_token)
+        if not rect:
+            return None
 
-        if clip_rect and clip_rect.height > 100:
-            pix = page.get_pixmap(clip=clip_rect, dpi=130)
-            return pix.tobytes("jpeg")
-
-        embedded = page.get_images()
-        for img_info in embedded:
-            xref = img_info[0]
-            w, h = img_info[2], img_info[3]
-            if w >= 250 and h >= 180:
-                extracted = doc.extract_image(xref)
-                if extracted and extracted.get("image"):
-                    return extracted["image"]
-
-        pix = page.get_pixmap(dpi=120)
+        pix = page.get_pixmap(clip=rect, dpi=180)
         return pix.tobytes("jpeg")
     except Exception as e:
         logger.debug("Figure extraction fallback for page %s: %s", page_num, e)
