@@ -246,7 +246,14 @@ async function fetchQuota() {
 
 function setupMarkdown() {
   if (window.marked) {
+    const renderer = new marked.Renderer();
+    const originalTable = renderer.table.bind(renderer);
+    renderer.table = function (header, body) {
+      const tableHtml = originalTable(header, body);
+      return `<div class="table-responsive-wrapper">${tableHtml}</div>`;
+    };
     marked.setOptions({
+      renderer: renderer,
       breaks: true,
       gfm: true
     });
@@ -1285,6 +1292,17 @@ function bindEvents() {
     chatInput.style.height = "auto";
     chatInput.style.height = Math.min(chatInput.scrollHeight, 160) + "px";
     updateSendButtonState();
+  });
+
+  // On mobile/virtual keyboard, scroll to bottom when focused so active content remains visible
+  chatInput.addEventListener("focus", () => {
+    if (window.innerWidth < 768) {
+      setTimeout(() => {
+        if (messagesContainer) {
+          messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: "smooth" });
+        }
+      }, 250);
+    }
   });
 
   // View Navigation & Library Manager listeners

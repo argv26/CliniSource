@@ -198,3 +198,34 @@ def test_accessibility_keyboard_and_reduced_motion():
     assert "@media (prefers-reduced-motion: reduce)" in STYLES_CSS
     assert "animation-duration: 0.01ms !important" in STYLES_CSS
     assert "transition-duration: 0.01ms !important" in STYLES_CSS
+
+
+def test_mobile_and_web_responsiveness():
+    # AC: Application must be fully mobile and web browser compatible:
+    #     - Dynamic viewport height (100dvh) and viewport-fit=cover for notch/home-bar safety.
+    #     - 16px mobile input floor (text-base sm:text-sm) to eliminate iOS Safari auto-zoom.
+    #     - Safe-area insets env(safe-area-inset-bottom) on input bar, drawer, and lightbox.
+    #     - Responsive table wrapper (.table-responsive-wrapper) preventing horizontal page scroll.
+    #     - Fluid grid on library manager metrics banner (grid-cols-3 min-w-0).
+    # @lane: integration
+    # @dependency: none
+    # Selection evidence: Guarantees seamless, zero-horizontal-scroll UX across both mobile phones and desktop browsers.
+    # 1. Viewport & Dynamic Height
+    assert "viewport-fit=cover" in INDEX_HTML, "Missing viewport-fit=cover in index.html"
+    assert "interactive-widget=resizes-content" in INDEX_HTML, "Missing interactive-widget in index.html"
+    assert "100dvh" in INDEX_HTML, "Missing 100dvh in index.html"
+    assert "--app-height: 100dvh" in STYLES_CSS, "Missing --app-height in styles.css"
+
+    # 2. Safe Area Insets for Mobile Notches & Gesture Bars
+    assert "env(safe-area-inset-bottom" in INDEX_HTML, "Missing safe-area-inset-bottom in index.html"
+
+    # 3. iOS Auto-Zoom Prevention (16px text-base on mobile)
+    assert "text-base sm:text-sm" in INDEX_HTML, "Chat input must use text-base on mobile to avoid iOS Safari auto-zoom"
+
+    # 4. Responsive Table Wrapper
+    assert ".table-responsive-wrapper" in STYLES_CSS, "Missing .table-responsive-wrapper in styles.css"
+    assert "table-responsive-wrapper" in APP_JS, "app.js must wrap tables in table-responsive-wrapper"
+
+    # 5. Library Metrics Grid Fluidity
+    assert "grid grid-cols-3" in INDEX_HTML, "Library metrics banner should use fluid grid-cols-3"
+    assert "min-w-0" in INDEX_HTML, "Library metrics badges must use min-w-0 to prevent mobile overflow"

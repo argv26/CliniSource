@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-50 text-slate-800">
+<html lang="en" class="h-full h-[100dvh] bg-slate-50 text-slate-800">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <title>CliniSource | Authoritative Clinical Knowledge & Decision Intelligence</title>
 
   <!-- Google Fonts: Roboto -->
@@ -41,13 +41,13 @@
     }
   </script>
 </head>
-<body class="h-full flex overflow-hidden font-sans antialiased bg-slate-50 text-slate-800">
+<body class="h-full h-[100dvh] flex overflow-hidden font-sans antialiased bg-slate-50 text-slate-800">
 
   <!-- MOBILE SIDEBAR BACKDROP -->
   <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/40 z-30 opacity-0 pointer-events-none transition-opacity duration-300 md:hidden backdrop-blur-xs" aria-hidden="true"></div>
 
   <!-- LEFT SIDEBAR -->
-  <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-72 sm:w-80 border-r border-slate-200 bg-white flex flex-col flex-shrink-0 -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl md:shadow-none" aria-label="Main Navigation & Study Topics">
+  <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-72 sm:w-80 h-full h-[100dvh] border-r border-slate-200 bg-white flex flex-col flex-shrink-0 -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl md:shadow-none pb-[env(safe-area-inset-bottom,0px)]" aria-label="Main Navigation & Study Topics">
     <!-- Brand / Title -->
     <div class="p-4 border-b border-slate-200 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -66,7 +66,7 @@
         </div>
       </div>
       <!-- Close Sidebar on Mobile -->
-      <button id="btn-close-sidebar" class="md:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition" aria-label="Close navigation sidebar">
+      <button id="btn-close-sidebar" class="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition active:scale-95" aria-label="Close navigation sidebar">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <line x1="18" y1="6" x2="6" y2="18" stroke-width="2" stroke-linecap="round"/>
           <line x1="6" y1="6" x2="18" y2="18" stroke-width="2" stroke-linecap="round"/>
@@ -152,24 +152,24 @@
   </aside>
 
   <!-- MAIN CONTAINER (CONSULTATION & LIBRARY MANAGER) -->
-  <main class="flex-1 flex flex-col min-w-0 bg-slate-50 relative">
+  <main class="flex-1 flex flex-col min-w-0 h-full h-[100dvh] bg-slate-50 relative">
 
     <!-- Top Navigation Header with View Switcher Tabs -->
-    <header class="h-14 border-b border-slate-200 px-3 sm:px-6 flex items-center justify-between bg-white/95 backdrop-blur z-10">
-      <div class="flex items-center gap-2 sm:gap-4">
+    <header class="h-14 border-b border-slate-200 px-2.5 sm:px-6 flex items-center justify-between bg-white/95 backdrop-blur z-10 flex-nowrap overflow-x-hidden">
+      <div class="flex items-center gap-1.5 sm:gap-4 min-w-0 flex-shrink">
         <!-- Mobile Menu Toggle Button -->
-        <button id="btn-mobile-menu" class="md:hidden p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition active:scale-95" aria-label="Toggle navigation menu">
+        <button id="btn-mobile-menu" class="md:hidden w-10 h-10 min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition active:scale-95 flex-shrink-0" aria-label="Toggle navigation menu">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
           </svg>
         </button>
 
         <!-- Top Header Navigation Tabs (Consultation vs Library Manager) -->
-        <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-semibold" role="tablist" aria-label="Main Views">
+        <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-semibold flex-shrink-0" role="tablist" aria-label="Main Views">
           <button
             id="tab-view-consultation"
             type="button"
-            class="px-3 py-1.5 rounded-lg bg-white text-blue-600 shadow-2xs font-bold transition flex items-center gap-1.5 active:scale-95 min-h-[36px]"
+            class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-white text-blue-600 shadow-2xs font-bold transition flex items-center gap-1.5 active:scale-95 min-h-[38px] sm:min-h-[36px]"
             role="tab"
             aria-selected="true"
           >
@@ -180,7 +180,7 @@
           <button
             id="tab-view-library"
             type="button"
-            class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 active:scale-95 min-h-[36px]"
+            class="px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 active:scale-95 min-h-[38px] sm:min-h-[36px]"
             role="tab"
             aria-selected="false"
           >
@@ -191,7 +191,7 @@
         </div>
 
         <!-- Consultation Scope Indicator Pill (visible on medium+ screens) -->
-        <div id="header-scope-wrapper" class="hidden xl:flex items-center gap-2 text-xs">
+        <div id="header-scope-wrapper" class="hidden xl:flex items-center gap-2 text-xs flex-shrink-0">
           <span class="text-slate-500 font-medium">Scope:</span>
           <span id="active-book-indicator" class="font-semibold text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full truncate max-w-[180px]">
             All Textbooks
@@ -199,20 +199,20 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
         <!-- Daily Quota Badge -->
-        <div id="quota-badge-container" class="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-medium text-slate-600 flex items-center gap-1.5 shadow-2xs" title="Daily queries remaining">
+        <div id="quota-badge-container" class="px-2 sm:px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-medium text-slate-600 flex items-center gap-1 sm:gap-1.5 shadow-2xs flex-shrink-0 min-h-[38px] sm:min-h-[34px]" title="Daily queries remaining">
           <svg class="w-3.5 h-3.5 text-amber-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
           </svg>
           <span id="quota-text" class="font-mono">
             <span class="hidden sm:inline">50/50 left</span>
-            <span class="sm:hidden">50</span>
+            <span class="sm:hidden font-bold">50</span>
           </span>
         </div>
 
         <!-- Toggle Evidence Button -->
-        <button id="btn-toggle-evidence" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition shadow-sm active:scale-95 min-h-[36px]" aria-label="Toggle evidence library">
+        <button id="btn-toggle-evidence" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition shadow-sm active:scale-95 min-h-[44px] flex-shrink-0" aria-label="Toggle evidence library">
           <svg class="w-4 h-4 text-slate-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
             <path d="M6 6h10"/>
@@ -223,13 +223,13 @@
         </button>
 
         <!-- User Identity Menu Button -->
-        <div class="relative" id="auth-dropdown-wrapper">
-          <button id="btn-auth-trigger" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-xs font-semibold text-blue-700 flex items-center gap-1.5 transition active:scale-95 shadow-2xs min-h-[36px]" aria-label="User account" aria-expanded="false" aria-haspopup="true">
+        <div class="relative flex-shrink-0" id="auth-dropdown-wrapper">
+          <button id="btn-auth-trigger" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-xs font-semibold text-blue-700 flex items-center gap-1.5 transition active:scale-95 shadow-2xs min-h-[44px]" aria-label="User account" aria-expanded="false" aria-haspopup="true">
             <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            <span id="auth-user-label" class="truncate max-w-[90px] sm:max-w-[140px]">Sign In / Guest</span>
+            <span id="auth-user-label" class="truncate max-w-[80px] sm:max-w-[140px] text-xs">Sign In / Guest</span>
           </button>
 
           <!-- User Dropdown Menu -->
@@ -296,7 +296,7 @@
       </button>
 
       <!-- Bottom Input Area -->
-      <div class="p-3 sm:p-4 border-t border-slate-200 bg-white/95 backdrop-blur">
+      <div class="p-2.5 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] border-t border-slate-200 bg-white/95 backdrop-blur">
         <div class="max-w-3xl mx-auto relative">
           <form id="chat-form" class="relative flex items-end bg-white border border-slate-300 rounded-2xl p-1.5 sm:p-2 transition shadow-sm">
             <textarea
@@ -304,14 +304,14 @@
               rows="1"
               placeholder="Consult CliniSource on a clinical case, differential, or treatment guideline..."
               aria-label="Clinical inquiry text input"
-              class="w-full bg-transparent text-sm text-slate-900 placeholder-slate-400 px-3 py-2.5 focus:outline-none resize-none max-h-40 min-h-[44px] leading-relaxed font-sans"
+              class="w-full bg-transparent text-base sm:text-sm text-slate-900 placeholder-slate-400 px-3 py-2.5 focus:outline-none resize-none max-h-40 min-h-[44px] leading-relaxed font-sans"
             ></textarea>
             <button
               type="submit"
               id="btn-send"
               disabled
               aria-label="Send clinical inquiry"
-              class="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0 transition duration-150 disabled:opacity-35 disabled:cursor-not-allowed ml-1.5 shadow-sm active:scale-95 min-w-[42px] min-h-[42px] flex items-center justify-center"
+              class="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0 transition duration-150 disabled:opacity-35 disabled:cursor-not-allowed ml-1.5 shadow-sm active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center"
             >
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <line x1="12" y1="19" x2="12" y2="5"></line>
@@ -322,7 +322,7 @@
               type="button"
               id="btn-stop"
               aria-label="Stop generating response"
-              class="hidden p-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white flex-shrink-0 transition duration-150 ml-1.5 shadow-sm active:scale-95 min-w-[42px] min-h-[42px] items-center justify-center gap-1.5 text-xs font-semibold"
+              class="hidden p-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white flex-shrink-0 transition duration-150 ml-1.5 shadow-sm active:scale-95 min-w-[44px] min-h-[44px] items-center justify-center gap-1.5 text-xs font-semibold"
             >
               <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="5" y="5" width="14" height="14" rx="2"></rect>
@@ -356,18 +356,18 @@
           </div>
 
           <!-- Quick Metrics Badges -->
-          <div class="flex items-center gap-3 w-full md:w-auto">
-            <div class="flex-1 md:flex-initial p-3 rounded-xl bg-slate-50 border border-slate-200 text-center min-w-[105px]">
-              <div class="text-xs font-bold text-slate-600 uppercase tracking-wider">My Library</div>
-              <div id="stat-user-books" class="text-lg font-bold text-slate-800 font-mono mt-0.5">0</div>
+          <div class="grid grid-cols-3 gap-2 sm:gap-3 w-full md:w-auto">
+            <div class="p-2.5 sm:p-3 rounded-xl bg-slate-50 border border-slate-200 text-center min-w-0">
+              <div class="text-xs font-bold text-slate-600 uppercase tracking-wider truncate">My Library</div>
+              <div id="stat-user-books" class="text-base sm:text-lg font-bold text-slate-800 font-mono mt-0.5">0</div>
             </div>
-            <div class="flex-1 md:flex-initial p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center min-w-[105px]">
-              <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Active Scope</div>
-              <div id="stat-active-books" class="text-lg font-bold text-emerald-800 font-mono mt-0.5">0</div>
+            <div class="p-2.5 sm:p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center min-w-0">
+              <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider truncate">Active</div>
+              <div id="stat-active-books" class="text-base sm:text-lg font-bold text-emerald-800 font-mono mt-0.5">0</div>
             </div>
-            <div class="flex-1 md:flex-initial p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-center min-w-[105px]">
-              <div class="text-xs font-bold text-indigo-800 uppercase tracking-wider">Global Catalog</div>
-              <div id="stat-global-books" class="text-lg font-bold text-indigo-800 font-mono mt-0.5">0</div>
+            <div class="p-2.5 sm:p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-center min-w-0">
+              <div class="text-xs font-bold text-indigo-800 uppercase tracking-wider truncate">Catalog</div>
+              <div id="stat-global-books" class="text-base sm:text-lg font-bold text-indigo-800 font-mono mt-0.5">0</div>
             </div>
           </div>
         </div>
@@ -514,7 +514,7 @@
   </main>
 
   <!-- RIGHT EVIDENCE DRAWER -->
-  <aside id="evidence-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" class="fixed inset-y-0 right-0 w-96 max-w-full bg-white border-l border-slate-200 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out z-40">
+  <aside id="evidence-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" class="fixed inset-y-0 right-0 w-96 max-w-full h-full h-[100dvh] bg-white border-l border-slate-200 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out z-40 pb-[env(safe-area-inset-bottom,0px)]">
     <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
       <div class="flex items-center gap-2">
         <!-- Document Text SVG -->
@@ -526,7 +526,7 @@
         </svg>
         <h3 id="drawer-title" class="font-bold text-sm text-slate-900">Citing Evidence Drawer</h3>
       </div>
-      <button id="btn-close-drawer" class="p-2 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition active:scale-95" aria-label="Close evidence drawer">
+      <button id="btn-close-drawer" class="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition active:scale-95" aria-label="Close evidence drawer">
         <!-- Close SVG -->
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -617,7 +617,7 @@
             required
             autocomplete="username"
             placeholder="e.g. dr_watson"
-            class="w-full text-xs px-3 py-2.5 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
+            class="w-full text-base sm:text-xs px-3 py-2.5 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
           />
           <p id="auth-username-hint" class="text-xs text-slate-500 mt-1 hidden">At least 3 characters, letters and numbers</p>
         </div>
@@ -632,7 +632,7 @@
             required
             autocomplete="current-password"
             placeholder="••••••••"
-            class="w-full text-xs px-3 py-2.5 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
+            class="w-full text-base sm:text-xs px-3 py-2.5 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
           />
         </div>
 
@@ -648,8 +648,8 @@
   </div>
 
   <!-- FIGURE LIGHTBOX MODAL -->
-  <div id="figure-lightbox-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-sm hidden transition-opacity duration-200" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
-    <div class="relative max-w-4xl w-full max-h-[92vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-700/40 animate-in fade-in zoom-in-95 duration-150">
+  <div id="figure-lightbox-modal" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] bg-slate-950/85 backdrop-blur-sm hidden transition-opacity duration-200" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+    <div class="relative max-w-4xl w-full max-h-[92dvh] sm:max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-700/40 animate-in fade-in zoom-in-95 duration-150">
       
       <!-- Top Bar -->
       <div class="p-3 sm:p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/90">
@@ -662,7 +662,7 @@
           <h3 id="lightbox-title" class="font-bold text-xs sm:text-sm text-slate-900 truncate">Textbook Diagram</h3>
           <span id="lightbox-page-badge" class="text-xs font-mono text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-full flex-shrink-0">p. 0</span>
         </div>
-        <button id="btn-close-lightbox" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer" aria-label="Close figure lightbox">
+        <button id="btn-close-lightbox" class="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer active:scale-95" aria-label="Close figure lightbox">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18" stroke-width="2" stroke-linecap="round"/>
             <line x1="6" y1="6" x2="18" y2="18" stroke-width="2" stroke-linecap="round"/>
@@ -671,8 +671,8 @@
       </div>
 
       <!-- Image Area -->
-      <div class="flex-1 overflow-auto bg-slate-950 flex items-center justify-center p-2 sm:p-4 min-h-[300px]">
-        <img id="lightbox-img" src="" alt="Textbook Diagram Preview" class="max-w-full max-h-[65vh] object-contain rounded shadow-md" />
+      <div class="flex-1 overflow-auto bg-slate-950 flex items-center justify-center p-2 sm:p-4 min-h-[220px] sm:min-h-[300px]">
+        <img id="lightbox-img" src="" alt="Textbook Diagram Preview" class="max-w-full max-h-[58dvh] sm:max-h-[65vh] object-contain rounded shadow-md" />
       </div>
 
       <!-- Caption Footer -->
@@ -740,14 +740,14 @@
           <!-- Textbook Title -->
           <div>
             <label for="input-upload-title" class="block text-xs font-semibold text-slate-700 mb-1.5">Textbook Title <span class="text-rose-500">*</span></label>
-            <input id="input-upload-title" type="text" placeholder="e.g. Cornea: Fundamentals, Diagnosis and Management" required class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition" />
+            <input id="input-upload-title" type="text" placeholder="e.g. Cornea: Fundamentals, Diagnosis and Management" required class="w-full px-3.5 py-2 text-base sm:text-xs rounded-lg border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition" />
             <p id="upload-title-duplicate-warning" class="hidden text-xs text-amber-600 font-medium mt-1">⚠️ A textbook with this title already exists in the Global Library.</p>
           </div>
 
           <!-- Free-Text Specialty Input with Suggestions -->
           <div>
             <label for="input-upload-specialty" class="block text-xs font-semibold text-slate-700 mb-1.5">Medical Specialty / Category</label>
-            <input id="input-upload-specialty" type="text" placeholder="e.g. Ophthalmology, Internal Medicine, Cardiology" list="specialty-suggestions" class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition" />
+            <input id="input-upload-specialty" type="text" placeholder="e.g. Ophthalmology, Internal Medicine, Cardiology" list="specialty-suggestions" class="w-full px-3.5 py-2 text-base sm:text-xs rounded-lg border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition" />
             <datalist id="specialty-suggestions">
               <option value="Ophthalmology">
               <option value="Internal Medicine">
