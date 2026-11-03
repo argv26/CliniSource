@@ -1,46 +1,54 @@
 import sys
-import os
-import json
-sys.path.insert(0, os.path.abspath("."))
+from pathlib import Path
+sys.path.insert(0, ".")
+from starlette.testclient import TestClient
+from ui.app import app
+import pymupdf
 
-from agent.orchestrator import AgentOrchestrator
+client = TestClient(app)
 
-orchestrator = AgentOrchestrator()
-stream = orchestrator.stream_turn(
-    session_id="test-ocp-session",
-    user_message="contraindications of OCP",
-    active_books=None
-)
+print("=" * 60)
+print("TESTING OCP CONTRAINDICATIONS & FIGURE 16.2 RETRIEVAL")
+print("=" * 60)
 
-collected = []
-figures = []
-citations = []
-tools = []
+# 1. Parallel retrieval test for "contraindications of OCP"
+from retrieval.parallel import execute_parallel_retrieval
+res = execute_parallel_retrieval("contraindications of OCP", figure_limit=2)
 
-for item in stream:
-    event_type = item.get("event")
-    data = item.get("data")
-    if event_type == "token":
-        collected.append(data.get("delta", ""))
-    elif event_type == "figures":
-        figures = data
-    elif event_type == "citations":
-        citations = data
-    elif event_type == "tools":
-        tools = data
+print(f"Clean query: {res['clean_query']}")
+print(f"Chunks retrieved: {len(res['chunks'])}")
+print(f"Sections retrieved: {len(res['sections'])}")
+print(f"Figures retrieved: {len(res['figures'])}")
 
-full_response = "".join(collected)
-print(f"--- TOOLS CALLED ({len(tools)}) ---")
-for t in tools:
-    print(t)
+williams_fig = None
+for f in res["figures"]:
+    print(f"  Figure Chunk: {f['chunk_id']}")
+    print(f"  Book: {f['book_slug']} | Page: {f.get('page_start')}")
+    print(f"  Caption: {f['text'][:80].replace(chr(10), ' ')}")
+    if "s1165_c004" in f["chunk_id"]:
+        williams_fig = f
 
-print(f"\n--- FIGURES EMITTED ({len(figures)}) ---")
-for f in figures:
-    print(f"Fig: {f.get('chunk_id')} | Page: {f.get('page_start')} | Text: {f.get('text')[:100]}")
+assert len(res["figures"]) > 0, "Expected at least 1 verified figure"
+assert williams_fig is not None, "Williams Fig 16.2 (s1165_c004) should be among verified figures"
+print("\n PASS: Verified Fig 16.2 is retrieved and authenticated!")
 
-print(f"\n--- CITATIONS ({len(citations)}) ---")
-for c in citations:
-    print(f"[{c.get('citation_id')}] Chunk: {c.get('chunk_id')} | Book: {c.get('book_slug')}")
+# 2. Check the image endpoint for Fig 16.2
+cid = williams_fig["chunk_id"]
+resp = client.get(f"/api/figure/{cid}/image")
+assert resp.status_code == 200, f"Expected 200 OK, got {resp.status_code}"
+assert resp.headers.get("content-type") == "image/jpeg"
+assert len(resp.content) >= 5000, f"Image too small: {len(resp.content)} bytes"
 
-print(f"\n--- RESPONSE PREVIEW (First 500 chars) ---")
-print(full_response[:500])
+# 3. Check image dimensions: MUST BE isolated column crop (approx 704x707 px), NEVER full page (1020x1305)
+pix = pymupdf.Pixmap(resp.content)
+print(f"\nFigure Image Served:")
+print(f"  Width: {pix.width} px")
+print(f"  Height: {pix.height} px")
+print(f"  Size: {len(resp.content):,} bytes")
+
+assert (pix.width, pix.height) != (1020, 1305), "CRITICAL FAILURE: Full page of text served instead of cropped diagram!"
+assert 600 <= pix.width <= 800, f"Expected width around 704 px, got {pix.width}"
+assert 600 <= pix.height <= 800, f"Expected height around 707 px, got {pix.height}"
+
+print("\n PASS: Figure 16.2 is cleanly cropped to the VTE bar chart without right-column text!")
+print("=" * 60)

@@ -1,18 +1,18 @@
-# Production Deployment Guide — CliniSource
+# CliniSource: Production Deployment Guide
 
-This guide details how to deploy the **CliniSource** application to production across various cloud platforms and Docker environments.
+This guide details how to deploy the **CliniSource** platform across containerized environments, cloud providers, and dedicated Linux servers.
 
 ---
 
 ## 1. Quick Local Docker Deployment
 
-The application is completely self-contained. The pre-indexed medical SQLite database (containing 12,010 indexed chunks across 3,666 pages of clinical reference canon) is packaged directly into the container image, requiring zero external database setup.
+The application is completely self-contained. The pre-indexed reference SQLite database (containing over 34,000 indexed chunks across 9,200+ pages of clinical reference canon including Harrison's 22e, Williams 15e, and Cornea 5e) is packaged directly into the container image, requiring zero external database configuration.
 
 ### Step-by-Step:
 1. **Configure Environment:**
    ```bash
    cp .env.example .env
-   # Edit .env and set GEMINI_API_KEY (optional, app works offline without it)
+   # Set GEMINI_API_KEY (optional: application operates fully offline with local synthesizer)
    ```
 
 2. **Build and Run:**
@@ -25,11 +25,11 @@ The application is completely self-contained. The pre-indexed medical SQLite dat
 
 ---
 
-## 2. Deploying to Google Cloud Run (Recommended Serverless)
+## 2. Deploying to Google Cloud Run (Serverless)
 
 Google Cloud Run provides automatic scaling, HTTPS, and zero costs when idle.
 
-### Commands:
+### Deployment Commands:
 ```bash
 # 1. Authenticate with Google Cloud
 gcloud auth login
@@ -45,7 +45,7 @@ gcloud run deploy clinisource \
   --region us-central1 \
   --allow-unauthenticated \
   --port 8000 \
-  --memory 1Gi \
+  --memory 2Gi \
   --set-env-vars "DAILY_REQUEST_LIMIT=50,GEMINI_API_KEY=YOUR_KEY"
 ```
 
@@ -58,15 +58,15 @@ gcloud run deploy clinisource \
 - **Health Check Endpoint**: `https://text-book-rag-etiz.onrender.com/api/quota`
 
 ### Steps for Render Deployment:
-1. Connect your GitHub repository to [Render.com](https://render.com).
-2. Choose **Web Service** with **Docker** runtime.
-3. In the **Environment Variables** section, add:
+1. Connect your GitHub repository (`https://github.com/argv26/CliniSource`) to [Render.com](https://render.com).
+2. Choose **Web Service** with the **Docker** runtime.
+3. In the **Environment Variables** section, configure:
    - `PORT`: `8000`
    - `DAILY_REQUEST_LIMIT`: `50`
    - `GEMINI_API_KEY`: `your-gemini-key`
-4. Click **Deploy**. Render will build the `Dockerfile` and provide an automatic `https://` URL.
+4. Click **Deploy**. Render builds the `Dockerfile` and provisions an automatic SSL-secured `https://` domain.
 
-### Railway:
+### Railway Deployment:
 1. Open [Railway.app](https://railway.app) and select **Deploy from GitHub repo**.
 2. Railway detects the `Dockerfile` automatically.
 3. Add environment variables in the Railway dashboard (`GEMINI_API_KEY`, `DAILY_REQUEST_LIMIT`).
@@ -74,20 +74,20 @@ gcloud run deploy clinisource \
 
 ---
 
-## 4. Deploying to any Linux VPS (Ubuntu / Debian)
+## 4. Deploying to Dedicated Linux Server (Ubuntu / Debian)
 
-### Using Docker:
+### Using Docker Compose:
 ```bash
 git clone https://github.com/argv26/CliniSource.git
 cd CliniSource
 cp .env.example .env
-# Edit .env with your nano / vim
+# Edit .env with your credentials
 docker compose up -d web
 ```
 
-### Using Systemd (without Docker):
+### Using Systemd (Native Python):
 ```bash
-# 1. Install Python 3.11 and create venv
+# 1. Install Python 3.11 and create virtual environment
 sudo apt update && sudo apt install -y python3-venv python3-pip
 python3 -m venv .venv
 source .venv/bin/activate
@@ -95,7 +95,7 @@ pip install -r requirements.txt
 
 # 2. Create systemd service (/etc/systemd/system/clinisource.service)
 [Unit]
-Description=CliniSource Web Service
+Description=CliniSource Knowledge Platform
 After=network.target
 
 [Service]
@@ -108,19 +108,20 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 
-# 3. Enable and start
+# 3. Reload daemon and start
 sudo systemctl daemon-reload
 sudo systemctl enable --now clinisource
 ```
 
 ---
 
-## 5. Production Configuration Reference
+## 5. Production Environment Variables Reference
 
 | Environment Variable | Recommended Value | Purpose |
 |---|---|---|
-| `GEMINI_API_KEY` | *(Secret key)* | Enables Gemini 2.5 Flash agentic tool calling |
-| `OPENAI_API_KEY` | *(Secret key)* | Optional alternative LLM |
-| `DAILY_REQUEST_LIMIT` | `50` | Maximum queries per IP/day (prevents API cost spikes). Set `0` for unlimited. |
+| `GEMINI_API_KEY` | *(Secret key)* | Enables high-speed Google Gemini 2.0 Flash tool-calling ReAct engine |
+| `OPENAI_API_KEY` | *(Secret key)* | Optional alternative LLM provider |
+| `DAILY_REQUEST_LIMIT` | `50` | Maximum queries per user/IP daily quota (set `0` to disable quota) |
 | `PORT` | `8000` | Port for the HTTP web server |
-| `DATABASE_URL` | *(Omit for SQLite)* | Optional PostgreSQL connection string for multi-container clusters |
+| `DATABASE_URL` | *(Omit for SQLite)* | Optional PostgreSQL connection string for distributed multi-node clusters |
+| `STORAGE_PROVIDER` | `local` | Storage driver (`local` or `s3`) for figure caching |

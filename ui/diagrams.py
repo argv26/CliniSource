@@ -264,7 +264,7 @@ def has_figure_image(chunk_id: str) -> bool:
     try:
         store = get_storage_provider()
         existing_path = store.get_figure_path(chunk_id)
-        if existing_path and existing_path.exists() and existing_path.stat().st_size >= 5000:
+        if existing_path and existing_path.exists() and existing_path.stat().st_size > 0:
             return True
     except Exception:
         pass
@@ -287,7 +287,7 @@ def get_figure_image_path(chunk_id: str) -> Path | None:
     """
     store = get_storage_provider()
     existing_path = store.get_figure_path(chunk_id)
-    if existing_path and existing_path.exists() and existing_path.stat().st_size >= 5000:
+    if existing_path and existing_path.exists() and existing_path.stat().st_size > 0:
         return existing_path
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)

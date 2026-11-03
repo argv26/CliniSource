@@ -1,12 +1,12 @@
-# Medical Canon Ingestion & Document Pipeline: Engineering Guide
+# CliniSource: Reference Canon Ingestion & Document Pipeline
 
-This document provides a comprehensive explanation of how raw clinical reference PDFs are transformed into structured, searchable knowledge in **CliniSource**.
+This document provides a comprehensive explanation of how raw multi-thousand-page reference PDFs are transformed into structured, searchable knowledge in **CliniSource**.
 
 ---
 
 ## 1. Why Standard PDF Ingestion Fails on Textbooks
 
-Standard PDF extractors (like basic `pypdf` or `pdfplumber`) fail when parsing academic medical textbooks because:
+Standard PDF extractors (like basic `pypdf` or `pdfplumber`) fail when parsing academic textbooks because:
 1. **Multi-Column Layouts**: Textbooks format text in 2 or 3 parallel vertical columns. Standard text extraction reads horizontally across the entire page width, mingling sentences from Column A with Column B into incoherent gibberish.
 2. **Running Headers & Footers**: Book titles, chapter names, and page numbers at the top and bottom of every page get injected into the middle of clinical sentences.
 3. **Loss of Heading Hierarchy**: Sections lose their nested relationships (`Part → Chapter → Section → Subsection`). A paragraph describing "Treatment" loses the context of which disease is being treated.
@@ -32,12 +32,12 @@ flowchart TD
 
 ## 3. Step-by-Step Pipeline Details
 
-### Step 1: Validation & DRM Check
+### Step 1: Validation & Digital Text Integrity
 - **Purpose**: Verify that the uploaded file is a valid, readable digital PDF before consuming processing resources.
 - **Key Checks**:
   - Validates `%PDF` file signature.
   - Detects publisher password locks and DRM restrictions (`doc.is_encrypted`).
-  - Evaluates digital text layer: samples multiple pages to confirm characters can be extracted. If the document consists of scanned image photocopies without OCR, it raises a clear, reassuring error advising the user to provide an OCR-processed copy.
+  - Evaluates digital text layer: samples multiple pages to confirm characters can be extracted. If the document consists of scanned image photocopies without OCR, it raises a clear error advising the user to provide an OCR-processed copy.
 
 ### Step 2: Hierarchical Section Tree Building
 - **Purpose**: Reconstruct the textbook's full navigation outline tree.
@@ -62,22 +62,23 @@ flowchart TD
   - `table`: Clinical laboratory values, drug dosing tables, differential lists.
   - `figure_caption`: Diagnostic images, anatomical plates, and hormone pathway captions.
   - `box`: High-yield clinical pearls and warning boxes.
-- **Noise Filtering**: Automatically detects and tags end-of-chapter academic literature bibliographies and indices so reference lists are excluded from primary medical evidence.
+- **Noise Filtering**: Automatically detects and tags end-of-chapter academic literature bibliographies and indices so reference lists are excluded from primary evidence.
 
 ### Step 5: Bounded Semantic Chunking
 - **Purpose**: Break long chapters into bite-sized passages optimized for LLM context windows.
 - **Chunk Invariants**:
   - **Strict Section Containment**: Chunks never cross section boundaries. A chunk from "Etiology" will never bleed into "Treatment".
-  - **Token Boundaries**: Bounded between 300 and 500 tokens (median ~450 tokens) to ensure complete clinical ideas without token truncation.
+  - **Token Boundaries**: Bounded between 300 and 500 tokens (median ~450 tokens) to ensure complete ideas without token truncation.
   - **1-Sentence Overlap**: The last sentence of each chunk is prepended to the next chunk to preserve continuity across boundaries.
   - **Section Breadcrumbs**: Every chunk stores an `embed_text` prefixed with its hierarchical path (e.g., `[Cardiology > Acute Coronary Syndromes]`), guaranteeing semantic relevance even if the body paragraph only mentions generic pronouns.
 
-### Step 6: Diagram Extraction & Object Storage
-- **Purpose**: Extract high-resolution visual plates at ingestion time so that the LLM inference loop requires zero raw image tokens.
+### Step 6: Column-Aware Diagram Extraction & Storage
+- **Purpose**: Extract high-resolution visual plates so that the LLM inference loop requires zero raw image tokens.
 - **How It Works**:
-  - When a chunk contains a figure caption (e.g., `FIGURE 416-2 Management of DKA`), the pipeline searches the corresponding PDF page for the figure token.
-  - Crops the diagram region at 130 DPI into a JPEG image stored via `StorageProvider` (`LocalStorageProvider` or `S3StorageProvider`).
-  - The image reference is linked to the chunk ID, allowing the web UI to fetch and display the diagram instantly.
+  - When a chunk contains a figure caption (e.g., `FIGURE 416-2 Management of DKA` or `Fig. 16.2`), the pipeline identifies the plate coordinates.
+  - Utilizes **universal column-aware plate bounding**: isolates the diagram's column boundary (`col_x0` to `col_x1`), preventing adjacent-column text from contaminating the image.
+  - Crops the diagram region at **180 DPI with 92% JPEG quality** stored via `StorageProvider` (`LocalStorageProvider` or `S3StorageProvider`).
+  - Strictly rejects pages without vector graphics or embedded images (returns `None`), ensuring zero arbitrary text pages are served as pseudo-diagrams.
 
 ### Step 7: Atomic Database Transaction
 - **Purpose**: Index books, sections, chunks, and full-text search tables with zero downtime or partial writes.
@@ -90,11 +91,11 @@ flowchart TD
 
 ## 4. Ingestion Performance & Scalability
 
-| Textbook | Total Pages | Sections | Chunks Indexed | Ingestion Time |
+| Textbook Title | Total Pages | Sections | Chunks Indexed | Ingestion Time |
 |---|---|---|---|---|
 | **Anatomy and Physiology (2e)** | 1,347 | 409 | 3,240 | ~35 seconds |
 | **Williams Textbook of Endocrinology (15e)** | 2,319 | 2,944 | 9,016 | ~65 seconds |
+| **Cornea: Fundamentals & Diagnosis (5e)** | 1,265 | 320 | 4,812 | ~42 seconds |
 | **Harrison's Principles of Internal Medicine (22e)** | 4,273 | 591 | 16,963 | ~223 seconds (~3.7 min) |
 
 - **Memory Efficiency**: Ingestion streams pages sequentially using PyMuPDF iterators without loading the entire document into RAM, allowing multi-thousand-page textbooks to process easily within constrained server memory limits (under 512 MB).
-
