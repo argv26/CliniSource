@@ -45,6 +45,6 @@ class BaseEngine(ABC):
         pass
 
     @abstractmethod
-    def list_books(self) -> list[dict[str, Any]]:
+    def list_books(self, user_id: str | None = None) -> list[dict[str, Any]]:
         pass
 

@@ -40,7 +40,7 @@ def init_sessions_db(db_path: Path | str | None = None) -> None:
             CREATE TABLE IF NOT EXISTS consultation_sessions (
                 id TEXT PRIMARY KEY,
                 user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                title TEXT NOT NULL DEFAULT 'New Consultation',
+                title TEXT NOT NULL DEFAULT 'New Inquiry',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -74,7 +74,7 @@ def generate_smart_title(query: str) -> str:
     """Generates a concise clinical title (max ~50 chars) from a medical question."""
     cleaned = query.strip()
     if not cleaned:
-        return "New Consultation"
+        return "New Inquiry"
 
     # Remove common conversational and interrogative prefixes
     patterns = [
@@ -107,13 +107,13 @@ def generate_smart_title(query: str) -> str:
         candidate = cleaned
 
     # Capitalize title
-    title = candidate.strip().title() if candidate else "New Consultation"
+    title = candidate.strip().title() if candidate else "New Inquiry"
     return title
 
 
 def create_session(
     user_id: str,
-    title: str = "New Consultation",
+    title: str = "New Inquiry",
     session_id: str | None = None,
     db_path: Path | str | None = None,
 ) -> dict[str, Any]:
@@ -128,16 +128,16 @@ def create_session(
             VALUES (?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 user_id = excluded.user_id,
-                title = CASE WHEN consultation_sessions.title = 'New Consultation' THEN excluded.title ELSE consultation_sessions.title END,
+                title = CASE WHEN consultation_sessions.title IN ('New Consultation', 'New Inquiry') THEN excluded.title ELSE consultation_sessions.title END,
                 updated_at = excluded.updated_at
             """,
-            (sid, user_id, title.strip() or "New Consultation", now, now),
+            (sid, user_id, title.strip() or "New Inquiry", now, now),
         )
 
     return {
         "id": sid,
         "user_id": user_id,
-        "title": title.strip() or "New Consultation",
+        "title": title.strip() or "New Inquiry",
         "created_at": now,
         "updated_at": now,
     }

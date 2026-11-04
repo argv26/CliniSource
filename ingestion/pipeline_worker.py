@@ -380,6 +380,22 @@ def _crop_figure_from_page(doc: Any, page_num: int, fig_caption: str) -> bytes |
         return None
 
 
+def _is_authentic_figure_caption(text: str, token_count: int) -> bool:
+    """Accurately distinguishes genuine figure caption blocks from body prose referencing figures."""
+    s = text.strip()
+    if not s:
+        return False
+    # Direct caption heading: "Fig. 1.2 ...", "FIGURE 4-1: ...", "• Fig. 10.6"
+    if re.match(r"^\s*(?:[•·■\-\*]\s*)?(?:FIGURE|FIG\.)\s*[\d\.\-]+", s, re.IGNORECASE):
+        return True
+    # Dedicated short caption block
+    if (len(s) <= 320 or token_count <= 60) and re.search(r"\b(?:FIGURE|Fig\.)\s*[\d\.\-]+(?!\s*\))", s, re.IGNORECASE):
+        # Discard prose sentences that merely contain an in-text parenthetical citation like "(see Fig. 1.2)"
+        if not re.search(r"\((?:see\s+)?(?:fig|figure)\.?\s*[\d\.\-]+\)", s, re.IGNORECASE):
+            return True
+    return False
+
+
 def _generate_chunks_from_sections(
     book_slug: str,
     sections: list[dict[str, Any]],
@@ -431,12 +447,62 @@ def _generate_chunks_from_sections(
 
         for sent in sentences:
             sent_tok = est_tokens(sent)
+            is_caption_sent = bool(re.match(r"^\s*(?:[•·■\-\*]\s*)?(?:FIGURE|FIG\.)\s*[\d\.\-]+", sent.strip(), re.IGNORECASE))
+
+            # Isolated Figure Caption Handling: Keep captions separate from body prose
+            if is_caption_sent:
+                if current_sentences:
+                    chunk_str = " ".join(current_sentences).strip()
+                    chunk_id = f"{book_slug}_s{sec_id:04d}_c{chunk_seq:04d}"
+                    c_hash = hashlib.sha256(f"{book_slug}:{chunk_id}:{chunk_str}".encode("utf-8")).hexdigest()
+                    chunks.append({
+                        "chunk_id": chunk_id,
+                        "section_id": sec_id,
+                        "content_type": "prose",
+                        "sub_type": "paragraph",
+                        "page_start": min_page,
+                        "page_end": max_page,
+                        "token_count": current_tokens,
+                        "text": chunk_str,
+                        "embed_text": f"[{sec['heading_path']}] {chunk_str}",
+                        "content_hash": c_hash,
+                    })
+                    chunk_seq += 1
+                    current_sentences = []
+                    current_tokens = 0
+
+                chunk_id = f"{book_slug}_s{sec_id:04d}_c{chunk_seq:04d}"
+                c_hash = hashlib.sha256(f"{book_slug}:{chunk_id}:{sent}".encode("utf-8")).hexdigest()
+                chunks.append({
+                    "chunk_id": chunk_id,
+                    "section_id": sec_id,
+                    "content_type": "figure_caption",
+                    "sub_type": "figure",
+                    "page_start": min_page,
+                    "page_end": max_page,
+                    "token_count": sent_tok,
+                    "text": sent,
+                    "embed_text": f"[{sec['heading_path']}] {sent}",
+                    "content_hash": c_hash,
+                })
+                if doc:
+                    fig_bytes = _crop_figure_from_page(doc, min_page, sent)
+                    if fig_bytes:
+                        try:
+                            store.save_figure(book_slug, chunk_id, fig_bytes)
+                        except Exception as e:
+                            logger.debug("Failed to store figure image %s: %s", chunk_id, e)
+                chunk_seq += 1
+                current_sentences = []
+                current_tokens = 0
+                continue
+
             if current_tokens + sent_tok > target_tokens and current_sentences:
                 chunk_str = " ".join(current_sentences).strip()
                 chunk_id = f"{book_slug}_s{sec_id:04d}_c{chunk_seq:04d}"
                 c_hash = hashlib.sha256(f"{book_slug}:{chunk_id}:{chunk_str}".encode("utf-8")).hexdigest()
                 
-                is_fig = bool(re.search(r"\b(FIGURE|Fig\.)\s*[\d\.]+", chunk_str, re.IGNORECASE))
+                is_fig = _is_authentic_figure_caption(chunk_str, current_tokens)
                 c_type = "figure_caption" if is_fig else "prose"
                 c_sub = "figure" if is_fig else "paragraph"
 
@@ -473,7 +539,7 @@ def _generate_chunks_from_sections(
             chunk_id = f"{book_slug}_s{sec_id:04d}_c{chunk_seq:04d}"
             c_hash = hashlib.sha256(f"{book_slug}:{chunk_id}:{chunk_str}".encode("utf-8")).hexdigest()
             
-            is_fig = bool(re.search(r"\b(FIGURE|Fig\.)\s*[\d\.]+", chunk_str, re.IGNORECASE))
+            is_fig = _is_authentic_figure_caption(chunk_str, current_tokens)
             c_type = "figure_caption" if is_fig else "prose"
             c_sub = "figure" if is_fig else "paragraph"
 
@@ -510,6 +576,8 @@ def run_ingestion_pipeline(
     specialty: str,
     db_path: Path | str | None = None,
     book_slug: str | None = None,
+    is_private: bool = False,
+    owner_user_id: str | None = None,
 ) -> IngestionJob:
     """Executes the complete asynchronous ingestion workflow for an uploaded textbook."""
     pdf_file = Path(pdf_path)
@@ -602,15 +670,26 @@ def run_ingestion_pipeline(
             chunks=chunks,
             title=title,
             specialty=specialty,
+            is_private=is_private,
+            owner_user_id=owner_user_id,
         )
 
-        # Stage 5: Completion
+        # Stage 5: User Library auto-activation if owner_user_id is provided
+        if owner_user_id:
+            try:
+                from ui.library import add_to_user_library
+                add_to_user_library(user_id=owner_user_id, book_slug=book_slug, is_active=True)
+                logger.info("Auto-added and activated %s in user library for %s", book_slug, owner_user_id)
+            except Exception as e:
+                logger.warning("Failed to auto-add book to user library: %s", e)
+
+        # Stage 6: Completion
         job = update_job(
             job_id,
             status="completed",
             stage="completed",
             progress_percent=100,
-            message="Textbook successfully indexed into Global Library and ready for consultations.",
+            message="Textbook successfully indexed and activated in your personal study library.",
             book_slug=book_slug,
         )
         logger.info("Successfully completed ingestion job %s for '%s' (%s chunks)", job_id, title, len(chunks))

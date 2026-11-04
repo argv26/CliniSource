@@ -77,12 +77,18 @@ class SemanticBookRouter:
     """Routes medical inquiries to the most relevant textbooks in the library."""
 
     def __init__(self, catalog: list[dict[str, Any]] | None = None):
+        self._initial_catalog = catalog
         self._catalog = catalog
 
     @property
     def catalog(self) -> list[dict[str, Any]]:
-        if self._catalog is None:
-            self._catalog = list_books()
+        if self._initial_catalog is not None:
+            return self._initial_catalog
+        return list_books()
+
+    def refresh_catalog(self) -> list[dict[str, Any]]:
+        """Force-refreshes catalog from database to discover newly ingested textbooks."""
+        self._catalog = list_books()
         return self._catalog
 
     def route(
@@ -94,21 +100,24 @@ class SemanticBookRouter:
         """Selects the optimal textbook slugs to query.
 
         Rules:
-        1. User Selection Sovereignty: If user explicitly selected a subset of books,
+        1. User Selection Sovereignty: If user explicitly selected books,
            strictly return that selection without modification.
-        2. All Books Mode: If user_selected_books is None or equals all available books,
+        2. All Books Mode: If user_selected_books is None or empty,
            evaluate the inquiry and plan against book domain profiles and return top 1-3.
         """
         all_slugs = [b["slug"] for b in self.catalog]
-        if not all_slugs:
+        if not all_slugs and not user_selected_books:
             return []
 
-        # 1. User Selection Sovereignty
-        if user_selected_books:
+        # 1. User Selection Sovereignty: 100% strictly enforced
+        if user_selected_books is not None and len(user_selected_books) > 0:
             valid_user_books = [b for b in user_selected_books if b in all_slugs]
-            # If user explicitly filtered to a subset of books, honor it 100%
-            if valid_user_books and len(valid_user_books) < len(all_slugs):
+            if valid_user_books:
                 return valid_user_books
+            # If the user selected books that were just ingested or have custom slugs, preserve their selection
+            clean_user_books = [b for b in user_selected_books if b]
+            if clean_user_books:
+                return clean_user_books
 
         # 2. Extract search terms from query and clinical plan
         tokens: set[str] = set()

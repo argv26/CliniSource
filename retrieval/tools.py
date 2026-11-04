@@ -178,9 +178,9 @@ def get_chunk(chunk_id: str) -> dict[str, Any]:
     return hit.to_dict()
 
 
-def list_books() -> list[dict[str, Any]]:
-    """List all indexed textbooks and metadata."""
-    return _engine().list_books()
+def list_books(user_id: str | None = None) -> list[dict[str, Any]]:
+    """List indexed textbooks and metadata, optionally filtered by user privacy."""
+    return _engine().list_books(user_id=user_id)
 
 
 # =============================================================================

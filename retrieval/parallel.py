@@ -177,6 +177,8 @@ def _execute_parallel_retrieval(
         try:
             conn = sqlite3.connect(str(DB_PATH))
             for b_slug, sec_id in section_targets:
+                if allowed_books is not None and b_slug not in allowed_books:
+                    continue
                 rows = conn.execute(
                     "SELECT chunk_id, book_slug, section_id, content_type, page_start, page_end, token_count, text FROM chunks WHERE book_slug = ? AND section_id = ? AND content_type = 'figure_caption'",
                     (b_slug, sec_id)
@@ -207,11 +209,14 @@ def _execute_parallel_retrieval(
         "algorithm", "evaluation", "protocol", "overview", "definition",
         "definitions", "syndrome", "disorder", "disease", "guide", "guidelines",
         "clinical", "approach", "diagnosis", "features", "causes", "therapy",
-        "review", "basics", "principles", "introduction", "summary"
+        "review", "basics", "principles", "introduction", "summary",
+        "level", "levels", "acid", "acids", "effect", "effects", "action", "actions",
+        "shape", "shapes", "type", "types", "role", "roles", "factor", "factors",
     }
     ambiguous_short_terms = {
         "law", "sign", "test", "type", "part", "case", "care", "view",
-        "rate", "unit", "line", "cell", "step", "role", "form", "mode", "term"
+        "rate", "unit", "line", "cell", "step", "role", "form", "mode", "term",
+        "acid", "base", "site", "side", "area", "zone", "flow", "core"
     }
     subject_terms = [
         w.lower()
@@ -224,6 +229,8 @@ def _execute_parallel_retrieval(
         cid = f.get("chunk_id")
         if not cid:
             continue
+        if allowed_books is not None and f.get("book_slug") not in allowed_books:
+            continue
         if not has_figure_image(cid):
             continue
 
@@ -232,10 +239,13 @@ def _execute_parallel_retrieval(
             matched_terms = [t for t in subject_terms if t in fig_text]
             if not matched_terms:
                 continue
-            # If multiple query terms exist, avoid false-positive on a single ambiguous short word (e.g. "law" or "type")
-            if len(subject_terms) >= 2 and len(matched_terms) == 1:
-                single_match = matched_terms[0]
-                if single_match in ambiguous_short_terms or len(single_match) < 4:
+            # If multiple query terms exist, require strong topical match
+            if len(subject_terms) >= 2:
+                if len(matched_terms) == 1:
+                    single_match = matched_terms[0]
+                    if single_match in ambiguous_short_terms or len(single_match) < 5:
+                        continue
+                elif len(matched_terms) == 0:
                     continue
 
         verified_figures.append(f)

@@ -11,7 +11,7 @@ class AuthRequest(BaseModel):
 
 
 class CreateSessionRequest(BaseModel):
-    title: str = "New Consultation"
+    title: str = "New Inquiry"
 
 
 class UpdateSessionRequest(BaseModel):

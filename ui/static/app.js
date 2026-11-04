@@ -848,12 +848,15 @@ async function handleUploadSubmit(e) {
   }
 
   const specialty = inputUploadSpecialty ? inputUploadSpecialty.value.trim() : "General Medicine";
+  const inputUploadPrivate = document.getElementById("input-upload-private");
+  const isPrivate = inputUploadPrivate ? inputUploadPrivate.checked : true;
 
   // Build FormData payload
   const formData = new FormData();
   formData.append("file", selectedUploadFile);
   formData.append("title", title);
   formData.append("specialty", specialty || "General Medicine");
+  formData.append("is_private", isPrivate ? "true" : "false");
 
   if (btnSubmitUpload) {
     btnSubmitUpload.disabled = true;
@@ -922,8 +925,16 @@ function startIngestionPolling(jobId) {
         clearInterval(ingestionPollInterval);
         ingestionPollInterval = null;
         showUploadSuccess(job);
-        // Refresh catalog in background
-        fetchUserLibrary();
+        // Refresh catalog and library immediately & auto-activate new book
+        if (job.book_slug) {
+          activeBooksSet.add(job.book_slug);
+        }
+        await fetchBooks();
+        saveActiveBooks();
+        renderBookToggles();
+        updateSidebarBadge();
+        updateScopeIndicator();
+        updateLibraryStats();
       } else if (job.status === "failed") {
         clearInterval(ingestionPollInterval);
         ingestionPollInterval = null;
@@ -1010,7 +1021,7 @@ function showUploadSuccess(job) {
   if (uploadSuccessDetail) {
     const pp = job.total_pages ? `${job.total_pages.toLocaleString()} pages` : "";
     const chk = job.chunks_count ? `${job.chunks_count.toLocaleString()} passages` : "";
-    uploadSuccessDetail.textContent = `Successfully indexed "${job.title}" (${[pp, chk].filter(Boolean).join(", ")}) into Global Library under ${job.specialty}. It is now available to browse and add to your active Study Library.`;
+    uploadSuccessDetail.textContent = `Successfully indexed "${job.title}" (${[pp, chk].filter(Boolean).join(", ")}) into your personal Study Library under ${job.specialty}. It is now active for clinical inquiries.`;
   }
 }
 
@@ -1104,7 +1115,7 @@ function renderSessionsList(sessions) {
     }`;
     item.setAttribute("role", "button");
     item.setAttribute("tabindex", "0");
-    item.setAttribute("aria-label", `Consultation: ${s.title}`);
+    item.setAttribute("aria-label", `Inquiry: ${s.title}`);
     item.setAttribute("data-session-id", s.id);
 
     const timeAgo = formatTimeAgo(s.updated_at);
@@ -1122,7 +1133,7 @@ function renderSessionsList(sessions) {
           </div>
         </div>
       </div>
-      <button class="btn-delete-session p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 opacity-0 group-hover:opacity-100 focus:opacity-100 transition" aria-label="Delete consultation: ${escapeHtml(s.title)}" title="Delete consultation">
+      <button class="btn-delete-session p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 opacity-0 group-hover:opacity-100 focus:opacity-100 transition" aria-label="Delete inquiry: ${escapeHtml(s.title)}" title="Delete inquiry">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
         </svg>
@@ -1179,7 +1190,7 @@ async function loadSession(id) {
   try {
     const res = await fetch(`/api/sessions/${encodeURIComponent(id)}`);
     if (!res.ok) {
-      throw new Error("Could not load consultation");
+      throw new Error("Could not load inquiry");
     }
     const data = await res.json();
     sessionId = id;
@@ -1228,12 +1239,12 @@ async function loadSession(id) {
 
   } catch (err) {
     console.error("Failed to switch session:", err);
-    appendErrorMessage("Failed to load consultation session: " + err.message);
+    appendErrorMessage("Failed to load inquiry session: " + err.message);
   }
 }
 
 async function deleteConsultation(id, title) {
-  if (!confirm(`Delete consultation "${title}"?`)) {
+  if (!confirm(`Delete inquiry "${title}"?`)) {
     return;
   }
 

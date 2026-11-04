@@ -74,19 +74,19 @@
       </button>
     </div>
 
-    <!-- New Consultation Button -->
+    <!-- New Clinical Inquiry Button -->
     <div class="p-3 pb-2">
-      <button id="btn-new-chat" class="w-full py-2.5 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 font-semibold text-xs transition duration-150 shadow-sm shadow-blue-500/20 active:scale-95" aria-label="Start new consultation">
+      <button id="btn-new-chat" class="w-full py-2.5 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 font-semibold text-xs transition duration-150 shadow-sm shadow-blue-500/20 active:scale-95" aria-label="Start new clinical inquiry">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-        <span>New Consultation</span>
+        <span>New Inquiry</span>
         <span class="text-xs text-blue-200 border border-blue-400/40 rounded px-1.5 py-0.5 ml-auto font-mono bg-blue-700/60">Ctrl K</span>
       </button>
     </div>
 
-    <!-- Recent Consultations (Session History) - Scroll Container 1 -->
+    <!-- Recent Inquiries (Session History) - Scroll Container 1 -->
     <div id="sidebar-sessions-container" class="flex-1 min-h-[160px] overflow-hidden flex flex-col px-3 py-2">
       <div class="px-2 py-1.5 flex items-center justify-between mb-1">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Recent Consultations</span>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Recent Inquiries</span>
         <span id="sessions-count-badge" class="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full font-mono">0</span>
       </div>
       <div id="sessions-list" class="space-y-1 flex-1 overflow-y-auto pr-0.5">
@@ -98,7 +98,7 @@
         <svg class="w-5 h-5 mx-auto text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
         </svg>
-        <span>No past consultations yet</span>
+        <span>No past inquiries yet</span>
       </div>
     </div>
 
@@ -174,8 +174,8 @@
             aria-selected="true"
           >
             <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-            <span class="hidden sm:inline">Consultation</span>
-            <span class="sm:hidden">Chat</span>
+            <span class="hidden sm:inline">Clinical Inquiry</span>
+            <span class="sm:hidden">Inquiry</span>
           </button>
           <button
             id="tab-view-library"
@@ -302,7 +302,7 @@
             <textarea
               id="chat-input"
               rows="1"
-              placeholder="Consult CliniSource on a clinical case, differential, or treatment guideline..."
+              placeholder="Inquire on a clinical case, differential, or treatment guideline..."
               aria-label="Clinical inquiry text input"
               class="w-full bg-transparent text-base sm:text-sm text-slate-900 placeholder-slate-400 px-3 py-2.5 focus:outline-none resize-none max-h-40 min-h-[44px] leading-relaxed font-sans"
             ></textarea>
@@ -351,7 +351,7 @@
             </div>
             <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Curate Your Medical Library</h2>
             <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Customize your personal study collection for clinical consultations. Active books define the search scope and reasoning context.
+              Customize your personal study collection for clinical inquiries. Active books define the search scope and reasoning context.
             </p>
           </div>
 
@@ -402,7 +402,7 @@
             type="button"
             class="hidden sm:inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-semibold mb-2 transition active:scale-95"
           >
-            <span>Back to Consultation</span>
+            <span>Back to Inquiry</span>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </button>
         </div>
@@ -412,7 +412,7 @@
           <!-- Action Bar -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:px-4 rounded-xl border border-slate-200 shadow-2xs">
             <div class="text-xs text-slate-600">
-              <span class="font-semibold text-slate-800">Consultation Scope:</span> Toggle individual textbooks to include or exclude them from search results.
+              <span class="font-semibold text-slate-800">Inquiry Scope:</span> Toggle individual textbooks to include or exclude them from search results.
             </div>
             <div class="flex items-center gap-2">
               <button
@@ -709,8 +709,8 @@
         <div class="p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3 text-xs text-blue-900 leading-relaxed">
           <svg class="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <div class="space-y-1">
-            <p><span class="font-bold">Global Shared Library:</span> This textbook will be indexed into the shared Global Library and made accessible to all users across consultations.</p>
-            <p class="text-blue-800"><span class="font-semibold">Processing Notice:</span> Complete textbook ingestion (structure extraction, multi-column reading layout, chunking, and database indexing) runs in the background and may take a few minutes depending on volume length. You can continue using consultations while ingestion completes.</p>
+            <p><span class="font-bold">Global Shared Library:</span> This textbook will be indexed into the shared Global Library and made accessible to all users across clinical inquiries.</p>
+            <p class="text-blue-800"><span class="font-semibold">Processing Notice:</span> Complete textbook ingestion (structure extraction, multi-column reading layout, chunking, and database indexing) runs in the background and may take a few minutes depending on volume length. You can continue clinical inquiries while ingestion completes.</p>
           </div>
         </div>
 
@@ -761,6 +761,14 @@
               <option value="Surgery">
             </datalist>
             <p class="text-xs text-slate-500 mt-1">Type any specialty or subspecialty; used to categorize the book in the catalog.</p>
+          </div>
+
+          <!-- Personal Library Privacy Scope Toggle -->
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2.5">
+            <input id="input-upload-private" type="checkbox" checked class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer" />
+            <label for="input-upload-private" class="text-xs font-semibold text-slate-700 select-none cursor-pointer">
+              Keep only in my personal study library (Private to my account)
+            </label>
           </div>
 
           <!-- Inline Error State -->

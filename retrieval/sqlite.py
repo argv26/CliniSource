@@ -394,18 +394,40 @@ class SqliteEngine(BaseEngine):
             text=r[9],
         )
 
-    def list_books(self) -> list[dict[str, Any]]:
+    def list_books(self, user_id: str | None = None) -> list[dict[str, Any]]:
         cur = self.conn.cursor()
         cols = [c[1] for c in cur.execute("PRAGMA table_info(books);").fetchall()]
-        if "specialty" in cols:
-            rows = cur.execute("SELECT id, slug, title, total_pages, specialty FROM books ORDER BY id ASC;").fetchall()
-            return [
-                {"id": r[0], "slug": r[1], "title": r[2], "total_pages": r[3], "specialty": r[4]}
-                for r in rows
-            ]
-        rows = cur.execute("SELECT id, slug, title, total_pages FROM books ORDER BY id ASC;").fetchall()
-        return [
-            {"id": r[0], "slug": r[1], "title": r[2], "total_pages": r[3]}
-            for r in rows
-        ]
+        has_spec = "specialty" in cols
+        has_privacy = "is_private" in cols and "owner_user_id" in cols
+
+        query = "SELECT id, slug, title, total_pages"
+        if has_spec:
+            query += ", specialty"
+        if has_privacy:
+            query += ", is_private, owner_user_id"
+        query += " FROM books"
+
+        params: list[Any] = []
+        if has_privacy:
+            if user_id is not None:
+                query += " WHERE is_private = 0 OR is_private IS NULL OR owner_user_id = ?"
+                params.append(user_id)
+            else:
+                query += " WHERE is_private = 0 OR is_private IS NULL"
+
+        query += " ORDER BY id ASC;"
+        rows = cur.execute(query, params).fetchall()
+
+        results = []
+        for r in rows:
+            entry = {"id": r[0], "slug": r[1], "title": r[2], "total_pages": r[3]}
+            idx = 4
+            if has_spec:
+                entry["specialty"] = r[idx]
+                idx += 1
+            if has_privacy:
+                entry["is_private"] = bool(r[idx]) if r[idx] is not None else False
+                entry["owner_user_id"] = r[idx + 1]
+            results.append(entry)
+        return results
 

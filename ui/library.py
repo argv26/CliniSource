@@ -64,16 +64,16 @@ def _enrich_book_metadata(raw_book: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def get_global_catalog() -> list[dict[str, Any]]:
-    """Returns all indexed textbooks in the system enriched with specialty metadata."""
-    books = list_books()
+def get_global_catalog(user_id: str | None = None) -> list[dict[str, Any]]:
+    """Returns all accessible textbooks enriched with metadata, filtering private books by user."""
+    books = list_books(user_id=user_id)
     return [_enrich_book_metadata(b) for b in books]
 
 
 def ensure_user_library_initialized(user_id: str, db_path: Path | str | None = None) -> None:
     """Ensures the user library has initial entries from the global catalog if empty."""
     init_user_library_db(db_path)
-    global_books = get_global_catalog()
+    global_books = get_global_catalog(user_id=user_id)
     with _get_conn(db_path) as conn:
         cur = conn.cursor()
         rows = cur.execute(
@@ -97,7 +97,7 @@ def get_user_library(user_id: str, db_path: Path | str | None = None) -> list[di
     all currently available global textbooks with is_active = 1.
     """
     ensure_user_library_initialized(user_id, db_path)
-    global_books = get_global_catalog()
+    global_books = get_global_catalog(user_id=user_id)
     global_by_slug = {b["slug"]: b for b in global_books}
 
     with _get_conn(db_path) as conn:

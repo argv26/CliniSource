@@ -196,7 +196,7 @@ class AgentOrchestrator:
                 figures = search_figures(
                     query=clean_query,
                     book_slug=book_slug,
-                    allowed_books=active_books,
+                    allowed_books=routed_books or active_books,
                     limit=4,
                 )
                 turn_result["figures"] = figures
@@ -388,10 +388,10 @@ class AgentOrchestrator:
 
                 client = genai.Client(api_key=self.gemini_api_key)
                 candidate_models = [
-                    os.environ.get("GEMINI_MODEL", "gemini-flash-lite-latest"),
-                    "gemini-3.5-flash-lite",
-                    "gemini-3.1-flash-lite",
-                    "gemini-3.5-flash",
+                    os.environ.get("GEMINI_MODEL", "gemini-2.0-flash"),
+                    "gemini-2.0-flash",
+                    "gemini-1.5-flash",
+                    "gemini-2.0-flash-lite",
                 ]
                 seen_m = set()
                 models = [m for m in candidate_models if not (m in seen_m or seen_m.add(m))]

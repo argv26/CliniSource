@@ -266,6 +266,8 @@ class SqliteBackend:
         chunks: list[dict],
         title: str | None = None,
         specialty: str | None = None,
+        is_private: bool = False,
+        owner_user_id: str | None = None,
     ):
         if not title:
             title = book_slug.replace("_", " ").replace("-", " ").title()
@@ -275,17 +277,23 @@ class SqliteBackend:
         cols = [c[1] for c in cur.execute("PRAGMA table_info(books);").fetchall()]
         if "specialty" not in cols:
             cur.execute("ALTER TABLE books ADD COLUMN specialty TEXT;")
+        if "is_private" not in cols:
+            cur.execute("ALTER TABLE books ADD COLUMN is_private INTEGER DEFAULT 0;")
+        if "owner_user_id" not in cols:
+            cur.execute("ALTER TABLE books ADD COLUMN owner_user_id TEXT;")
 
         cur.execute(
             """
-            INSERT INTO books (slug, title, total_pages, specialty)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO books (slug, title, total_pages, specialty, is_private, owner_user_id)
+            VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT(slug) DO UPDATE SET
                 title=excluded.title,
                 total_pages=excluded.total_pages,
-                specialty=coalesce(excluded.specialty, books.specialty);
+                specialty=coalesce(excluded.specialty, books.specialty),
+                is_private=excluded.is_private,
+                owner_user_id=excluded.owner_user_id;
             """,
-            (book_slug, title, total_pages, specialty),
+            (book_slug, title, total_pages, specialty, 1 if is_private else 0, owner_user_id),
         )
 
         sec_rows = [

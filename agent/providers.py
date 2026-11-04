@@ -109,10 +109,10 @@ def run_gemini_turn(
 
     client = genai.Client(api_key=api_key)
     candidate_models = [
-        os.environ.get("GEMINI_MODEL", "gemini-flash-lite-latest"),
-        "gemini-3.5-flash-lite",
-        "gemini-3.1-flash-lite",
-        "gemini-3.5-flash",
+        os.environ.get("GEMINI_MODEL", "gemini-2.0-flash"),
+        "gemini-2.0-flash",
+        "gemini-1.5-flash",
+        "gemini-2.0-flash-lite",
     ]
     seen_m = set()
     models = [m for m in candidate_models if not (m in seen_m or seen_m.add(m))]

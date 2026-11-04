@@ -69,7 +69,7 @@ def api_chat(req: ChatRequest, request: Request, response: Response):
     if not db_session:
         title = generate_smart_title(req.message)
         create_consultation_session(user_id=user["id"], title=title, session_id=req.session_id)
-    elif db_session["title"] == "New Consultation":
+    elif db_session["title"] in ("New Consultation", "New Inquiry"):
         new_title = generate_smart_title(req.message)
         update_session_title(req.session_id, user["id"], new_title)
 
@@ -150,7 +150,7 @@ def api_chat_stream(req: ChatRequest, request: Request, response: Response):
     if not db_session:
         title = generate_smart_title(req.message)
         create_consultation_session(user_id=user["id"], title=title, session_id=req.session_id)
-    elif db_session["title"] == "New Consultation":
+    elif db_session["title"] in ("New Consultation", "New Inquiry"):
         new_title = generate_smart_title(req.message)
         update_session_title(req.session_id, user["id"], new_title)
 

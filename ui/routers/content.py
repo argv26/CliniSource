@@ -18,7 +18,7 @@ from ingestion.pipeline_worker import (
     run_ingestion_pipeline,
 )
 from retrieval.tools import get_chunk, list_books
-from ui.dependencies import get_orchestrator, resolve_or_create_user
+from ui.dependencies import get_orchestrator, resolve_current_user, resolve_or_create_user
 from ui.diagrams import get_figure_image_path
 from ui.library import (
     add_to_user_library,
@@ -47,10 +47,12 @@ class BookToggleAllRequest(BaseModel):
 
 
 @router.get("/books")
-def api_list_books():
+def api_list_books(request: Request):
     """Retrieve all available indexed textbooks and page statistics."""
     try:
-        books = list_books()
+        user = resolve_current_user(request)
+        user_id = user["id"] if user else None
+        books = list_books(user_id=user_id)
         return {"books": books}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -62,7 +64,7 @@ def api_get_user_library(request: Request, response: Response):
     user = resolve_or_create_user(request, response)
     user_id = user["id"]
     library = get_user_library(user_id)
-    catalog = get_global_catalog()
+    catalog = get_global_catalog(user_id=user_id)
 
     library_slugs = {b["slug"] for b in library}
     global_items = []
@@ -200,9 +202,12 @@ def api_get_session_citations(session_id: str, request: Request, response: Respo
 @router.post("/books/upload", status_code=202)
 async def api_upload_book(
     background_tasks: BackgroundTasks,
+    request: Request,
+    response: Response,
     file: UploadFile = File(...),
     title: str = Form(...),
     specialty: str = Form("General Medicine"),
+    is_private: bool = Form(False),
 ):
     """Uploads a textbook PDF and starts background extraction and indexing."""
     clean_title = title.strip()
@@ -210,6 +215,9 @@ async def api_upload_book(
 
     if not clean_title:
         raise HTTPException(status_code=400, detail="Textbook title is required.")
+
+    user = resolve_or_create_user(request, response)
+    owner_id = user["id"] if user else None
 
     # Validate file extension
     filename = file.filename or "upload.pdf"
@@ -246,6 +254,8 @@ async def api_upload_book(
         pdf_path=staged_path,
         title=clean_title,
         specialty=clean_specialty,
+        is_private=is_private,
+        owner_user_id=owner_id,
     )
 
     return {
@@ -253,6 +263,7 @@ async def api_upload_book(
         "book_slug": slug,
         "title": clean_title,
         "specialty": clean_specialty,
+        "is_private": is_private,
         "status": "queued",
         "message": "Upload accepted. Background ingestion started.",
     }

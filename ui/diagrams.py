@@ -173,16 +173,16 @@ def extract_clean_figure_rect(page: Any, fig_token: str) -> Any | None:
         final_rect = matching_img_rect | caption_block
         if is_column == "LEFT":
             return pymupdf.Rect(
-                max(page.rect.x0, col_x0 - 6),
+                max(col_x0, final_rect.x0 - 6),
                 max(page.rect.y0, final_rect.y0 - 6),
-                min(pw * 0.52, final_rect.x1 + 6),
+                min(col_x1, final_rect.x1 + 6),
                 min(page.rect.y1, final_rect.y1 + 6),
             )
         elif is_column == "RIGHT":
             return pymupdf.Rect(
-                max(pw * 0.48, final_rect.x0 - 6),
+                max(col_x0, final_rect.x0 - 6),
                 max(page.rect.y0, final_rect.y0 - 6),
-                min(page.rect.x1, col_x1 + 6),
+                min(col_x1, final_rect.x1 + 6),
                 min(page.rect.y1, final_rect.y1 + 6),
             )
         else:
@@ -198,49 +198,59 @@ def extract_clean_figure_rect(page: Any, fig_token: str) -> Any | None:
     col_drawings = []
     for d in drawings:
         dr = d["rect"]
+        # Discard header banners, colored chapter bars, and footer rules
+        if dr.y0 < 55 or dr.y1 > ph - 45:
+            continue
+        # Discard full-width divider rules
+        if dr.width > pw * 0.70 and dr.height < 6.0:
+            continue
         if is_column == "LEFT" and dr.x1 > col_x1:
             continue
         if is_column == "RIGHT" and dr.x0 < col_x0:
             continue
-        if dr.y0 < 38 or dr.y1 > ph - 30:
-            continue
-        # Proximity: drawing above caption (up to 480 pt)
-        if 10 < caption_block.y0 - dr.y0 < 480 and dr.y1 <= caption_block.y0 + 25:
+
+        # Proximity: drawing above caption (tight threshold up to 280 pt)
+        if 8 < caption_block.y0 - dr.y0 < 280 and dr.y1 <= caption_block.y0 + 20:
             col_drawings.append(dr)
-        # Proximity: drawing below caption (up to 380 pt)
-        elif 0 < dr.y0 - caption_block.y1 < 380 and dr.y0 >= caption_block.y1 - 15:
+        # Proximity: drawing below caption (tight threshold up to 220 pt)
+        elif 0 < dr.y0 - caption_block.y1 < 220 and dr.y0 >= caption_block.y1 - 10:
             col_drawings.append(dr)
 
-    if col_drawings:
+    if col_drawings and len(col_drawings) >= 2:
         draw_union = col_drawings[0]
         for dr in col_drawings[1:]:
             draw_union = draw_union | dr
 
-        # Include text blocks strictly within the chart and column
+        # Include text blocks strictly within the chart boundaries (e.g. flowchart node labels)
         for b in blocks:
             br = pymupdf.Rect(b[:4])
             if is_column == "LEFT" and br.x1 > col_x1:
                 continue
             if is_column == "RIGHT" and br.x0 < col_x0:
                 continue
-            if (draw_union.y0 - 15 <= br.y0 and br.y1 <= caption_block.y1 + 10) or \
-               (caption_block.y0 - 10 <= br.y0 and br.y1 <= draw_union.y1 + 15):
-                if br.y0 > 38 and br.y1 < ph - 30:
+            if (draw_union.x0 - 8 <= br.x0 and br.x1 <= draw_union.x1 + 8 and
+                draw_union.y0 - 8 <= br.y0 and br.y1 <= draw_union.y1 + 8):
+                if br.y0 > 50 and br.y1 < ph - 40:
                     draw_union = draw_union | br
 
         final_rect = draw_union | caption_block
+
+        # Reject runaway full-page crops that captured prose text
+        if final_rect.height > 0.65 * ph:
+            return None
+
         if is_column == "LEFT":
             return pymupdf.Rect(
-                max(page.rect.x0, col_x0 - 6),
+                max(col_x0, final_rect.x0 - 6),
                 max(page.rect.y0, final_rect.y0 - 6),
-                min(pw * 0.52, final_rect.x1 + 6),
+                min(col_x1, final_rect.x1 + 6),
                 min(page.rect.y1, final_rect.y1 + 6),
             )
         elif is_column == "RIGHT":
             return pymupdf.Rect(
-                max(pw * 0.48, final_rect.x0 - 6),
+                max(col_x0, final_rect.x0 - 6),
                 max(page.rect.y0, final_rect.y0 - 6),
-                min(page.rect.x1, col_x1 + 6),
+                min(col_x1, final_rect.x1 + 6),
                 min(page.rect.y1, final_rect.y1 + 6),
             )
         else:
