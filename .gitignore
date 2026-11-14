@@ -50,3 +50,8 @@ desktop.ini
 # ─── Docker ──────────────────────────────────────────────────────────────────
 # Keep docker-compose.yml committed; ignore runtime volumes
 docker-data/
+
+# ─── LLM Eval Reports ────────────────────────────────────────────────────────
+evals/reports/*
+!evals/reports/.gitkeep
+!evals/reports/baseline.json

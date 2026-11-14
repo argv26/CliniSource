@@ -49,7 +49,26 @@ def test_citation_sanitizer():
     assert "[2]" in sanitized, f"Failed: valid citation [2] lost in '{sanitized}'"
     assert "[14]" not in sanitized, f"Failed: invalid citation [14] remained as pill in '{sanitized}'"
     assert "(Ref 14)" in sanitized, f"Failed: expected '(Ref 14)' in '{sanitized}'"
-    print("[PASS] Test 4: Out-of-bounds citations sanitized to '(Ref 14)'.")
+
+    # Comma-separated valid & 4-digit page citations
+    assert _sanitize_citations("[1, 2] and [1000, 0994]", {1, 2}) == "[1] [2] and (Ref 1000, 0994)"
+    assert _sanitize_citations("Mixed [1, 99].", {1, 2}) == "Mixed [1] (Ref 99)."
+    print("[PASS] Test 4: Out-of-bounds and comma-separated citations sanitized cleanly.")
+
+
+def test_gemini_candidate_model_resolution(monkeypatch):
+    from agent.providers import DEFAULT_GEMINI_MODELS, resolve_gemini_candidate_models
+
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-2.0-flash")
+    models = resolve_gemini_candidate_models()
+    assert "gemini-2.0-flash" not in models
+    assert "gemini-1.5-flash" not in models
+    assert models == list(DEFAULT_GEMINI_MODELS)
+
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-2.5-flash")
+    models_custom = resolve_gemini_candidate_models()
+    assert models_custom[0] == "gemini-2.5-flash"
+    assert len(models_custom) == len(set(models_custom))
 
 
 def test_chunk_dehyphenation():

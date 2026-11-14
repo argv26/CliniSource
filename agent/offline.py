@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+import time
 import uuid
 from typing import TYPE_CHECKING, Any
 
@@ -61,43 +62,35 @@ def build_offline_response_text(user_message: str, chunks_result: list[dict[str,
             "  Synthesizes **adrenal androgens**, mainly **dehydroepiandrosterone (DHEA) and DHEA-sulfate (DHEAS)**, via CYP17A1 17,20-lyase activity. These androgens are converted peripherally to active androgens and estrogens, contributing to adrenarche and secondary sexual characteristics. Regulated predominantly by ACTH.\n\n"
             "> **Clinical Takeaway:**\n"
             "> A classic clinical mnemonic for the three zones from superficial to deep and their respective hormone products is **GFR** (*Glomerulosa, Fasciculata, Reticularis*) matching **\"Salt, Sugar, Sex\"** (*Aldosterone, Cortisol, Androgens*).\n\n"
-            "### Steroidogenic Functional Zonation Pathway\n"
-            "```mermaid\n"
-            "flowchart TD\n"
-            "    Cholesterol[\"Cholesterol (Substrate)\"] --> GFR{\"Adrenal Cortex Zonation\"}\n"
-            "    GFR -->|Zona Glomerulosa (CYP11B2)| Aldo[\"Aldosterone (Mineralocorticoid)\"]\n"
-            "    GFR -->|Zona Fasciculata (CYP17A1, CYP11B1)| Cort[\"Cortisol (Glucocorticoid)\"]\n"
-            "    GFR -->|Zona Reticularis (CYP17A1 17,20-lyase)| Andro[\"DHEA / DHEAS (Androgens)\"]\n"
-            "    Aldo -->|Target: Renal Distal Tubule| Volume[\"Na+ Retention & K+ Secretion\"]\n"
-            "    Cort -->|Target: Liver & Muscle| Stress[\"Gluconeogenesis & Anti-inflammatory\"]\n"
-            "    Andro -->|Target: Peripheral Tissues| Sex[\"Adrenarche & Secondary Sex Steroids\"]\n"
-            "```\n\n"
+            "### Steroidogenic Functional Zonation Pathway\n\n"
+            "| Zone | Layer Depth | Primary Hormone | Regulatory Driver | Principal Actions |\n"
+            "| :--- | :--- | :--- | :--- | :--- |\n"
+            "| **Zona Glomerulosa** | Outer (~15%) | Aldosterone [1] | RAAS & Serum K⁺ | Renal Na⁺ retention, K⁺ excretion, blood pressure maintenance |\n"
+            "| **Zona Fasciculata** | Middle (~75%) | Cortisol [2] | Pituitary ACTH | Gluconeogenesis, protein catabolism, anti-inflammatory modulation |\n"
+            "| **Zona Reticularis** | Innermost (~10%) | DHEA / DHEAS [3] | Pituitary ACTH | Precursor for peripheral androgens and estrogens, adrenarche |\n\n"
             "[FOLLOW_UP_QUESTIONS]\n"
             "- How do 21-hydroxylase deficiencies disrupt this steroidogenic pathway in Congenital Adrenal Hyperplasia?\n"
             "- What are the diagnostic criteria distinguishing primary from secondary adrenal insufficiency?\n"
             "- How does the Renin-Angiotensin-Aldosterone System (RAAS) regulate systemic blood pressure?"
         )
-    elif any(k in query_lower for k in ["thyroid", "t3", "t4", "hypothyroid", "hyperthyroid"]):
+    elif re.search(r"\b(?:thyroid|hypothyroid|hyperthyroid)\b", query_lower) and not re.search(r"\b(?:parathyroid|cornea|corneal|ocular|eye)\b", query_lower):
         return (
             "Thyroid hormone synthesis and systemic regulation involve coordinated follicular cellular processes and neuroendocrine feedback:\n\n"
             "* **Hormone Synthesis & Iodine Trapping** [1]\n"
-            "  Follicular cells actively transport circulating iodide ($I^-$) across the basolateral membrane via the sodium-iodide symporter (NIS). Thyroid peroxidase (TPO) oxidizes iodide and organifies it onto tyrosine residues of thyroglobulin, generating monoiodotyrosine (MIT) and diiodotyrosine (DIT), which subsequently couple to form triiodothyronine (T3) and thyroxine (T4).\n\n"
+            "  Follicular cells actively transport circulating iodide (I⁻) across the basolateral membrane via the sodium-iodide symporter (NIS). Thyroid peroxidase (TPO) oxidizes iodide and organifies it onto tyrosine residues of thyroglobulin, generating monoiodotyrosine (MIT) and diiodotyrosine (DIT), which subsequently couple to form triiodothyronine (T3) and thyroxine (T4).\n\n"
             "* **Neuroendocrine Regulation (HPT Axis)** [2]\n"
             "  Hypothalamic thyrotropin-releasing hormone (TRH) stimulates anterior pituitary release of thyroid-stimulating hormone (TSH). TSH binds follicular TSH receptors to upregulate every step of synthesis and endocytic release of T4 and T3. Circulating free T4 and T3 exert negative feedback inhibition on both TRH and TSH secretion.\n\n"
             "* **Clinical Features of Thyroid Dysfunction** [3]\n"
             "  Hypothyroidism manifests with systemic hypometabolism: lethargy, cold intolerance, weight gain, bradycardia, dry skin, constipation, and delayed tendon reflex relaxation. Elevated serum TSH with low free T4 confirms primary hypothyroidism.\n\n"
             "> **Clinical Takeaway:**\n"
             "> Most circulating active hormone is produced by peripheral 5'-deiodination of T4 to T3 in liver and kidneys, making T3 roughly 4 to 5 times more biologically potent than T4.\n\n"
-            "### Hypothalamic-Pituitary-Thyroid (HPT) Regulatory Loop\n"
-            "```mermaid\n"
-            "flowchart TD\n"
-            "    Hypo[\"Hypothalamus: TRH Release\"] -->|Stimulates| Pit[\"Anterior Pituitary: TSH Secretion\"]\n"
-            "    Pit -->|Stimulates Follicular Cells| Gland[\"Thyroid Gland: NIS Uptake & TPO Organification\"]\n"
-            "    Gland -->|Releases into Circulation| Hormones[\"T4 (93%) & T3 (7%)\"]\n"
-            "    Hormones -->|Peripheral 5'-Deiodination| Active[\"Active T3 (Target Tissues)\"]\n"
-            "    Hormones -.->|Negative Feedback| Pit\n"
-            "    Hormones -.->|Negative Feedback| Hypo\n"
-            "```\n\n"
+            "### Hypothalamic-Pituitary-Thyroid (HPT) Regulatory Loop\n\n"
+            "| Process Step | Site / Enzyme | Substrates & Intermediates | Clinical Significance |\n"
+            "| :--- | :--- | :--- | :--- |\n"
+            "| **Iodide Trapping** | Basolateral NIS | Circulating I⁻ + Na⁺ [1] | Active transport against electrochemical gradient |\n"
+            "| **Organification** | Apical Thyroid Peroxidase (TPO) | Iodide + Thyroglobulin tyrosyl [1] | Yields monoiodotyrosine (MIT) and diiodotyrosine (DIT) |\n"
+            "| **Coupling** | Follicular Colloid (TPO) | MIT + DIT (T3), DIT + DIT (T4) [1] | Generates prohormone T4 (93%) and active T3 (7%) |\n"
+            "| **HPT Regulation** | Pituitary TSH & Hypothalamic TRH | TSH receptor signaling [2] | Negative feedback by circulating free T4 and T3 |\n\n"
             "[FOLLOW_UP_QUESTIONS]\n"
             "- What are the laboratory findings and autoantibodies in Hashimoto thyroiditis versus Graves disease?\n"
             "- How do thyroid storm and myxedema coma differ in clinical presentation and acute emergency management?\n"
@@ -119,6 +112,14 @@ def build_offline_response_text(user_message: str, chunks_result: list[dict[str,
             "  4. **Femoral Canal (Empty space / Lymphatics):** Contains deep inguinal lymph nodes (Cloquet node) and lymphatic channels.\n\n"
             "> **Clinical Takeaway:**\n"
             "> The mnemonic **NAVEL** (Nerve, Artery, Vein, Empty space, Lymphatics) from lateral to medial guides safe vascular access for femoral catheterization and helps identify femoral hernias (which protrude into the medial femoral canal below the inguinal ligament).\n\n"
+            "### Femoral Triangle Boundaries & Contents Summary\n\n"
+            "| Boundary / Component | Anatomical Structure | Clinical Relevance |\n"
+            "| :--- | :--- | :--- |\n"
+            "| **Superior Border** | Inguinal ligament | Base of triangle; landmark for midinguinal point [1] |\n"
+            "| **Lateral Border** | Medial margin of sartorius muscle | Directs lateral boundary [1] |\n"
+            "| **Medial Border** | Medial margin of adductor longus | Directs medial boundary [1] |\n"
+            "| **Floor** | Iliopsoas (laterally) & pectineus (medially) | Muscular bed supporting neurovascular bundle [1] |\n"
+            "| **Contents (NAVEL)** | Femoral Nerve, Artery, Vein, Canal, Lymphatics | Vascular access and femoral hernia localization [2] |\n\n"
             "[FOLLOW_UP_QUESTIONS]\n"
             "- How do you clinically differentiate an indirect inguinal hernia from a femoral hernia on physical exam?\n"
             "- What are the vascular access landmarks for femoral artery cannulation versus femoral vein puncture?\n"
@@ -145,7 +146,7 @@ def build_offline_response_text(user_message: str, chunks_result: list[dict[str,
             "- What are the anatomical relations of the brachial plexus relevant to performing an interscalene or supraclavicular nerve block?\n"
             "- What clinical findings differentiate an ulnar nerve entrapment at the cubital tunnel versus Guyon canal?"
         )
-    elif any(k in query_lower for k in ["endocrin", "encrin", "hormone system", "endocrine gland"]):
+    elif re.search(r"\b(?:what is endocrinology|intro(?:duction)? to endocrinology|endocrine system overview|principles of endocrinology)\b", query_lower):
         return (
             "Endocrinology is the branch of medicine and physiology devoted to the study of the endocrine system, its specialized glands, and the hormones they synthesize directly into circulation to coordinate organ function and maintain systemic homeostasis:\n\n"
             "* **Core Components & Endocrine Glands** [1]\n"
@@ -162,6 +163,30 @@ def build_offline_response_text(user_message: str, chunks_result: list[dict[str,
             "- What clinical lab tests differentiate primary endocrine gland dysfunction from secondary (pituitary) disease?"
         )
     else:
+        # Check for out-of-scope inquiry with no topical presence in retrieved chunks
+        generic_query_terms = {
+            "what", "when", "where", "which", "explain", "describe", "please",
+            "about", "exact", "maximum", "minimum", "their", "there", "these",
+            "those", "section", "limit", "chapter", "part", "unit", "line",
+            "first", "type", "types", "many", "much", "does", "with", "from",
+        }
+        query_substantive = {
+            w.lower()
+            for w in re.findall(r"\b[a-zA-Z]{4,}\b", user_message)
+            if w.lower() not in generic_query_terms
+        }
+        chunk_text_combined = " ".join(
+            f"{c.get('heading_path', '')} {c.get('text', '')}"
+            for c in chunks_result[:3]
+        ).lower()
+        overlap = {w for w in query_substantive if w in chunk_text_combined}
+        if query_substantive and (len(overlap) == 0 or (len(query_substantive) >= 3 and len(overlap) < 2)):
+            return (
+                f"I searched the indexed textbooks for **\"{user_message}\"**, but this topic was not found "
+                f"in the indexed medical textbooks. The library contains verified medical, physiological, "
+                f"and anatomical canon, so inquiries outside the scope of the indexed textbooks cannot be answered with authoritative citations."
+            )
+
         top_hit = chunks_result[0]
         top_heading = top_hit.get("heading_path", "Overview")
         clean_top_topic = top_heading.split(" > ")[-1].strip()
@@ -169,6 +194,7 @@ def build_offline_response_text(user_message: str, chunks_result: list[dict[str,
 
         opening = f"Here is an overview of **{clean_top_topic}** based on core physiological and clinical concepts:"
         points = []
+        table_rows = []
         seen_texts = set()
 
         for i, chunk in enumerate(chunks_result[:3]):
@@ -183,12 +209,25 @@ def build_offline_response_text(user_message: str, chunks_result: list[dict[str,
                 continue
             seen_texts.add(coherent_text)
             points.append(f"* **{sub_h}** [{cit_num}]:\n  {coherent_text}")
+            first_sentence = coherent_text.split(". ")[0].strip()
+            if not first_sentence.endswith("."):
+                first_sentence += "."
+            table_rows.append(f"| **{sub_h}** | {first_sentence} | [{cit_num}] |")
 
         combined_points = "\n\n".join(points) if points else "Key principles are discussed in the referenced textbook sections."
 
+        table_block = ""
+        if table_rows:
+            table_block = (
+                "\n\n### Summary of Evidence & Key Criteria\n\n"
+                "| Domain / Section | Clinical Findings & Principles | Source |\n"
+                "| :--- | :--- | :--- |\n"
+                + "\n".join(table_rows)
+            )
+
         return f"""{opening}
 
-{combined_points}
+{combined_points}{table_block}
 
 > **Clinical Insight:**
 > Correlating structural anatomy with biochemical regulation provides the foundation for accurate diagnostic workup and targeted clinical therapeutics.
@@ -233,10 +272,16 @@ def run_offline_synthesizer_turn(
             "citations": [],
             "tool_calls": [],
             "follow_ups": follow_ups,
+            "telemetry": {
+                "provider": "fastpath",
+                "model_used": "fastpath-meta",
+                "retrieval_ms": 0.0,
+            },
         }
 
     tool_activity: list[dict[str, Any]] = []
 
+    t_ret = time.perf_counter()
     retrieval = _execute_parallel_retrieval(
         query=query,
         book_slug=book_slug,
@@ -245,6 +290,7 @@ def run_offline_synthesizer_turn(
         section_limit=2,
         figure_limit=4,
     )
+    retrieval_ms = round((time.perf_counter() - t_ret) * 1000, 2)
     clean_query = retrieval["clean_query"]
     chunks_result = retrieval["chunks"]
     sections_result = retrieval["sections"]
@@ -297,5 +343,10 @@ def run_offline_synthesizer_turn(
         "tool_calls": tool_activity,
         "follow_ups": follow_ups,
         "figures": retrieval.get("figures", []),
+        "telemetry": {
+            "provider": "offline",
+            "model_used": "offline-synthesizer",
+            "retrieval_ms": retrieval_ms,
+        },
     }
 

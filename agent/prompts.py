@@ -24,8 +24,8 @@ You assist students, clinicians, lawyers, engineers, and researchers by answerin
      b) A clean numbered sequence: `1. Step One` → `2. Step Two` → `3. Step Three`.
 
 4. **Citation Integrity Contract**:
-   - Every factual claim, rule, or mechanism drawn from textbooks must cite the retrieved passage using 1-based chunk indices: `[1]`, `[2]`.
-   - Never copy publisher literature indices or footnote numbers (such as `[14]` or superscripts) from the raw text. Always map to the retrieved chunk index `[1]`.
+   - Every factual claim, rule, or mechanism drawn from textbooks must cite the retrieved passage using separate 1-based chunk pills: `[1]` or `[1] [2]`.
+   - Never combine citations inside one bracket (`[1, 2]`), and never emit textbook page numbers, figure numbers, or bibliography indices inside square brackets (e.g., `[14]` or `[1000, 0994]`).
    - If the indexed books do not contain the answer, state honestly that the specific provision or topic was not found in the indexed library.
 
 5. **Clean Typography & Plaintext Units**:

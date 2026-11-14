@@ -118,3 +118,4 @@ def test_personal_library_privacy_and_isolation(tmp_path: Path, client_a: TestCl
         conn.execute("DELETE FROM books WHERE slug = ?;", (book_slug,))
         conn.commit()
         conn.close()
+

@@ -1,0 +1,3097 @@
+{
+  "run_id": "eval_retrieval-only_20261114_075651",
+  "timestamp": "2026-11-14T07:56:51.537073+00:00",
+  "mode": "retrieval-only",
+  "judge_mode": "none",
+  "dataset_name": "clinisource_clinical_gold_v1",
+  "dataset_version": "1.0.0",
+  "total_cases": 27,
+  "passed_cases": 24,
+  "aggregate_scores": {
+    "overall": 0.874,
+    "pass_rate": 0.8889,
+    "figure_presence": 0.8,
+    "latency_sla": 1.0,
+    "retrieval_hit_at_k": 0.8889,
+    "retrieval_keyword_coverage": 0.8642,
+    "retrieval_mrr": 0.6247,
+    "routing": 0.9815
+  },
+  "category_scores": {
+    "anatomy_figure": {
+      "count": 4.0,
+      "passed": 2.0,
+      "pass_rate": 0.5,
+      "mean_score": 0.7084
+    },
+    "clinical_factual": {
+      "count": 9.0,
+      "passed": 9.0,
+      "pass_rate": 1.0,
+      "mean_score": 0.8944
+    },
+    "conversational_fastpath": {
+      "count": 3.0,
+      "passed": 3.0,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "differential_diagnosis": {
+      "count": 3.0,
+      "passed": 3.0,
+      "pass_rate": 1.0,
+      "mean_score": 0.8889
+    },
+    "multi_book": {
+      "count": 2.0,
+      "passed": 2.0,
+      "pass_rate": 1.0,
+      "mean_score": 0.95
+    },
+    "out_of_scope": {
+      "count": 1.0,
+      "passed": 1.0,
+      "pass_rate": 1.0,
+      "mean_score": 1.0
+    },
+    "table_criteria": {
+      "count": 5.0,
+      "passed": 4.0,
+      "pass_rate": 0.8,
+      "mean_score": 0.8297
+    }
+  },
+  "ops_summary": {
+    "total_ms_mean": 29.2,
+    "total_ms_p50": 10.62,
+    "total_ms_p95": 110.76,
+    "ttft_ms_p50": 0.0,
+    "ttft_ms_p95": 0.0,
+    "retrieval_ms_mean": 30.13,
+    "retrieval_ms_p95": 112.43,
+    "planner_ms_mean": 0.02,
+    "llm_ms_mean": 0.0,
+    "total_prompt_tokens": 0,
+    "total_cached_tokens": 0,
+    "total_completion_tokens": 0,
+    "total_tokens": 0,
+    "cache_hit_ratio": 0.0,
+    "fallback_count": 0,
+    "fallback_rate": 0.0,
+    "error_count": 0,
+    "provider_counts": {
+      "retrieval-only": 24,
+      "fastpath": 3
+    },
+    "model_counts": {
+      "fts5-bm25": 24,
+      "fastpath-regex": 3
+    }
+  },
+  "regressions": [],
+  "results": [
+    {
+      "case_id": "endo-001",
+      "category": "clinical_factual",
+      "query": "What is the initial biochemical diagnostic workup and case detection criteria for suspected pheochromocytoma?",
+      "routed_books": [
+        "Williams_Textbook_of_Endocrinology_15th_edition_2",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 1,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.07,
+        "routing_ms": 3.01,
+        "retrieval_ms": 165.65,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 168.76,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "routed_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 3,
+            "matched_keywords": [
+              "catecholamines",
+              "metanephrines",
+              "pheochromocytoma"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.3333333333333333,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 3,
+            "matched_keywords": [
+              "catecholamines",
+              "metanephrines",
+              "pheochromocytoma"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 3,
+            "matched_keywords": [
+              "catecholamines",
+              "metanephrines",
+              "pheochromocytoma"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 168.76,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.8667,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "endo-002",
+      "category": "table_criteria",
+      "query": "How is primary aldosteronism screened and diagnosed using plasma aldosterone concentration and renin activity?",
+      "routed_books": [
+        "Williams_Textbook_of_Endocrinology_15th_edition_2",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 4,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.03,
+        "routing_ms": 0.14,
+        "retrieval_ms": 63.92,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 64.09,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "routed_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 4,
+            "matched_keywords": [
+              "aldosterone",
+              "primary aldosteronism",
+              "renin"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.25,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 4,
+            "matched_keywords": [
+              "aldosterone",
+              "primary aldosteronism",
+              "renin"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 4,
+            "matched_keywords": [
+              "aldosterone",
+              "primary aldosteronism",
+              "renin"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "figure_presence": {
+          "name": "figure_presence",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "figure_count": 4,
+            "required": true
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 64.09,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.875,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "endo-003",
+      "category": "anatomy_figure",
+      "query": "Explain the steps of thyroid hormone synthesis including iodide trapping, organification, and coupling in thyroid follicular cells.",
+      "routed_books": [
+        "Williams_Textbook_of_Endocrinology_15th_edition_2",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 4,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.02,
+        "routing_ms": 0.14,
+        "retrieval_ms": 117.94,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 118.11,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "routed_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 0.0,
+          "passed": false,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": null,
+            "matched_keywords": [
+              "thyroid"
+            ],
+            "missing_keywords": [
+              "iodide",
+              "thyroglobulin"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.0,
+          "passed": false,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": null,
+            "matched_keywords": [
+              "thyroid"
+            ],
+            "missing_keywords": [
+              "iodide",
+              "thyroglobulin"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 0.3333333333333333,
+          "passed": false,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": null,
+            "matched_keywords": [
+              "thyroid"
+            ],
+            "missing_keywords": [
+              "iodide",
+              "thyroglobulin"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "figure_presence": {
+          "name": "figure_presence",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "figure_count": 4,
+            "required": true
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 118.11,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.5556,
+      "passed": false,
+      "error": null
+    },
+    {
+      "case_id": "endo-004",
+      "category": "table_criteria",
+      "query": "What are the first-line screening tests to confirm endogenous hypercortisolism in suspected Cushing syndrome?",
+      "routed_books": [
+        "Williams_Textbook_of_Endocrinology_15th_edition_2"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 1,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.13,
+        "retrieval_ms": 7.95,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 8.11,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "routed_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "matched_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "cortisol",
+              "cushing",
+              "dexamethasone"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "cortisol",
+              "cushing",
+              "dexamethasone"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "cortisol",
+              "cushing",
+              "dexamethasone"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 8.11,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 1.0,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "endo-005",
+      "category": "table_criteria",
+      "query": "What are the diagnostic criteria and core management pillars for Diabetic Ketoacidosis (DKA)?",
+      "routed_books": [
+        "Williams_Textbook_of_Endocrinology_15th_edition_2",
+        "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.13,
+        "retrieval_ms": 5.67,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 5.83,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "routed_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2",
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "matched_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "glucose",
+              "insulin",
+              "ketoacidosis"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.5,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "glucose",
+              "insulin",
+              "ketoacidosis"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "glucose",
+              "insulin",
+              "ketoacidosis"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 5.83,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.9,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "endo-006",
+      "category": "clinical_factual",
+      "query": "Explain the functional zonation of the adrenal cortex and the steroid hormones produced in each zone.",
+      "routed_books": [
+        "Williams_Textbook_of_Endocrinology_15th_edition_2",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 1,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.02,
+        "routing_ms": 0.14,
+        "retrieval_ms": 6.02,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 6.2,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "routed_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 3,
+            "matched_keywords": [
+              "aldosterone",
+              "cortisol"
+            ],
+            "missing_keywords": [
+              "zona glomerulosa"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.3333333333333333,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 3,
+            "matched_keywords": [
+              "aldosterone",
+              "cortisol"
+            ],
+            "missing_keywords": [
+              "zona glomerulosa"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 0.6666666666666666,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 3,
+            "matched_keywords": [
+              "aldosterone",
+              "cortisol"
+            ],
+            "missing_keywords": [
+              "zona glomerulosa"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 6.2,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.8,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "harrison-001",
+      "category": "clinical_factual",
+      "query": "How are sepsis and septic shock defined clinically, and what organ dysfunction indicators are assessed?",
+      "routed_books": [
+        "Harrison_2025_22nd_Edition",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.11,
+        "retrieval_ms": 9.58,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 9.72,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Harrison_2025_22nd_Edition"
+            ],
+            "routed_books": [
+              "Harrison_2025_22nd_Edition",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "Harrison_2025_22nd_Edition"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "organ",
+              "sepsis",
+              "shock"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "organ",
+              "sepsis",
+              "shock"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "organ",
+              "sepsis",
+              "shock"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 9.72,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 1.0,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "harrison-002",
+      "category": "table_criteria",
+      "query": "What are the KDIGO staging criteria for Acute Kidney Injury (AKI) based on serum creatinine and urine output?",
+      "routed_books": [
+        "Harrison_2025_22nd_Edition",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.13,
+        "retrieval_ms": 10.86,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 11.02,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Harrison_2025_22nd_Edition"
+            ],
+            "routed_books": [
+              "Harrison_2025_22nd_Edition",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "Harrison_2025_22nd_Edition"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 0.0,
+          "passed": false,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": null,
+            "matched_keywords": [
+              "aki",
+              "kdigo"
+            ],
+            "missing_keywords": [
+              "creatinine"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.0,
+          "passed": false,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": null,
+            "matched_keywords": [
+              "aki",
+              "kdigo"
+            ],
+            "missing_keywords": [
+              "creatinine"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 0.6666666666666666,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": null,
+            "matched_keywords": [
+              "aki",
+              "kdigo"
+            ],
+            "missing_keywords": [
+              "creatinine"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 11.02,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.5333,
+      "passed": false,
+      "error": null
+    },
+    {
+      "case_id": "harrison-003",
+      "category": "differential_diagnosis",
+      "query": "How do you differentiate PTH-mediated from non-PTH-mediated causes of hypercalcemia?",
+      "routed_books": [
+        "Williams_Textbook_of_Endocrinology_15th_edition_2"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 1,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.11,
+        "retrieval_ms": 6.61,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 6.74,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 0.5,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Harrison_2025_22nd_Edition",
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "routed_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "matched_books": [
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "parathyroid",
+              "pth"
+            ],
+            "missing_keywords": [
+              "hypercalcemia"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "parathyroid",
+              "pth"
+            ],
+            "missing_keywords": [
+              "hypercalcemia"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 0.6666666666666666,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "parathyroid",
+              "pth"
+            ],
+            "missing_keywords": [
+              "hypercalcemia"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 6.74,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.8333,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "harrison-004",
+      "category": "table_criteria",
+      "query": "Compare the ECG and cardiac troponin diagnostic criteria distinguishing NSTEMI from unstable angina and STEMI.",
+      "routed_books": [
+        "Harrison_2025_22nd_Edition",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.12,
+        "retrieval_ms": 7.67,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 7.81,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Harrison_2025_22nd_Edition"
+            ],
+            "routed_books": [
+              "Harrison_2025_22nd_Edition",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "Harrison_2025_22nd_Edition"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 5,
+            "matched_keywords": [
+              "myocardial",
+              "stemi",
+              "troponin"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.2,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 5,
+            "matched_keywords": [
+              "myocardial",
+              "stemi",
+              "troponin"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 5,
+            "matched_keywords": [
+              "myocardial",
+              "stemi",
+              "troponin"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 7.81,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.84,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "harrison-005",
+      "category": "differential_diagnosis",
+      "query": "What are the primary pathogens and empiric outpatient versus inpatient antibiotic considerations for community-acquired pneumonia?",
+      "routed_books": [
+        "Harrison_2025_22nd_Edition",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.12,
+        "retrieval_ms": 8.11,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 8.26,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Harrison_2025_22nd_Edition"
+            ],
+            "routed_books": [
+              "Harrison_2025_22nd_Edition",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "Harrison_2025_22nd_Edition"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "pneumonia",
+              "streptococcus"
+            ],
+            "missing_keywords": [
+              "macrolide"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.5,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "pneumonia",
+              "streptococcus"
+            ],
+            "missing_keywords": [
+              "macrolide"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 0.6666666666666666,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "pneumonia",
+              "streptococcus"
+            ],
+            "missing_keywords": [
+              "macrolide"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 8.26,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.8333,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "harrison-006",
+      "category": "clinical_factual",
+      "query": "How is heart failure classified by left ventricular ejection fraction (HFrEF vs HFmrEF vs HFpEF) and what biomarkers aid diagnosis?",
+      "routed_books": [
+        "Harrison_2025_22nd_Edition",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.16,
+        "retrieval_ms": 20.48,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 20.67,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "Harrison_2025_22nd_Edition"
+            ],
+            "routed_books": [
+              "Harrison_2025_22nd_Edition",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "Harrison_2025_22nd_Edition"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "ejection fraction",
+              "heart failure"
+            ],
+            "missing_keywords": [
+              "natriuretic"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "ejection fraction",
+              "heart failure"
+            ],
+            "missing_keywords": [
+              "natriuretic"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 0.6666666666666666,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "ejection fraction",
+              "heart failure"
+            ],
+            "missing_keywords": [
+              "natriuretic"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 20.67,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.9333,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "cornea-001",
+      "category": "clinical_factual",
+      "query": "What are the major risk factors, common causative organisms (such as Pseudomonas), and diagnostic evaluation of bacterial keratitis?",
+      "routed_books": [
+        "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.13,
+        "retrieval_ms": 8.21,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 8.36,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "routed_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "keratitis",
+              "pseudomonas",
+              "ulcer"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "keratitis",
+              "pseudomonas",
+              "ulcer"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "keratitis",
+              "pseudomonas",
+              "ulcer"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 8.36,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 1.0,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "cornea-002",
+      "category": "clinical_factual",
+      "query": "Describe the pathophysiology, clinical slit-lamp findings (guttae), and surgical management options for Fuchs endothelial corneal dystrophy.",
+      "routed_books": [
+        "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+        "Harrison_2025_22nd_Edition"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.12,
+        "retrieval_ms": 10.37,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 10.52,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "routed_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+              "Harrison_2025_22nd_Edition"
+            ],
+            "matched_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 4,
+            "matched_keywords": [
+              "endothelial",
+              "fuchs"
+            ],
+            "missing_keywords": [
+              "guttae"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.25,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 4,
+            "matched_keywords": [
+              "endothelial",
+              "fuchs"
+            ],
+            "missing_keywords": [
+              "guttae"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 0.6666666666666666,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 4,
+            "matched_keywords": [
+              "endothelial",
+              "fuchs"
+            ],
+            "missing_keywords": [
+              "guttae"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 10.52,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.7833,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "cornea-003",
+      "category": "differential_diagnosis",
+      "query": "How do epithelial (dendritic) and stromal manifestations of herpes simplex keratitis differ clinically and in management?",
+      "routed_books": [
+        "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 1,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.05,
+        "routing_ms": 0.35,
+        "retrieval_ms": 10.19,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 10.62,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "routed_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "dendritic",
+              "herpes",
+              "keratitis"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "dendritic",
+              "herpes",
+              "keratitis"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "dendritic",
+              "herpes",
+              "keratitis"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 10.62,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 1.0,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "cornea-004",
+      "category": "clinical_factual",
+      "query": "What corneal topography features characterize keratoconus, and why is refractive laser ablation (LASIK) contraindicated?",
+      "routed_books": [
+        "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.13,
+        "retrieval_ms": 11.21,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 11.37,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "routed_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 6,
+            "matched_keywords": [
+              "keratoconus",
+              "topography"
+            ],
+            "missing_keywords": [
+              "lasik"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.16666666666666666,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 6,
+            "matched_keywords": [
+              "keratoconus",
+              "topography"
+            ],
+            "missing_keywords": [
+              "lasik"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 0.6666666666666666,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 6,
+            "matched_keywords": [
+              "keratoconus",
+              "topography"
+            ],
+            "missing_keywords": [
+              "lasik"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 11.37,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.7667,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "cornea-005",
+      "category": "clinical_factual",
+      "query": "What are the key risk factors, clinical signs, and management of corneal allograft rejection following penetrating keratoplasty?",
+      "routed_books": [
+        "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.13,
+        "retrieval_ms": 22.33,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 22.48,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "routed_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "allograft",
+              "keratoplasty",
+              "rejection"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "allograft",
+              "keratoplasty",
+              "rejection"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "allograft",
+              "keratoplasty",
+              "rejection"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 22.48,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 1.0,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "anat-001",
+      "category": "anatomy_figure",
+      "query": "Describe the anatomical pathway and sequence of the cardiac electrical conduction system from the SA node to the Purkinje fibers.",
+      "routed_books": [
+        "anatomy-and-physiology-2e_-_WEB",
+        "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.12,
+        "retrieval_ms": 81.23,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 81.38,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "routed_books": [
+              "anatomy-and-physiology-2e_-_WEB",
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "matched_books": [
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 0.0,
+          "passed": false,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": null,
+            "matched_keywords": [
+              "purkinje"
+            ],
+            "missing_keywords": [
+              "atrioventricular",
+              "sinoatrial"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.0,
+          "passed": false,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": null,
+            "matched_keywords": [
+              "purkinje"
+            ],
+            "missing_keywords": [
+              "atrioventricular",
+              "sinoatrial"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 0.3333333333333333,
+          "passed": false,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": null,
+            "matched_keywords": [
+              "purkinje"
+            ],
+            "missing_keywords": [
+              "atrioventricular",
+              "sinoatrial"
+            ],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "figure_presence": {
+          "name": "figure_presence",
+          "score": 0.0,
+          "passed": false,
+          "details": {
+            "figure_count": 0,
+            "required": true
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 81.38,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.3889,
+      "passed": false,
+      "error": null
+    },
+    {
+      "case_id": "anat-002",
+      "category": "anatomy_figure",
+      "query": "Explain the structural components of the nephron and how hydrostatic and osmotic pressures govern glomerular filtration.",
+      "routed_books": [
+        "anatomy-and-physiology-2e_-_WEB",
+        "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 1,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.13,
+        "retrieval_ms": 24.64,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 24.8,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "routed_books": [
+              "anatomy-and-physiology-2e_-_WEB",
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "matched_books": [
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "filtration",
+              "glomerulus",
+              "nephron"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "filtration",
+              "glomerulus",
+              "nephron"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "filtration",
+              "glomerulus",
+              "nephron"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "figure_presence": {
+          "name": "figure_presence",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "figure_count": 1,
+            "required": true
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 24.8,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 1.0,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "anat-003",
+      "category": "anatomy_figure",
+      "query": "Describe the major spinal nerve plexuses of the body, including the organization and innervation of the brachial plexus.",
+      "routed_books": [
+        "anatomy-and-physiology-2e_-_WEB",
+        "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 4,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.02,
+        "routing_ms": 0.15,
+        "retrieval_ms": 54.17,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 54.35,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "routed_books": [
+              "anatomy-and-physiology-2e_-_WEB",
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "matched_books": [
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 3,
+            "matched_keywords": [
+              "brachial",
+              "nerve",
+              "plexus"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.3333333333333333,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 3,
+            "matched_keywords": [
+              "brachial",
+              "nerve",
+              "plexus"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 3,
+            "matched_keywords": [
+              "brachial",
+              "nerve",
+              "plexus"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "figure_presence": {
+          "name": "figure_presence",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "figure_count": 4,
+            "required": true
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 54.35,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.8889,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "anat-004",
+      "category": "clinical_factual",
+      "query": "What are the anatomical boundaries and contents of the femoral triangle?",
+      "routed_books": [
+        "anatomy-and-physiology-2e_-_WEB"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.14,
+        "retrieval_ms": 3.83,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 3.99,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": false,
+            "expected_books": [
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "routed_books": [
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "matched_books": [
+              "anatomy-and-physiology-2e_-_WEB"
+            ],
+            "top1_match": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 3,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "femoral",
+              "inguinal",
+              "sartorius"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.5,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 3,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "femoral",
+              "inguinal",
+              "sartorius"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 3,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "femoral",
+              "inguinal",
+              "sartorius"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 3.99,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 0.9,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "multi-001",
+      "category": "multi_book",
+      "query": "Compare parathyroid hormone regulation and the diagnostic approach to primary hyperparathyroidism across internal medicine and endocrinology.",
+      "routed_books": [
+        "Harrison_2025_22nd_Edition",
+        "Williams_Textbook_of_Endocrinology_15th_edition_2"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 1,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.05,
+        "retrieval_ms": 14.4,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 14.47,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": true,
+            "active_books": [
+              "Harrison_2025_22nd_Edition",
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "routed_books": [
+              "Harrison_2025_22nd_Edition",
+              "Williams_Textbook_of_Endocrinology_15th_edition_2"
+            ],
+            "sovereignty_preserved": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "calcium",
+              "parathyroid",
+              "pth"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 0.5,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "calcium",
+              "parathyroid",
+              "pth"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 2,
+            "matched_keywords": [
+              "calcium",
+              "parathyroid",
+              "pth"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 14.47,
+            "max_latency_ms": 18000.0
+          }
+        }
+      },
+      "overall_score": 0.9,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "multi-002",
+      "category": "multi_book",
+      "query": "How do thyroid hormone abnormalities manifest in ocular and corneal surface disease?",
+      "routed_books": [
+        "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.01,
+        "routing_ms": 0.06,
+        "retrieval_ms": 44.16,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 44.25,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "sovereignty_mode": true,
+            "active_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "routed_books": [
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"
+            ],
+            "sovereignty_preserved": true
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "cornea",
+              "thyroid"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "cornea",
+              "thyroid"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "k": 6,
+            "retrieved_count": 6,
+            "first_relevant_rank": 1,
+            "matched_keywords": [
+              "cornea",
+              "thyroid"
+            ],
+            "missing_keywords": [],
+            "references_chunks_in_top_k": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 44.25,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 1.0,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "conv-001",
+      "category": "conversational_fastpath",
+      "query": "hello",
+      "routed_books": [],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.0,
+        "routing_ms": 0.0,
+        "retrieval_ms": 0.0,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 0.01,
+        "provider": "fastpath",
+        "model_used": "fastpath-regex",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "routed_books": [],
+            "expected_books": [],
+            "note": "conversational_fastpath"
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "conversational_fastpath",
+            "chunk_count": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "conversational_fastpath",
+            "chunk_count": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "conversational_fastpath",
+            "chunk_count": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 0.01,
+            "max_latency_ms": 1000.0
+          }
+        }
+      },
+      "overall_score": 1.0,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "conv-002",
+      "category": "conversational_fastpath",
+      "query": "thank you!",
+      "routed_books": [],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.0,
+        "routing_ms": 0.0,
+        "retrieval_ms": 0.0,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 0.0,
+        "provider": "fastpath",
+        "model_used": "fastpath-regex",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "routed_books": [],
+            "expected_books": [],
+            "note": "conversational_fastpath"
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "conversational_fastpath",
+            "chunk_count": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "conversational_fastpath",
+            "chunk_count": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "conversational_fastpath",
+            "chunk_count": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 0.0,
+            "max_latency_ms": 1000.0,
+            "note": "timing_not_recorded"
+          }
+        }
+      },
+      "overall_score": 1.0,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "conv-003",
+      "category": "conversational_fastpath",
+      "query": "what model are you?",
+      "routed_books": [],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.0,
+        "routing_ms": 0.0,
+        "retrieval_ms": 0.0,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 0.0,
+        "provider": "fastpath",
+        "model_used": "fastpath-regex",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "routed_books": [],
+            "expected_books": [],
+            "note": "conversational_fastpath"
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "conversational_fastpath",
+            "chunk_count": 0
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "conversational_fastpath",
+            "chunk_count": 0
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "conversational_fastpath",
+            "chunk_count": 0
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 0.0,
+            "max_latency_ms": 1000.0,
+            "note": "timing_not_recorded"
+          }
+        }
+      },
+      "overall_score": 1.0,
+      "passed": true,
+      "error": null
+    },
+    {
+      "case_id": "oos-001",
+      "category": "out_of_scope",
+      "query": "What is the exact IRS Section 179 maximum tax depreciation deduction limit for commercial vehicles in 2025?",
+      "routed_books": [
+        "anatomy-and-physiology-2e_-_WEB",
+        "Williams_Textbook_of_Endocrinology_15th_edition_2",
+        "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+        "Harrison_2025_22nd_Edition"
+      ],
+      "reply": "",
+      "citation_count": 0,
+      "figure_count": 0,
+      "tool_calls": [],
+      "metrics": {
+        "planner_ms": 0.02,
+        "routing_ms": 0.13,
+        "retrieval_ms": 7.82,
+        "ttft_ms": 0.0,
+        "llm_ms": 0.0,
+        "total_ms": 7.98,
+        "provider": "retrieval-only",
+        "model_used": "fts5-bm25",
+        "fallback_triggered": false,
+        "fallback_reason": "",
+        "react_iterations": 0,
+        "prompt_tokens": 0,
+        "cached_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scores": {
+        "routing": {
+          "name": "routing",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "routed_books": [
+              "anatomy-and-physiology-2e_-_WEB",
+              "Williams_Textbook_of_Endocrinology_15th_edition_2",
+              "CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed",
+              "Harrison_2025_22nd_Edition"
+            ],
+            "expected_books": [],
+            "note": "out_of_scope_na"
+          }
+        },
+        "retrieval_hit_at_k": {
+          "name": "retrieval_hit_at_k",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "na_for_case",
+            "chunk_count": 6
+          }
+        },
+        "retrieval_mrr": {
+          "name": "retrieval_mrr",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "na_for_case",
+            "chunk_count": 6
+          }
+        },
+        "retrieval_keyword_coverage": {
+          "name": "retrieval_keyword_coverage",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "note": "na_for_case",
+            "chunk_count": 6
+          }
+        },
+        "latency_sla": {
+          "name": "latency_sla",
+          "score": 1.0,
+          "passed": true,
+          "details": {
+            "total_ms": 7.98,
+            "max_latency_ms": 15000.0
+          }
+        }
+      },
+      "overall_score": 1.0,
+      "passed": true,
+      "error": null
+    }
+  ]
+}

@@ -129,6 +129,9 @@ def _execute_parallel_retrieval(
                 core_q = " ".join(core_words)
                 if core_q and core_q not in fig_search_queries:
                     fig_search_queries.append(core_q)
+                for cw in core_words:
+                    if len(cw) >= 4 and cw.lower() not in fig_search_queries:
+                        fig_search_queries.append(cw)
 
         for q in fig_search_queries:
             f_args: dict[str, Any] = {"query": q, "limit": figure_limit}

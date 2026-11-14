@@ -82,10 +82,18 @@ class SqliteEngine(BaseEngine):
     def _correct_spelling(self, word: str) -> str:
         if len(word) < 4:
             return word
+        w_lower = word.lower()
         vocab = self._get_medical_vocabulary()
-        if word.lower() in vocab:
+        if w_lower in vocab:
             return word
-        matches = difflib.get_close_matches(word.lower(), vocab, n=1, cutoff=0.68)
+        try:
+            q = f'"{word}"'
+            if self.conn.execute("SELECT 1 FROM chunks_fts WHERE chunks_fts MATCH ? LIMIT 1;", [q]).fetchone():
+                vocab.add(w_lower)
+                return word
+        except Exception:
+            pass
+        matches = difflib.get_close_matches(w_lower, vocab, n=1, cutoff=0.78)
         return matches[0] if matches else word
 
     def _clean_fts_query(self, query: str, operator: str = "AND") -> str:
@@ -207,7 +215,16 @@ class SqliteEngine(BaseEngine):
         if content_type:
             sql += " AND c.content_type = ?"
             params.append(content_type)
-        sql += " ORDER BY rank LIMIT ?"
+        sql += """
+            ORDER BY
+                (CASE
+                    WHEN s.heading_path LIKE '%References'
+                      OR s.heading_path LIKE '%Bibliography'
+                      OR s.heading_path LIKE '%Suggested Reading%'
+                    THEN 1 ELSE 0 END) ASC,
+                rank ASC
+            LIMIT ?
+        """
         params.append(limit)
 
         try:

@@ -3,16 +3,49 @@ from __future__ import annotations
 
 import json
 import os
+import time
 import uuid
 from typing import TYPE_CHECKING, Any
 
 from agent.offline import parse_follow_ups
 from agent.prompts import SYSTEM_PROMPT
 from agent.sanitizers import _sanitize_citations, _sanitize_medical_typography
+from agent.telemetry import extract_gemini_usage, extract_openai_usage
 from agent.tools_spec import TOOL_DEFINITIONS, execute_tool
 
 if TYPE_CHECKING:
     from context.manager import ContextManager
+
+DEFAULT_GEMINI_MODELS = (
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash",
+    "gemini-2.5-flash",
+    "gemini-3.1-flash-lite",
+)
+
+RETIRED_GEMINI_MODELS = {
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b",
+    "gemini-1.5-pro",
+}
+
+
+def resolve_gemini_candidate_models(preferred: str | None = None) -> list[str]:
+    """Builds a deduplicated ordered Gemini model list, skipping retired 1.5/2.0 defaults."""
+    env_model = (preferred if preferred is not None else os.environ.get("GEMINI_MODEL", "")).strip()
+    candidates: list[str] = []
+    if env_model:
+        normalized = env_model.removeprefix("models/")
+        if normalized in RETIRED_GEMINI_MODELS:
+            print(f"[AgentOrchestrator] Ignoring retired GEMINI_MODEL '{env_model}'; using active defaults.")
+        else:
+            candidates.append(env_model)
+    candidates.extend(DEFAULT_GEMINI_MODELS)
+
+    seen: set[str] = set()
+    return [m for m in candidates if m and not (m in seen or seen.add(m))]
 
 
 def run_openai_turn(
@@ -36,14 +69,31 @@ def run_openai_turn(
 
     max_iterations = 5
     final_reply = ""
+    model_name = os.environ.get("OPENAI_MODEL", "gpt-4o")
+    llm_ms = 0.0
+    retrieval_ms = 0.0
+    react_iterations = 0
+    prompt_tokens = 0
+    cached_tokens = 0
+    completion_tokens = 0
+    total_tokens = 0
 
     for _ in range(max_iterations):
+        react_iterations += 1
+        t_llm = time.perf_counter()
         response = client.chat.completions.create(
-            model=os.environ.get("OPENAI_MODEL", "gpt-4o"),
+            model=model_name,
             messages=messages,
             tools=TOOL_DEFINITIONS,
             tool_choice="auto",
         )
+        llm_ms += (time.perf_counter() - t_llm) * 1000
+        usage = extract_openai_usage(response)
+        prompt_tokens += usage["prompt_tokens"]
+        cached_tokens += usage["cached_tokens"]
+        completion_tokens += usage["completion_tokens"]
+        total_tokens += usage["total_tokens"]
+
         msg = response.choices[0].message
 
         if not msg.tool_calls:
@@ -58,7 +108,9 @@ def run_openai_turn(
             if active_books is not None and fn_name in ("search_chunks", "search_sections"):
                 fn_args["allowed_books"] = active_books
 
+            t_tool = time.perf_counter()
             result = execute_tool(fn_name, fn_args)
+            retrieval_ms += (time.perf_counter() - t_tool) * 1000
 
             context_manager.add_tool_result(
                 session_id=session_id,
@@ -92,6 +144,17 @@ def run_openai_turn(
         "citations": [c.to_dict() for c in session.citations.values()],
         "tool_calls": tool_activity,
         "follow_ups": follow_ups,
+        "telemetry": {
+            "provider": "openai",
+            "model_used": model_name,
+            "llm_ms": round(llm_ms, 2),
+            "retrieval_ms": round(retrieval_ms, 2),
+            "react_iterations": react_iterations,
+            "prompt_tokens": prompt_tokens,
+            "cached_tokens": cached_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": total_tokens,
+        },
     }
 
 
@@ -108,14 +171,7 @@ def run_gemini_turn(
     from google.genai import types
 
     client = genai.Client(api_key=api_key)
-    candidate_models = [
-        os.environ.get("GEMINI_MODEL", "gemini-2.0-flash"),
-        "gemini-2.0-flash",
-        "gemini-1.5-flash",
-        "gemini-2.0-flash-lite",
-    ]
-    seen_m = set()
-    models = [m for m in candidate_models if not (m in seen_m or seen_m.add(m))]
+    models = resolve_gemini_candidate_models()
     tool_activity: list[dict[str, Any]] = []
 
     tools = [
@@ -151,14 +207,24 @@ def run_gemini_turn(
     max_iterations = 5
     final_reply = ""
     last_error = None
+    winning_telemetry: dict[str, Any] = {}
 
     for model in models:
         try:
             working_contents = list(contents)
             turn_tools = list(tool_activity)
             model_reply = ""
+            llm_ms = 0.0
+            retrieval_ms = 0.0
+            react_iterations = 0
+            prompt_tokens = 0
+            cached_tokens = 0
+            completion_tokens = 0
+            total_tokens = 0
 
             for _ in range(max_iterations):
+                react_iterations += 1
+                t_llm = time.perf_counter()
                 res = client.models.generate_content(
                     model=model,
                     contents=working_contents,
@@ -167,6 +233,12 @@ def run_gemini_turn(
                         tools=tools,
                     ),
                 )
+                llm_ms += (time.perf_counter() - t_llm) * 1000
+                usage = extract_gemini_usage(res)
+                prompt_tokens += usage["prompt_tokens"]
+                cached_tokens += usage["cached_tokens"]
+                completion_tokens += usage["completion_tokens"]
+                total_tokens += usage["total_tokens"]
 
                 if not res.function_calls:
                     model_reply = res.text or ""
@@ -184,7 +256,9 @@ def run_gemini_turn(
                     if active_books is not None and fn_name in ("search_chunks", "search_sections"):
                         fn_args["allowed_books"] = active_books
 
+                    t_tool = time.perf_counter()
                     result = execute_tool(fn_name, fn_args)
+                    retrieval_ms += (time.perf_counter() - t_tool) * 1000
                     tool_call_id = f"call_{uuid.uuid4().hex[:8]}"
 
                     context_manager.add_tool_result(
@@ -210,6 +284,17 @@ def run_gemini_turn(
             if model_reply:
                 final_reply = model_reply
                 tool_activity = turn_tools
+                winning_telemetry = {
+                    "provider": "gemini",
+                    "model_used": model,
+                    "llm_ms": round(llm_ms, 2),
+                    "retrieval_ms": round(retrieval_ms, 2),
+                    "react_iterations": react_iterations,
+                    "prompt_tokens": prompt_tokens,
+                    "cached_tokens": cached_tokens,
+                    "completion_tokens": completion_tokens,
+                    "total_tokens": total_tokens,
+                }
                 break
         except Exception as e:
             print(f"[AgentOrchestrator] Model {model} failed ({e}). Trying next candidate...")
@@ -232,5 +317,6 @@ def run_gemini_turn(
         "citations": [c.to_dict() for c in session.citations.values()],
         "tool_calls": tool_activity,
         "follow_ups": follow_ups,
+        "telemetry": winning_telemetry,
     }
 

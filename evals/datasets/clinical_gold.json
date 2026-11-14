@@ -1,0 +1,538 @@
+{
+  "name": "clinisource_clinical_gold_v1",
+  "version": "1.0.0",
+  "description": "Curated multi-textbook clinical & anatomical evaluation benchmark grounded against Harrison 22e, Williams Endocrinology 15e, Cornea 5e, and Anatomy & Physiology 2e.",
+  "cases": [
+    {
+      "id": "endo-001",
+      "category": "clinical_factual",
+      "query": "What is the initial biochemical diagnostic workup and case detection criteria for suspected pheochromocytoma?",
+      "active_books": null,
+      "expected_books": ["Williams_Textbook_of_Endocrinology_15th_edition_2"],
+      "expected_keywords_in_chunks": ["pheochromocytoma", "metanephrines", "catecholamines"],
+      "expected_answer_points": [
+        "Plasma free metanephrines or 24-hour urinary fractionated metanephrines are first-line diagnostic tests",
+        "Clinical suspicion includes hyperadrenergic spells, resistant hypertension, or incidental adrenal mass",
+        "Localization imaging (CT/MRI) follows biochemical confirmation"
+      ],
+      "require_citations": true,
+      "require_table": false,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Williams Ch 14 Endocrine Hypertension (p. 683-689)."
+    },
+    {
+      "id": "endo-002",
+      "category": "table_criteria",
+      "query": "How is primary aldosteronism screened and diagnosed using plasma aldosterone concentration and renin activity?",
+      "active_books": null,
+      "expected_books": ["Williams_Textbook_of_Endocrinology_15th_edition_2"],
+      "expected_keywords_in_chunks": ["primary aldosteronism", "aldosterone", "renin"],
+      "expected_answer_points": [
+        "Plasma aldosterone concentration (PAC) to plasma renin activity (PRA) ratio (ARR) is the primary screening test",
+        "Suppressed renin with elevated aldosterone characterizes primary aldosteronism",
+        "Confirmatory testing (e.g., oral sodium loading, saline infusion, fludrocortisone suppression, or captopril challenge) is required unless spontaneous hypokalemia with undetectable renin and marked PAC elevation"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": true,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Williams Ch 14 Primary Aldosteronism (p. 692-694, Fig 14.9)."
+    },
+    {
+      "id": "endo-003",
+      "category": "anatomy_figure",
+      "query": "Explain the steps of thyroid hormone synthesis including iodide trapping, organification, and coupling in thyroid follicular cells.",
+      "active_books": null,
+      "expected_books": ["Williams_Textbook_of_Endocrinology_15th_edition_2"],
+      "expected_keywords_in_chunks": ["iodide", "thyroid", "thyroglobulin"],
+      "expected_answer_points": [
+        "Active iodide uptake via the sodium-iodide symporter (NIS) across the basolateral membrane",
+        "Oxidation and organification of iodide onto thyroglobulin tyrosine residues catalyzed by thyroid peroxidase (TPO)",
+        "Coupling of MIT and DIT to yield T3 and T4 regulated by TSH"
+      ],
+      "require_citations": true,
+      "require_table": false,
+      "require_figures": true,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Williams Ch 9 Thyroid Pathophysiology (p. 415-420, Fig 9.1)."
+    },
+    {
+      "id": "endo-004",
+      "category": "table_criteria",
+      "query": "What are the first-line screening tests to confirm endogenous hypercortisolism in suspected Cushing syndrome?",
+      "active_books": null,
+      "expected_books": ["Williams_Textbook_of_Endocrinology_15th_edition_2"],
+      "expected_keywords_in_chunks": ["Cushing", "cortisol", "dexamethasone"],
+      "expected_answer_points": [
+        "Low-dose overnight dexamethasone suppression test (1 mg)",
+        "Late-night salivary cortisol measuring loss of circadian nadir",
+        "24-hour urinary free cortisol (UFC) excretion"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Williams Ch 13 The Adrenal Cortex (p. 624)."
+    },
+    {
+      "id": "endo-005",
+      "category": "table_criteria",
+      "query": "What are the diagnostic criteria and core management pillars for Diabetic Ketoacidosis (DKA)?",
+      "active_books": null,
+      "expected_books": ["Williams_Textbook_of_Endocrinology_15th_edition_2"],
+      "expected_keywords_in_chunks": ["ketoacidosis", "glucose", "insulin"],
+      "expected_answer_points": [
+        "Hyperglycemia, ketonemia (beta-hydroxybutyrate >= 3 mmol/L or ketonuria), and metabolic acidosis",
+        "Immediate intravenous fluid resuscitation followed by continuous insulin therapy",
+        "Careful serum potassium monitoring and replacement before/during insulin administration"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Williams Ch 35 Type 1 Diabetes Mellitus (p. 1807)."
+    },
+    {
+      "id": "endo-006",
+      "category": "clinical_factual",
+      "query": "Explain the functional zonation of the adrenal cortex and the steroid hormones produced in each zone.",
+      "active_books": null,
+      "expected_books": ["Williams_Textbook_of_Endocrinology_15th_edition_2"],
+      "expected_keywords_in_chunks": ["zona glomerulosa", "cortisol", "aldosterone"],
+      "expected_answer_points": [
+        "Zona glomerulosa (outer) synthesizes mineralocorticoids (aldosterone)",
+        "Zona fasciculata (middle) synthesizes glucocorticoids (cortisol)",
+        "Zona reticularis (inner) synthesizes adrenal androgens (DHEA/DHEAS)"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Williams Ch 13 (13 chunks contain zona glomerulosa)."
+    },
+    {
+      "id": "harrison-001",
+      "category": "clinical_factual",
+      "query": "How are sepsis and septic shock defined clinically, and what organ dysfunction indicators are assessed?",
+      "active_books": null,
+      "expected_books": ["Harrison_2025_22nd_Edition"],
+      "expected_keywords_in_chunks": ["sepsis", "organ", "shock"],
+      "expected_answer_points": [
+        "Sepsis is life-threatening organ dysfunction caused by a dysregulated host response to infection",
+        "SOFA / qSOFA criteria assess respiratory, cardiovascular, hepatic, coagulation, renal, and neurologic dysfunction",
+        "Septic shock involves persistent hypotension requiring vasopressors and elevated serum lactate despite adequate fluid resuscitation"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Harrison Ch 315 Sepsis and Septic Shock (p. 2359)."
+    },
+    {
+      "id": "harrison-002",
+      "category": "table_criteria",
+      "query": "What are the KDIGO staging criteria for Acute Kidney Injury (AKI) based on serum creatinine and urine output?",
+      "active_books": null,
+      "expected_books": ["Harrison_2025_22nd_Edition"],
+      "expected_keywords_in_chunks": ["KDIGO", "creatinine", "AKI"],
+      "expected_answer_points": [
+        "Stage 1: serum creatinine 1.5-1.9x baseline or >= 0.3 mg/dL increase, or urine output < 0.5 mL/kg/h for 6-12 hours",
+        "Stage 2: serum creatinine 2.0-2.9x baseline or urine output < 0.5 mL/kg/h for >= 12 hours",
+        "Stage 3: serum creatinine >= 3.0x baseline or >= 4.0 mg/dL or RRT initiation, or urine output < 0.3 mL/kg/h for >= 24 hours / anuria >= 12 hours"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Harrison (12 chunks contain KDIGO)."
+    },
+    {
+      "id": "harrison-003",
+      "category": "differential_diagnosis",
+      "query": "How do you differentiate PTH-mediated from non-PTH-mediated causes of hypercalcemia?",
+      "active_books": null,
+      "expected_books": ["Harrison_2025_22nd_Edition", "Williams_Textbook_of_Endocrinology_15th_edition_2"],
+      "expected_keywords_in_chunks": ["hypercalcemia", "parathyroid", "PTH"],
+      "expected_answer_points": [
+        "Elevated or inappropriately normal intact PTH indicates PTH-mediated hypercalcemia (primarily primary hyperparathyroidism)",
+        "Suppressed PTH indicates non-PTH-mediated hypercalcemia, most commonly malignancy (PTHrP or osteolytic metastases)",
+        "Other non-PTH causes include vitamin D intoxication, granulomatous disease, and thiazide/milk-alkali effects"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Harrison Ch 57 & Ch 422 (p. 405, 3314)."
+    },
+    {
+      "id": "harrison-004",
+      "category": "table_criteria",
+      "query": "Compare the ECG and cardiac troponin diagnostic criteria distinguishing NSTEMI from unstable angina and STEMI.",
+      "active_books": null,
+      "expected_books": ["Harrison_2025_22nd_Edition"],
+      "expected_keywords_in_chunks": ["troponin", "myocardial", "STEMI"],
+      "expected_answer_points": [
+        "Elevated cardiac troponin above the 99th percentile with rise/fall defines acute myocardial injury/infarction",
+        "STEMI features persistent ST-segment elevation or new LBBB/ischemic equivalent requiring immediate reperfusion",
+        "Unstable angina presents with ischemic symptoms without troponin elevation, whereas NSTEMI has troponin elevation without persistent ST elevation"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Harrison Ch 285 & Ch 286 (p. 2149-2156)."
+    },
+    {
+      "id": "harrison-005",
+      "category": "differential_diagnosis",
+      "query": "What are the primary pathogens and empiric outpatient versus inpatient antibiotic considerations for community-acquired pneumonia?",
+      "active_books": null,
+      "expected_books": ["Harrison_2025_22nd_Edition"],
+      "expected_keywords_in_chunks": ["pneumonia", "Streptococcus", "macrolide"],
+      "expected_answer_points": [
+        "Streptococcus pneumoniae and atypical organisms (Mycoplasma, Chlamydophila, Legionella) are key etiologies",
+        "Severity scores (CURB-65 / PSI) guide outpatient vs inpatient disposition",
+        "Empiric regimens balance beta-lactams plus macrolide/doxycycline or respiratory fluoroquinolones based on comorbidities and setting"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Harrison Ch 131 Pneumonia (p. 1066+)."
+    },
+    {
+      "id": "harrison-006",
+      "category": "clinical_factual",
+      "query": "How is heart failure classified by left ventricular ejection fraction (HFrEF vs HFmrEF vs HFpEF) and what biomarkers aid diagnosis?",
+      "active_books": null,
+      "expected_books": ["Harrison_2025_22nd_Edition"],
+      "expected_keywords_in_chunks": ["heart failure", "ejection fraction", "natriuretic"],
+      "expected_answer_points": [
+        "HFrEF is defined by LVEF <= 40%, HFmrEF by 41-49%, and HFpEF by >= 50%",
+        "BNP and NT-proBNP support diagnosis and risk stratification",
+        "Transthoracic echocardiography is essential to assess ventricular function and structural pathology"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Harrison Ch 264 Heart Failure (p. 2018+)."
+    },
+    {
+      "id": "cornea-001",
+      "category": "clinical_factual",
+      "query": "What are the major risk factors, common causative organisms (such as Pseudomonas), and diagnostic evaluation of bacterial keratitis?",
+      "active_books": null,
+      "expected_books": ["CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"],
+      "expected_keywords_in_chunks": ["keratitis", "ulcer", "Pseudomonas"],
+      "expected_answer_points": [
+        "Contact lens wear is a major risk factor, strongly associated with Pseudomonas aeruginosa",
+        "Other common organisms include Staphylococcus aureus, coagulase-negative staphylococci, and Streptococcus pneumoniae",
+        "Corneal scraping for Gram stain and culture precedes broad-spectrum fortified or fluoroquinolone topical antibiotics"
+      ],
+      "require_citations": true,
+      "require_table": false,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Cornea Ch 20 & Ch 76 (p. 275, 863)."
+    },
+    {
+      "id": "cornea-002",
+      "category": "clinical_factual",
+      "query": "Describe the pathophysiology, clinical slit-lamp findings (guttae), and surgical management options for Fuchs endothelial corneal dystrophy.",
+      "active_books": null,
+      "expected_books": ["CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"],
+      "expected_keywords_in_chunks": ["Fuchs", "guttae", "endothelial"],
+      "expected_answer_points": [
+        "Progressive loss of corneal endothelial cells with Descemet membrane excrescences (cornea guttae)",
+        "Leads to corneal stromal and epithelial edema with morning visual blurring",
+        "Definitive surgical treatment includes endothelial keratoplasty (DSEK/DMEK)"
+      ],
+      "require_citations": true,
+      "require_table": false,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Cornea Ch 72 (48 chunks mention guttae)."
+    },
+    {
+      "id": "cornea-003",
+      "category": "differential_diagnosis",
+      "query": "How do epithelial (dendritic) and stromal manifestations of herpes simplex keratitis differ clinically and in management?",
+      "active_books": null,
+      "expected_books": ["CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"],
+      "expected_keywords_in_chunks": ["herpes", "dendritic", "keratitis"],
+      "expected_answer_points": [
+        "Epithelial HSV keratitis presents with classic branching dendritic ulcers with terminal bulbs staining with fluorescein",
+        "Epithelial keratitis is treated with topical or oral antivirals while topical corticosteroids are contraindicated",
+        "Stromal keratitis is immune-mediated and requires topical corticosteroids covered by antiviral prophylaxis"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Cornea Ch 78 (118 chunks mention dendritic)."
+    },
+    {
+      "id": "cornea-004",
+      "category": "clinical_factual",
+      "query": "What corneal topography features characterize keratoconus, and why is refractive laser ablation (LASIK) contraindicated?",
+      "active_books": null,
+      "expected_books": ["CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"],
+      "expected_keywords_in_chunks": ["keratoconus", "topography", "LASIK"],
+      "expected_answer_points": [
+        "Inferior steepening, asymmetric bow-tie pattern, and corneal thinning on topography/tomography",
+        "LASIK and surface ablation are contraindicated due to risk of rapid ectasia progression",
+        "Corneal collagen cross-linking (CXL) stabilizes progressive ectasia"
+      ],
+      "require_citations": true,
+      "require_table": false,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Cornea Ch 11 & Ch 174 (p. 176, 1737)."
+    },
+    {
+      "id": "cornea-005",
+      "category": "clinical_factual",
+      "query": "What are the key risk factors, clinical signs, and management of corneal allograft rejection following penetrating keratoplasty?",
+      "active_books": null,
+      "expected_books": ["CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"],
+      "expected_keywords_in_chunks": ["keratoplasty", "rejection", "allograft"],
+      "expected_answer_points": [
+        "Risk factors include corneal neovascularization, prior graft rejection, and ocular inflammation",
+        "Signs include keratic precipitates, endothelial rejection line (Khodadoust line), stromal edema, and anterior chamber reaction",
+        "Prompt intensive topical corticosteroid therapy is critical to reverse rejection"
+      ],
+      "require_citations": true,
+      "require_table": false,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Cornea Ch 115 (p. 1262-1267)."
+    },
+    {
+      "id": "anat-001",
+      "category": "anatomy_figure",
+      "query": "Describe the anatomical pathway and sequence of the cardiac electrical conduction system from the SA node to the Purkinje fibers.",
+      "active_books": null,
+      "expected_books": ["anatomy-and-physiology-2e_-_WEB"],
+      "expected_keywords_in_chunks": ["sinoatrial", "atrioventricular", "Purkinje"],
+      "expected_answer_points": [
+        "Impulse originates at the sinoatrial (SA) node in the superior right atrial wall",
+        "Travels via internodal pathways to the atrioventricular (AV) node where conduction delays briefly",
+        "Proceeds through the AV bundle (bundle of His), right and left bundle branches, and subendocardial Purkinje fibers"
+      ],
+      "require_citations": true,
+      "require_table": false,
+      "require_figures": true,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Anatomy & Physiology 2e Ch 19.2 (p. 812, Fig 19.18)."
+    },
+    {
+      "id": "anat-002",
+      "category": "anatomy_figure",
+      "query": "Explain the structural components of the nephron and how hydrostatic and osmotic pressures govern glomerular filtration.",
+      "active_books": null,
+      "expected_books": ["anatomy-and-physiology-2e_-_WEB"],
+      "expected_keywords_in_chunks": ["glomerulus", "nephron", "filtration"],
+      "expected_answer_points": [
+        "The renal corpuscle consists of the glomerulus capillary tuft surrounded by Bowman's capsule",
+        "Tubular segments include the proximal convoluted tubule, loop of Henle, distal convoluted tubule, and collecting duct",
+        "Glomerular filtration rate (GFR) depends on net filtration pressure balancing glomerular hydrostatic pressure against capsular hydrostatic and blood colloid osmotic pressures"
+      ],
+      "require_citations": true,
+      "require_table": false,
+      "require_figures": true,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Anatomy & Physiology 2e Ch 25.4 & 25.5 (p. 1165-1170, Fig 25.13)."
+    },
+    {
+      "id": "anat-003",
+      "category": "anatomy_figure",
+      "query": "Describe the major spinal nerve plexuses of the body, including the organization and innervation of the brachial plexus.",
+      "active_books": null,
+      "expected_books": ["anatomy-and-physiology-2e_-_WEB"],
+      "expected_keywords_in_chunks": ["plexus", "brachial", "nerve"],
+      "expected_answer_points": [
+        "Four main nerve plexuses: cervical, brachial, lumbar, and sacral",
+        "Brachial plexus arises from spinal nerves C4/C5 through T1 to innervate the upper limb",
+        "Major terminal branches include axillary, radial, median, ulnar, and musculocutaneous nerves"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": true,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verified in Anatomy & Physiology 2e Ch 13.4 (p. 557-558, Fig 13.24)."
+    },
+    {
+      "id": "anat-004",
+      "category": "clinical_factual",
+      "query": "What are the anatomical boundaries and contents of the femoral triangle?",
+      "active_books": null,
+      "expected_books": ["anatomy-and-physiology-2e_-_WEB"],
+      "expected_keywords_in_chunks": ["femoral", "inguinal", "sartorius"],
+      "expected_answer_points": [
+        "Superior border: inguinal ligament; lateral border: sartorius; medial border: adductor longus",
+        "Contents from lateral to medial (NAVEL): femoral nerve, femoral artery, femoral vein, lymphatics",
+        "Clinical relevance for femoral pulse palpation, vascular access, and femoral hernias"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "2 chunks in Anatomy & Physiology 2e contain 'femoral triangle' (tests retrieval precision against spell-correction drift)."
+    },
+    {
+      "id": "multi-001",
+      "category": "multi_book",
+      "query": "Compare parathyroid hormone regulation and the diagnostic approach to primary hyperparathyroidism across internal medicine and endocrinology.",
+      "active_books": ["Harrison_2025_22nd_Edition", "Williams_Textbook_of_Endocrinology_15th_edition_2"],
+      "expected_books": ["Harrison_2025_22nd_Edition", "Williams_Textbook_of_Endocrinology_15th_edition_2"],
+      "expected_keywords_in_chunks": ["parathyroid", "calcium", "PTH"],
+      "expected_answer_points": [
+        "Elevated serum calcium with elevated or non-suppressed intact PTH confirms primary hyperparathyroidism",
+        "Exclude familial hypocalciuric hypercalcemia (FHH) via 24-hour urine calcium / calcium-to-creatinine clearance ratio",
+        "Surgical parathyroidectomy is indicated for symptomatic patients or asymptomatic patients meeting age/renal/bone density thresholds"
+      ],
+      "require_citations": true,
+      "require_table": true,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 18000.0,
+      "notes": "Tests explicit multi-book user selection sovereignty."
+    },
+    {
+      "id": "multi-002",
+      "category": "multi_book",
+      "query": "How do thyroid hormone abnormalities manifest in ocular and corneal surface disease?",
+      "active_books": ["CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"],
+      "expected_books": ["CORNEA_FundamentalsDiagnosis_and_Management_5th_Ed"],
+      "expected_keywords_in_chunks": ["cornea", "thyroid"],
+      "expected_answer_points": [
+        "Strict scoping to the selected Cornea textbook (User Selection Sovereignty)",
+        "Discusses exposure keratopathy, dry eye, or ocular surface changes if present in Cornea"
+      ],
+      "require_citations": true,
+      "require_table": false,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": false,
+      "max_latency_ms": 15000.0,
+      "notes": "Verifies router preserves explicit Cornea selection even when query contains 'thyroid' keyword."
+    },
+    {
+      "id": "conv-001",
+      "category": "conversational_fastpath",
+      "query": "hello",
+      "active_books": null,
+      "expected_books": [],
+      "expected_keywords_in_chunks": [],
+      "expected_answer_points": [
+        "Immediate greeting with zero tool calls and zero retrieval latency"
+      ],
+      "require_citations": false,
+      "require_table": false,
+      "require_figures": false,
+      "is_conversational": true,
+      "is_out_of_scope": false,
+      "max_latency_ms": 1000.0,
+      "notes": "Conversational greeting fast-path check."
+    },
+    {
+      "id": "conv-002",
+      "category": "conversational_fastpath",
+      "query": "thank you!",
+      "active_books": null,
+      "expected_books": [],
+      "expected_keywords_in_chunks": [],
+      "expected_answer_points": [
+        "Polite acknowledgement with zero tool calls and follow-up suggestions"
+      ],
+      "require_citations": false,
+      "require_table": false,
+      "require_figures": false,
+      "is_conversational": true,
+      "is_out_of_scope": false,
+      "max_latency_ms": 1000.0,
+      "notes": "Conversational gratitude fast-path check."
+    },
+    {
+      "id": "conv-003",
+      "category": "conversational_fastpath",
+      "query": "what model are you?",
+      "active_books": null,
+      "expected_books": [],
+      "expected_keywords_in_chunks": [],
+      "expected_answer_points": [
+        "Explains CliniSource AI Clinical Study Companion role without triggering heavy textbook retrieval"
+      ],
+      "require_citations": false,
+      "require_table": false,
+      "require_figures": false,
+      "is_conversational": true,
+      "is_out_of_scope": false,
+      "max_latency_ms": 1000.0,
+      "notes": "Meta inquiry fast-path check."
+    },
+    {
+      "id": "oos-001",
+      "category": "out_of_scope",
+      "query": "What is the exact IRS Section 179 maximum tax depreciation deduction limit for commercial vehicles in 2025?",
+      "active_books": null,
+      "expected_books": [],
+      "expected_keywords_in_chunks": [],
+      "expected_answer_points": [
+        "Explicitly states the topic is not covered in the indexed medical textbooks without fabricating textbook citations"
+      ],
+      "require_citations": false,
+      "require_table": false,
+      "require_figures": false,
+      "is_conversational": false,
+      "is_out_of_scope": true,
+      "max_latency_ms": 15000.0,
+      "notes": "Out-of-scope hallucination guardrail test."
+    }
+  ]
+}

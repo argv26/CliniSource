@@ -106,24 +106,39 @@ _sanitize_universal_typography = _sanitize_medical_typography
 
 def _sanitize_citations(reply: str, valid_citation_ids: set[int]) -> str:
     """Ensures all [N] citation pills correspond to registered citations in the session.
-    Out-of-range citations (e.g. LLM copying textbook bibliography numbers like [14])
-    are converted to plaintext '(Ref 14)' so un-cached clickable pills are never emitted.
+
+    - Valid single or comma-separated pills (e.g. `[1, 2]`) are normalized to separate pills (`[1] [2]`).
+    - Out-of-range bracketed numbers (e.g. `[14]` or `[1000, 0994]`) are converted to plaintext
+      `(Ref 14)` / `(Ref 1000, 0994)` so un-cached clickable pills are never emitted.
     """
     if not reply:
         return ""
 
     def _replace_cit(match: re.Match) -> str:
-        num_str = match.group(1)
-        try:
-            num = int(num_str)
-            if num in valid_citation_ids:
-                return f"[{num}]"
-            else:
-                return f"(Ref {num})"
-        except ValueError:
+        raw_parts = [p.strip() for p in match.group(1).split(",") if p.strip()]
+        if not raw_parts:
             return match.group(0)
 
-    return re.sub(r"\[(\d+)\]", _replace_cit, reply)
+        valid_tokens: list[str] = []
+        invalid_tokens: list[str] = []
+        for part in raw_parts:
+            try:
+                num = int(part)
+            except ValueError:
+                return match.group(0)
+            if num in valid_citation_ids:
+                valid_tokens.append(f"[{num}]")
+            else:
+                invalid_tokens.append(part if len(raw_parts) > 1 else str(num))
+
+        out_segments: list[str] = []
+        if valid_tokens:
+            out_segments.append(" ".join(valid_tokens))
+        if invalid_tokens:
+            out_segments.append(f"(Ref {', '.join(invalid_tokens)})")
+        return " ".join(out_segments)
+
+    return re.sub(r"\[(\d+(?:\s*,\s*\d+)*)\]", _replace_cit, reply)
 
 
 # Public aliases

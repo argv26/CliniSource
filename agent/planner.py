@@ -4,12 +4,14 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from dotenv import load_dotenv
 
 from agent.prompts import PLANNER_SYSTEM_INSTRUCTION
+from agent.telemetry import extract_gemini_usage, extract_openai_usage
 
 load_dotenv()
 
@@ -41,6 +43,7 @@ class AttendingPlanner:
             "GEMINI_PLANNER_MODEL",
             os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite"),
         )
+        self.last_telemetry: dict[str, Any] = {}
 
     def plan(
         self,
@@ -54,6 +57,9 @@ class AttendingPlanner:
             RuntimeError: If neither GEMINI_API_KEY nor OPENAI_API_KEY is configured,
                          or if LLM generation fails.
         """
+        self.last_telemetry = {}
+        t0 = time.perf_counter()
+
         if not self.api_key and not self.openai_api_key:
             raise RuntimeError("LLM API key not configured for AttendingPlanner")
 
@@ -90,6 +96,13 @@ class AttendingPlanner:
                             ),
                         )
                         if response and response.text:
+                            usage = extract_gemini_usage(response)
+                            self.last_telemetry = {
+                                "planner_ms": round((time.perf_counter() - t0) * 1000, 2),
+                                "planner_provider": "gemini",
+                                "planner_model": m,
+                                **usage,
+                            }
                             return self._parse_plan_json(response.text, fallback_query=user_message)
                     except Exception as me:
                         last_error = me
@@ -106,8 +119,9 @@ class AttendingPlanner:
                 import openai
 
                 client = openai.OpenAI(api_key=self.openai_api_key)
+                model_name = os.environ.get("OPENAI_MODEL", "gpt-4o")
                 response = client.chat.completions.create(
-                    model=os.environ.get("OPENAI_MODEL", "gpt-4o"),
+                    model=model_name,
                     messages=[
                         {"role": "system", "content": PLANNER_SYSTEM_INSTRUCTION},
                         {"role": "user", "content": prompt_content},
@@ -115,6 +129,13 @@ class AttendingPlanner:
                     response_format={"type": "json_object"},
                     temperature=0.1,
                 )
+                usage = extract_openai_usage(response)
+                self.last_telemetry = {
+                    "planner_ms": round((time.perf_counter() - t0) * 1000, 2),
+                    "planner_provider": "openai",
+                    "planner_model": model_name,
+                    **usage,
+                }
                 text = response.choices[0].message.content or "{}"
                 return self._parse_plan_json(text, fallback_query=user_message)
             except Exception as e:
